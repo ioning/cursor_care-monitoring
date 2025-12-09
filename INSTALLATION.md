@@ -418,7 +418,7 @@ cd care-monitoring
    ```powershell
    cd C:\dev\care-monitoring
    git init                    # Создаёт репозиторий
-   git add .                   # Добавляет все файлы
+   git add .                   # Добавляет все файлы (ВАЖНО: пробел между "add" и ".")
    git commit -m "Initial commit"  # Сохраняет изменения
    ```
 
@@ -828,24 +828,55 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 powershell -ExecutionPolicy Bypass -File scripts/install-all.ps1
 ```
 
-### 3. Установка npm зависимостей
+### 3. Настройка ExecutionPolicy для PowerShell
+
+**Важно:** На Windows PowerShell может блокировать выполнение скриптов. Нужно разрешить выполнение:
+
+**Вариант 1: Временно для текущей сессии (рекомендуется для начала)**
+
+```powershell
+# Разрешить выполнение скриптов для текущего пользователя
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# При запросе подтверждения нажмите Y (Yes)
+```
+
+**Вариант 2: Только для текущего процесса**
+
+```powershell
+# Запуск PowerShell с обходом политики (для одной команды)
+powershell -ExecutionPolicy Bypass -Command "ваша-команда"
+```
+
+**Вариант 3: Использовать cmd.exe вместо PowerShell**
+
+```cmd
+# В командной строке (cmd.exe) политика выполнения не применяется
+cmd
+npm install
+```
+
+### 4. Установка npm зависимостей
 
 **Важно:** Проект использует `file:` протокол вместо workspaces для лучшей совместимости.
 
 **Вариант A: Автоматическая установка (рекомендуется)**
 
 ```powershell
-# Установка всех зависимостей автоматически
-.\scripts\install-all.ps1
-
-# Или с обходом ExecutionPolicy
+# С обходом ExecutionPolicy (если не настроена)
 powershell -ExecutionPolicy Bypass -File scripts/install-all.ps1
+
+# Или если ExecutionPolicy уже настроена:
+.\scripts\install-all.ps1
 ```
 
 **Вариант B: Через npm скрипт**
 
 ```powershell
-# Из корня проекта
+# Из корня проекта (с обходом ExecutionPolicy если нужно)
+powershell -ExecutionPolicy Bypass -Command "npm run install:all"
+
+# Или если ExecutionPolicy настроена:
 npm run install:all
 ```
 
@@ -854,17 +885,17 @@ npm run install:all
 ```powershell
 # 1. Сначала установите shared пакет (обязательно!)
 cd shared
-npm install
+powershell -ExecutionPolicy Bypass -Command "npm install"
 cd ..
 
 # 2. Установите realtime пакет
 cd frontend/packages/realtime
-npm install
+powershell -ExecutionPolicy Bypass -Command "npm install"
 cd ../../..
 
 # 3. Установите api-gateway
 cd api-gateway
-npm install
+powershell -ExecutionPolicy Bypass -Command "npm install"
 cd ..
 
 # 4. Установите каждый микросервис
@@ -878,7 +909,7 @@ $services = @(
 foreach ($service in $services) {
     Write-Host "Installing $service..." -ForegroundColor Cyan
     Set-Location "microservices/$service"
-    npm install
+    powershell -ExecutionPolicy Bypass -Command "npm install"
     Set-Location ../..
 }
 
@@ -888,7 +919,7 @@ $apps = @("guardian-app", "admin-app", "dispatcher-app", "landing-app")
 foreach ($app in $apps) {
     Write-Host "Installing $app..." -ForegroundColor Cyan
     Set-Location "frontend/apps/$app"
-    npm install
+    powershell -ExecutionPolicy Bypass -Command "npm install"
     Set-Location ../../..
 }
 ```
@@ -1218,14 +1249,23 @@ taskkill /PID <PID> /F
 
 ### Проблемы с PowerShell
 
-**Ошибка: "execution of scripts is disabled on this system"**
+**Ошибка: "execution of scripts is disabled on this system" или "Невозможно загрузить файл npm.ps1"**
 
 ```powershell
-# Разрешить выполнение скриптов (в PowerShell от имени администратора)
+# РЕШЕНИЕ 1: Настроить ExecutionPolicy (рекомендуется)
+# Откройте PowerShell от имени администратора и выполните:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# При запросе подтверждения нажмите Y (Yes)
 
-# Или для одного запуска:
+# РЕШЕНИЕ 2: Для одного запуска скрипта:
 powershell -ExecutionPolicy Bypass -File scripts/install-all.ps1
+
+# РЕШЕНИЕ 3: Для команды npm:
+powershell -ExecutionPolicy Bypass -Command "npm install"
+
+# РЕШЕНИЕ 4: Использовать cmd.exe (не требует ExecutionPolicy):
+cmd
+npm install
 ```
 
 **Ошибка: "ParserError: MissingEndParenthesisInMethodCall"**
@@ -1238,6 +1278,20 @@ powershell -NoProfile
 ```
 
 ### Проблемы с npm
+
+**Ошибка: "execution of scripts is disabled" или "Невозможно загрузить файл npm.ps1"**
+
+```powershell
+# РЕШЕНИЕ 1: Настроить ExecutionPolicy (рекомендуется)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# РЕШЕНИЕ 2: Использовать обход для одной команды
+powershell -ExecutionPolicy Bypass -Command "npm install"
+
+# РЕШЕНИЕ 3: Использовать cmd.exe (не требует ExecutionPolicy)
+cmd
+npm install
+```
 
 **Ошибка: "EACCES: permission denied"**
 
@@ -1276,24 +1330,24 @@ npm install
 **Ошибка: "Module not found"**
 
 ```powershell
-# Очистка и переустановка
+# Очистка и переустановка (с обходом ExecutionPolicy)
 Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
 Remove-Item package-lock.json -ErrorAction SilentlyContinue
-npm install
+powershell -ExecutionPolicy Bypass -Command "npm install"
 ```
 
 **Конфликты версий**
 
 ```powershell
 # Обновление npm
-npm install -g npm@latest
+powershell -ExecutionPolicy Bypass -Command "npm install -g npm@latest"
 
 # Очистка кэша
-npm cache clean --force
+powershell -ExecutionPolicy Bypass -Command "npm cache clean --force"
 
 # Переустановка зависимостей
-Remove-Item -Recurse -Force node_modules
-npm install
+Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
+powershell -ExecutionPolicy Bypass -Command "npm install"
 ```
 
 **Ошибка установки native модулей**

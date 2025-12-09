@@ -1,6 +1,10 @@
-# PowerShell скрипт для установки всех зависимостей
+# PowerShell script to install all dependencies (ASCII only)
+[CmdletBinding()]
+param()
 
-Write-Host "🚀 Installing all dependencies..." -ForegroundColor Green
+$ErrorActionPreference = "Stop"
+
+Write-Host "Installing all dependencies..."
 Write-Host ""
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -10,11 +14,14 @@ function Install-PackageJson {
     param([string]$Path)
     if (Test-Path (Join-Path $Path "package.json")) {
         $name = Split-Path $Path -Leaf
-        Write-Host "📦 Installing $name..." -ForegroundColor Cyan
+        Write-Host "Installing $name..."
         Push-Location $Path
-        npm install
-        Pop-Location
-        Write-Host "✅ Installed $name" -ForegroundColor Green
+        try {
+            & npm install
+        } finally {
+            Pop-Location
+        }
+        Write-Host "Installed $name."
         Write-Host ""
     }
 }
@@ -29,19 +36,19 @@ Install-PackageJson "$Root/frontend/packages/realtime"
 Install-PackageJson "$Root/api-gateway"
 
 # 4. microservices
-Write-Host "📦 Installing microservices..." -ForegroundColor Cyan
+Write-Host "Installing microservices..."
 Get-ChildItem -Path "$Root/microservices" -Directory | ForEach-Object {
     Install-PackageJson $_.FullName
 }
-Write-Host "✅ All microservices installed" -ForegroundColor Green
+Write-Host "Microservices done."
 Write-Host ""
 
 # 5. frontend apps
-Write-Host "📦 Installing frontend apps..." -ForegroundColor Cyan
+Write-Host "Installing frontend apps..."
 Get-ChildItem -Path "$Root/frontend/apps" -Directory | ForEach-Object {
     Install-PackageJson $_.FullName
 }
-Write-Host "✅ All frontend apps installed" -ForegroundColor Green
+Write-Host "Frontend apps done."
 Write-Host ""
 
-Write-Host "🎉 All dependencies installed successfully!" -ForegroundColor Green
+Write-Host "All dependencies installed successfully."
