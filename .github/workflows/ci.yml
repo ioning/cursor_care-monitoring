@@ -1,0 +1,306 @@
+name: CI (lint, test, build, migrations)
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install root deps
+        run: npm install
+
+      - name: Install all packages (monorepo)
+        run: npm run install:all --if-present
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: Build
+        run: npm run build --if-present
+
+  migrations:
+    runs-on: ubuntu-latest
+    needs: lint-test-build
+    services:
+      postgres:
+        image: postgres:14-alpine
+        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: cms_user
+          POSTGRES_PASSWORD: cms_password
+          POSTGRES_DB: care_monitoring
+        options: >-
+          --health-cmd="pg_isready -U cms_user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install root deps
+        run: npm install
+
+      - name: Install all packages (monorepo)
+        run: npm run install:all --if-present
+
+      - name: Create service databases
+        run: |
+          export PGPASSWORD="${DB_PASSWORD}"
+          for db in auth_db user_db device_db telemetry_db alert_db location_db billing_db integration_db dispatcher_db analytics_db ai_prediction_db; do
+            psql -h ${DB_HOST} -U ${DB_USER} -p ${DB_PORT} -d postgres -c "CREATE DATABASE ${db};"
+          done
+
+      - name: Run migrations (all services)
+        run: npm run db:migrate
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check || true
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - user-service
+          - device-service
+          - telemetry-service
+          - alert-service
+          - location-service
+          - billing-service
+          - integration-service
+          - dispatcher-service
+          - analytics-service
+          - ai-prediction-service
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: cms_user
+          POSTGRES_PASSWORD: cms_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests for ${{ matrix.service }}
+        working-directory: microservices/${{ matrix.service }}
+        run: npm test -- --coverage
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: cms_user
+          DB_PASSWORD: cms_password
+          DB_NAME: test_db
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./microservices/${{ matrix.service }}/coverage/lcov.info
+          flags: ${{ matrix.service }}
+          name: ${{ matrix.service }}-coverage
+
+  build:
+    name: Build Services
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test]
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - user-service
+          - device-service
+          - telemetry-service
+          - alert-service
+          - location-service
+          - billing-service
+          - integration-service
+          - dispatcher-service
+          - analytics-service
+          - ai-prediction-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ${{ matrix.service }}
+        working-directory: microservices/${{ matrix.service }}
+        run: npm run build
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - user-service
+          - device-service
+          - telemetry-service
+          - alert-service
+          - location-service
+          - billing-service
+          - integration-service
+          - dispatcher-service
+          - analytics-service
+          - ai-prediction-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: caremonitoring/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./microservices/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=caremonitoring/${{ matrix.service }}:buildcache
+          cache-to: type=registry,ref=caremonitoring/${{ matrix.service }}:buildcache,mode=max
+

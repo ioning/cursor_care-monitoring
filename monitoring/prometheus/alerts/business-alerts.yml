@@ -1,0 +1,64 @@
+groups:
+  - name: business_alerts
+    interval: 1m
+    rules:
+      # High Alert Creation Rate
+      - alert: HighAlertCreationRate
+        expr: rate(alerts_created_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High alert creation rate"
+          description: "{{ $value }} alerts are being created per second"
+
+      # Emergency Calls Queue
+      - alert: EmergencyCallsQueue
+        expr: emergency_calls_pending > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Emergency calls queue is building up"
+          description: "{{ $value }} emergency calls are pending"
+
+      # Telemetry Processing Lag
+      - alert: TelemetryProcessingLag
+        expr: telemetry_processing_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Telemetry processing lag is high"
+          description: "Telemetry processing is {{ $value }} seconds behind"
+
+      # AI Prediction Failure Rate
+      - alert: AIPredictionFailureRate
+        expr: rate(ai_predictions_failed_total[5m]) / rate(ai_predictions_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI prediction failure rate"
+          description: "{{ $value }}% of AI predictions are failing"
+
+      # Notification Delivery Failure
+      - alert: NotificationDeliveryFailure
+        expr: rate(notifications_failed_total[5m]) / rate(notifications_sent_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High notification delivery failure rate"
+          description: "{{ $value }}% of notifications are failing to deliver"
+
+      # Active Users Drop
+      - alert: ActiveUsersDrop
+        expr: (active_users_count / active_users_count offset 1h) < 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Significant drop in active users"
+          description: "Active users dropped by {{ $value }}%"
+

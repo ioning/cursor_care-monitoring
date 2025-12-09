@@ -1,0 +1,101 @@
+{
+  "dashboard": {
+    "title": "Business Metrics",
+    "tags": ["business", "metrics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Users",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_users_count",
+            "legendFormat": "Active Users"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Active Alerts",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "alerts_active_count",
+            "legendFormat": "Active Alerts"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Emergency Calls",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "emergency_calls_pending",
+            "legendFormat": "Pending Calls"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Telemetry Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(telemetry_received_total[5m])",
+            "legendFormat": "Telemetry/s"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+      },
+      {
+        "id": 5,
+        "title": "Alert Creation Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(alerts_created_total[5m])",
+            "legendFormat": "Alerts/s"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+      },
+      {
+        "id": 6,
+        "title": "AI Predictions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ai_predictions_total[5m])",
+            "legendFormat": "Predictions/s"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}
+      },
+      {
+        "id": 7,
+        "title": "Notification Delivery Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(notifications_sent_total[5m])",
+            "legendFormat": "Sent"
+          },
+          {
+            "expr": "rate(notifications_failed_total[5m])",
+            "legendFormat": "Failed"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}
+

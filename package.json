@@ -1,0 +1,37 @@
+{
+  "name": "care-monitoring-system",
+  "version": "0.1.0",
+  "description": "Care Monitoring System - система мониторинга и предиктивной аналитики здоровья",
+  "private": true,
+  "scripts": {
+    "install:all": "node -e \"const os=require('os'); const {execSync}=require('child_process'); const isWin=os.platform().startsWith('win'); const cmd=isWin? 'powershell -ExecutionPolicy Bypass -File scripts/install-all.ps1' : 'bash scripts/install-all.sh'; execSync(cmd, {stdio:'inherit'});\"",
+    "dev:infra": "cd infrastructure && docker-compose up -d",
+    "dev:infra:down": "cd infrastructure && docker-compose down",
+    "dev:gateway": "cd api-gateway && npm run start:dev",
+    "dev:services": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:device\" \"npm run dev:telemetry\" \"npm run dev:alert\" \"npm run dev:ai-prediction\" \"npm run dev:integration\" \"npm run dev:dispatcher-service\" \"npm run dev:location\" \"npm run dev:billing\" \"npm run dev:analytics\" \"npm run dev:organization\"",
+    "dev:auth": "cd microservices/auth-service && npm run start:dev",
+    "dev:user": "cd microservices/user-service && npm run start:dev",
+    "dev:device": "cd microservices/device-service && npm run start:dev",
+    "dev:telemetry": "cd microservices/telemetry-service && npm run start:dev",
+    "dev:alert": "cd microservices/alert-service && npm run start:dev",
+    "dev:ai-prediction": "cd microservices/ai-prediction-service && npm run start:dev",
+    "dev:integration": "cd microservices/integration-service && npm run start:dev",
+    "dev:dispatcher-service": "cd microservices/dispatcher-service && npm run start:dev",
+    "dev:dispatcher": "cd frontend/apps/dispatcher-app && npm run dev",
+    "dev:location": "cd microservices/location-service && npm run start:dev",
+    "dev:billing": "cd microservices/billing-service && npm run start:dev",
+    "dev:analytics": "cd microservices/analytics-service && npm run start:dev",
+    "dev:organization": "cd microservices/organization-service && npm run start:dev",
+    "dev:frontend": "concurrently \"npm run dev:guardian\" \"npm run dev:dispatcher\" \"npm run dev:admin\" \"npm run dev:landing\"",
+    "dev:guardian": "cd frontend/apps/guardian-app && npm run dev",
+    "dev:admin": "cd frontend/apps/admin-app && npm run dev",
+    "dev:landing": "cd frontend/apps/landing-app && npm run dev",
+    "dev:all": "concurrently \"npm run dev:gateway\" \"npm run dev:services\" \"npm run dev:frontend\"",
+    "db:migrate": "node scripts/migrate.js",
+    "db:migrate:up": "node scripts/migrate.js up",
+    "db:migrate:down": "node scripts/migrate.js down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

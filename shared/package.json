@@ -1,0 +1,61 @@
+{
+  "name": "@care-monitoring/shared",
+  "version": "0.1.0",
+  "description": "Shared libraries and utilities for Care Monitoring System",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./libs/env-validator": {
+      "import": "./dist/libs/env-validator.js",
+      "require": "./dist/libs/env-validator.js",
+      "types": "./dist/libs/env-validator.d.ts"
+    },
+    "./libs/*": {
+      "import": "./dist/libs/*.js",
+      "require": "./dist/libs/*.js",
+      "types": "./dist/libs/*.d.ts"
+    },
+    "./guards/*": {
+      "import": "./dist/guards/*.js",
+      "require": "./dist/guards/*.js",
+      "types": "./dist/guards/*.d.ts"
+    },
+    "./middleware/*": {
+      "import": "./dist/middleware/*.js",
+      "require": "./dist/middleware/*.js",
+      "types": "./dist/middleware/*.d.ts"
+    },
+    "./types/*": {
+      "import": "./dist/types/*.js",
+      "require": "./dist/types/*.js",
+      "types": "./dist/types/*.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "redis": "^4.6.12",
+    "amqplib": "^0.10.3",
+    "winston": "^3.11.0",
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/passport": "^10.0.3",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.9",
+    "@types/amqplib": "^0.10.4",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

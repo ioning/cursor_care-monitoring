@@ -1,0 +1,78 @@
+import { Module, OnModuleInit } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { BillingController } from './infrastructure/controllers/billing.controller';
+import { BillingService } from './application/services/billing.service';
+import { SubscriptionRepository } from './infrastructure/repositories/subscription.repository';
+import { PaymentRepository } from './infrastructure/repositories/payment.repository';
+import { InvoiceRepository } from './infrastructure/repositories/invoice.repository';
+import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { YooKassaAdapter } from './infrastructure/payment-providers/yookassa/yookassa.adapter';
+import { YooKassaWebhookController } from './infrastructure/payment-providers/yookassa/yookassa.webhook.controller';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '.env.local'],
+    }),
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => {
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return {
+          secret: jwtSecret,
+        };
+      },
+    }),
+  ],
+  controllers: [BillingController, YooKassaWebhookController],
+  providers: [
+    BillingService,
+    SubscriptionRepository,
+    PaymentRepository,
+    InvoiceRepository,
+    JwtStrategy,
+    YooKassaAdapter,
+  ],
+})
+export class AppModule implements OnModuleInit {
+  constructor(
+    private readonly subscriptionRepository: SubscriptionRepository,
+    private readonly paymentRepository: PaymentRepository,
+    private readonly invoiceRepository: InvoiceRepository,
+  ) {}
+
+  async onModuleInit() {
+    await this.subscriptionRepository.initialize();
+    await this.paymentRepository.initialize();
+    await this.invoiceRepository.initialize();
+  }
+}
+
+
+    private readonly invoiceRepository: InvoiceRepository,
+  ) {}
+
+  async onModuleInit() {
+    await this.subscriptionRepository.initialize();
+    await this.paymentRepository.initialize();
+    await this.invoiceRepository.initialize();
+  }
+}
+
+
+    private readonly invoiceRepository: InvoiceRepository,
+  ) {}
+
+  async onModuleInit() {
+    await this.subscriptionRepository.initialize();
+    await this.paymentRepository.initialize();
+    await this.invoiceRepository.initialize();
+  }
+}
+

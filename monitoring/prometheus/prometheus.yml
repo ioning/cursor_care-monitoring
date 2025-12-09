@@ -1,0 +1,146 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'care-monitoring'
+    environment: 'development'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+rule_files:
+  - "alerts/*.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api-gateway:3000']
+        labels:
+          service: 'api-gateway'
+
+  # Auth Service
+  - job_name: 'auth-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['auth-service:3001']
+        labels:
+          service: 'auth-service'
+
+  # User Service
+  - job_name: 'user-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['user-service:3002']
+        labels:
+          service: 'user-service'
+
+  # Device Service
+  - job_name: 'device-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['device-service:3003']
+        labels:
+          service: 'device-service'
+
+  # Telemetry Service
+  - job_name: 'telemetry-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['telemetry-service:3004']
+        labels:
+          service: 'telemetry-service'
+
+  # Alert Service
+  - job_name: 'alert-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['alert-service:3005']
+        labels:
+          service: 'alert-service'
+
+  # Location Service
+  - job_name: 'location-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['location-service:3006']
+        labels:
+          service: 'location-service'
+
+  # Billing Service
+  - job_name: 'billing-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['billing-service:3007']
+        labels:
+          service: 'billing-service'
+
+  # Integration Service
+  - job_name: 'integration-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['integration-service:3008']
+        labels:
+          service: 'integration-service'
+
+  # Dispatcher Service
+  - job_name: 'dispatcher-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['dispatcher-service:3009']
+        labels:
+          service: 'dispatcher-service'
+
+  # Analytics Service
+  - job_name: 'analytics-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['analytics-service:3010']
+        labels:
+          service: 'analytics-service'
+
+  # AI Prediction Service
+  - job_name: 'ai-prediction-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['ai-prediction-service:3011']
+        labels:
+          service: 'ai-prediction-service'
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+
+  # RabbitMQ
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq-exporter:9419']
+        labels:
+          service: 'rabbitmq'
+
+  # Node Exporter (system metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+

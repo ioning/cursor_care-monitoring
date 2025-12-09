@@ -1,0 +1,65 @@
+name: Database Migrations
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'database/migrations/**'
+  workflow_dispatch:
+
+jobs:
+  test-migrations:
+    name: Test Migrations
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: cms_user
+          POSTGRES_PASSWORD: cms_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run migrations
+        run: npm run db:migrate
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: cms_user
+          DB_PASSWORD: cms_password
+
+      - name: Test rollback
+        run: npm run db:migrate:down
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: cms_user
+          DB_PASSWORD: cms_password
+
+      - name: Run migrations again
+        run: npm run db:migrate
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: cms_user
+          DB_PASSWORD: cms_password
+

@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareLink - Умный браслет для безопасности пожилых людей</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш_ключ&lang=ru_RU" type="text/javascript"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --light-gray: #e2e8f0;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --heart-color: #e11d48;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background-color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 18px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-left: 20px;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: var(--light-gray);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            padding: 160px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-text {
+            flex: 1;
+            padding-right: 40px;
+        }
+        
+        .hero-text h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .hero-tagline {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .hero-text p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #334155;
+        }
+        
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .heart-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulsating-heart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background-color: var(--heart-color);
+            transform: rotate(45deg);
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+        }
+        
+        .pulsating-heart:before,
+        .pulsating-heart:after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background-color: var(--heart-color);
+            border-radius: 50%;
+        }
+        
+        .pulsating-heart:before {
+            top: -100px;
+            left: 0;
+        }
+        
+        .pulsating-heart:after {
+            top: 0;
+            left: -100px;
+        }
+        
+        .heart-glow {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(225, 29, 72, 0.1);
+            animation: glow 2s infinite;
+        }
+        
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .trust-badges {
+            display: flex;
+            margin-top: 30px;
+            gap: 20px;
+        }
+        
+        .badge {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .badge i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+        
+        /* Features Section */
+        .section {
+            padding: 100px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            font-size: 18px;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: #dbeafe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .feature-icon i {
+            font-size: 32px;
+            color: var(--primary);
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            background-color: #f1f5f9;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 0 15px;
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            margin: 0 10px;
+        }
+        
+        .steps::before {
+            content: "";
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--light-gray);
+            z-index: 1;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 0 15px;
+        }
+        
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 20px;
+        }
+        
+        .step h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        /* Pricing Section */
+        .pricing-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+            max-width: 280px;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .pricing-header {
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .basic .pricing-header {
+            background: var(--gray);
+        }
+        
+        .standard .pricing-header {
+            background: var(--primary);
+        }
+        
+        .careplus .pricing-header {
+            background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+        }
+        
+        .allinclusive .pricing-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .pricing-name {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .pricing-price {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .pricing-period {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .popular-tag {
+            position: absolute;
+            top: 20px;
+            right: -40px;
+            background: var(--warning);
+            color: white;
+            padding: 8px 40px;
+            transform: rotate(45deg);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .pricing-features {
+            padding: 30px;
+        }
+        
+        .pricing-features ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features li i {
+            color: var(--secondary);
+            margin-right: 10px;
+        }
+        
+        .pricing-features li .fa-times {
+            color: var(--gray);
+            opacity: 0.5;
+        }
+        
+        .pricing-button {
+            display: block;
+            text-align: center;
+            margin: 0 30px 30px;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            background-color: #f1f5f9;
+        }
+        
+        .testimonial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .testimonial-card {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .testimonial-name h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .testimonial-rating {
+            color: var(--warning);
+        }
+        
+        .testimonial-content p {
+            font-style: italic;
+            color: var(--dark);
+        }
+        
+        /* FAQ */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .faq-question {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            padding: 20px 25px;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question i {
+            transition: transform 0.3s;
+        }
+        
+        .faq-answer {
+            background: #f8fafc;
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+        }
+        
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+        
+        .faq-item.active .faq-answer {
+            padding: 20px 25px;
+            max-height: 500px;
+        }
+        
+        /* Useful Knowledge Section */
+        .useful-knowledge {
+            background-color: #f1f5f9;
+        }
+        
+        .articles {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .article {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .article h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .article h4 {
+            font-size: 20px;
+            margin: 25px 0 15px;
+            color: var(--dark);
+        }
+        
+        .article p {
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        .article ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        
+        .article li {
+            margin-bottom: 10px;
+        }
+        
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 80px 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .cta h2 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .cta p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+        
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        /* Map Section */
+        .map-section {
+            padding: 80px 0;
+            background: #f1f5f9;
+        }
+        
+        .map-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: 500px;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .map-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            max-width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .map-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .map-info p {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .contact-info {
+            list-style: none;
+        }
+        
+        .contact-info li {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .contact-info i {
+            font-size: 20px;
+            margin-right: 15px;
+            color: var(--primary);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #334155;
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: var(--secondary);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: rotate(45deg) scale(0.9);
+                box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+            }
+            50% {
+                transform: rotate(45deg) scale(1.1);
+                box-shadow: 0 10px 40px rgba(225, 29, 72, 0.5);
+            }
+            100% {
+                transform: rotate(45deg) scale(0.9);
+                box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+            }
+        }
+        
+        @keyframes glow {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .pricing-cards {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-text {
+                padding-right: 0;
+                margin-bottom: 40px;
+            }
+            
+            .hero-btns {
+                justify-content: center;
+            }
+            
+            .trust-badges {
+                justify-content: center;
+            }
+            
+            .steps {
+                flex-direction: column;
+                gap: 40px;
+            }
+            
+            .steps::before {
+                display: none;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .pricing-cards {
+                justify-content: center;
+            }
+            
+            .pricing-card {
+                max-width: 100%;
+                flex: 0 0 calc(50% - 30px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                background: white;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 0;
+                box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+                transform: translateY(-150%);
+                transition: transform 0.3s;
+            }
+            
+            .nav-menu.active {
+                transform: translateY(0);
+            }
+            
+            .nav-menu li {
+                margin: 15px 0;
+            }
+            
+            .hero-text h1 {
+                font-size: 36px;
+            }
+            
+            .hero-tagline {
+                font-size: 24px;
+            }
+            
+            .section {
+                padding: 70px 0;
+            }
+            
+            .section-title h2 {
+                font-size: 30px;
+            }
+            
+            .heart-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .pulsating-heart {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .pulsating-heart:before,
+            .pulsating-heart:after {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .pulsating-heart:before {
+                top: -75px;
+            }
+            
+            .pulsating-heart:after {
+                left: -75px;
+            }
+            
+            .map-info {
+                position: relative;
+                max-width: 100%;
+                margin-top: 20px;
+                left: 0;
+                bottom: 0;
+            }
+            
+            .pricing-card {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .article {
+                padding: 25px;
+            }
+            
+            .article h3 {
+                font-size: 24px;
+            }
+        }
+        .product-showcase {
+            padding: 100px 0;
+            background: white;
+        }
+        
+        .product-container {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .product-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .product-photo {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+        }
+        
+        .product-info {
+            flex: 1;
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .product-info h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .product-info p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .product-features {
+            margin-bottom: 30px;
+        }
+        
+        .product-features li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .product-features i {
+            color: var(--secondary);
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .pricing-block {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .price-old {
+            font-size: 24px;
+            color: var(--gray);
+            text-decoration: line-through;
+            margin-right: 15px;
+        }
+        
+        .price-new {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .social-offer {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+            border: 2px dashed var(--warning);
+        }
+        
+        .social-offer h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .social-offer p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 992px) {
+            .product-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .product-features li {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .product-info h2 {
+                font-size: 28px;
+            }
+        }        .platform-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+        
+        .platform-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        
+        .platform-card {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .platform-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .platform-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .platform-features {
+            list-style: none;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .platform-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+        }
+        
+        .platform-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .platform-features li i {
+            color: var(--secondary);
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        /* Architecture Section */
+        .architecture-section {
+            padding: 100px 0;
+            background: white;
+        }
+        
+        .architecture-diagram {
+            max-width: 1000px;
+            margin: 60px auto 0;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .architecture-level {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #f8fafc;
+        }
+        
+        .architecture-level h4 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .architecture-level h4 i {
+            margin-right: 10px;
+        }
+        
+        .microservices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .microservice {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Mobile Apps Section */
+        .mobile-apps-section {
+            padding: 100px 0;
+            background: #f1f5f9;
+        }
+        
+        .apps-container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .app-preview {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .app-mockup {
+            width: 300px;
+            height: 600px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+            border: 10px solid var(--dark);
+        }
+        
+        .app-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+        
+        .app-screen h4 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+        }
+        
+        .apps-info {
+            flex: 1;
+        }
+        
+        .app-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+         .app-feature {
+            display: flex;
+            align-items: flex-start;
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .app-feature i {
+            color: var(--primary);
+            font-size: 24px;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+        
+        /* Security Section */
+        .security-section {
+    background: linear-gradient(90deg, #cfecd0, #a0cea7, #9ec0db);/*linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #60a5fa 100%);*/
+    padding: 100px 0;/*position: relative;*/
+}
+
+.security-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.05) 50%, transparent 52%);
+    background-size: 100% 100%, 100% 100%, 30px 30px;
+}
+        
+.security-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+    margin-top: 60px;
+}
+
+.security-feature {
+    text-align: center;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    /* Фон как в hero-секции */
+    background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+}
+
+.security-feature:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.security-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.3); /* Полупрозрачный белый */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--primary);
+    font-size: 32px;
+    backdrop-filter: blur(10px); /* Эффект размытия для стеклянного эффекта */
+}
+        /* Monitoring Section */
+        .monitoring-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+        }
+        
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .monitoring-card {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .monitoring-card h4 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        /* Добавляем в responsive design */
+        @media (max-width: 992px) {
+            .apps-container {
+                flex-direction: column;
+            }
+            
+            .app-mockup {
+                width: 250px;
+                height: 500px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .architecture-diagram {
+                padding: 20px;
+            }
+            
+            .microservices-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h1>CareLink</h1>
+            </div>
+            
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-menu">
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#product">О продукте</a></li>
+                <li><a href="#platform">Платформа</a></li>
+                <li><a href="#mobile-apps">Приложения</a></li>
+                <li><a href="#how-it-works">Как это работает</a></li>
+                <li><a href="#pricing">Тарифы</a></li>
+                <li><a href="#testimonials">Отзывы</a></li>
+                <li><a href="#useful-knowledge">Полезно знать</a></li>
+                <li><a href="#map-section">Контакты</a></li>
+                <li><a href="#contact" class="btn btn-outline">Заказать</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1>Безопасность ваших близких — наша забота</h1>
+                <div class="hero-tagline">CareLink — Ваше сердце рядом с родителями</div>
+                <p>Умный браслет CareLink: мгновенный вызов помощи и спокойствие для всей семьи. Контроль здоровья, экстренный вызов МЧС и скорой в любом регионе России, точная геолокация.</p>
+                
+                <div class="hero-btns">
+                    <a href="#contact" class="btn btn-primary btn-large">Защитить близкого</a>
+                    <a href="#features" class="btn btn-outline btn-large">Узнать больше</a>
+                </div>
+                
+                <div class="trust-badges">
+                    <div class="badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>Одобрено Росздравнадзором</div>
+                    </div>
+                    <div class="badge">
+                        <i class="fas fa-handshake"></i>
+                        <div>Партнер МЧС России</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <div class="heart-container">
+                    <div class="heart-glow"></div>
+                    <div class="pulsating-heart"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- Новый блок: О продукте -->
+    <section id="product" class="product-showcase">
+        <div class="container">
+            <div class="product-container">
+                <div class="product-image">
+                    <img src="assets/images/carelink-watch.png" alt="Умный браслет CareLink" class="product-photo">
+                </div>
+                <div class="product-info">
+                    <h2>CareLink — разработан с заботой о ваших близких</h2>
+                    <p>Наш умный браслет создан специально для пожилых людей и тех, кто нуждается в дополнительной помощи. Легкий, удобный и простой в использовании — он станет надежным спутником вашего близкого человека.</p>
+                    
+                    <ul class="product-features">
+                        <li><i class="fas fa-check-circle"></i> Легкий вес (всего 35 г) — не ощущается на руке</li>
+                        <li><i class="fas fa-check-circle"></i> Водонепроницаемость — можно носить в душе</li>
+                        <li><i class="fas fa-check-circle"></i> Прочный корпус — выдерживает падения и удары</li>
+                        <li><i class="fas fa-check-circle"></i> Крупные кнопки — удобны для людей с ослабленным зрением</li>
+                        <li><i class="fas fa-check-circle"></i> Гипоаллергенные материалы — безопасны для кожи</li>
+                    </ul>
+                    
+                    <div class="pricing-block">
+                        <h3>Заказать устройство</h3>
+                        <div class="price">
+                            <span class="price-old">4990 руб.</span>
+                            <span class="price-new">2499 руб.</span>
+                        </div>
+                        <p>Специальная цена действует до конца месяца</p>
+                        <a href="#contact" class="btn btn-primary">Заказать со скидкой</a>
+                    </div>
+                    
+                    <div class="social-offer">
+                        <h3>Получить бесплатно</h3>
+                        <p>Мы понимаем, что иногда материальное положение не позволяет приобрести даже самое необходимое. Если вы или ваш близкий человек оказались в трудной жизненной ситуации, вы можете подать заявку на бесплатное получение браслета CareLink.</p>
+                        <p>Наша социальная программа направлена на помощь тем, кто действительно нуждается в поддержке, но не имеет возможности оплатить устройство.</p>
+                        <a href="#contact" class="btn btn-outline">Подать заявку на бесплатное получение</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="platform" class="platform-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Комплексная платформа CareLink</h2>
+                <p>Мощная экосистема для полного контроля безопасности ваших близких</p>
+            </div>
+            
+            <div class="platform-container">
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>Приложение для опекуна</h3>
+                    <p>Полный контроль над состоянием подопечного в реальном времени</p>
+                    <ul class="platform-features">
+                        <li><i class="fas fa-check"></i> Мониторинг показателей здоровья</li>
+                        <li><i class="fas fa-check"></i> Трекинг местоположения</li>
+                        <li><i class="fas fa-check"></i> Управление уведомлениями</li>
+                        <li><i class="fas fa-check"></i> История активности и сна</li>
+                        <li><i class="fas fa-check"></i> Настройка геозон</li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Диспетчерская служба</h3>
+                    <p>Круглосуточный мониторинг и экстренное реагирование</p>
+                    <ul class="platform-features">
+                        <li><i class="fas fa-check"></i> Обработка экстренных вызовов</li>
+                        <li><i class="fas fa-check"></i> Координация с МЧС и СМП</li>
+                        <li><i class="fas fa-check"></i> Управление бригадами</li>
+                        <li><i class="fas fa-check"></i> Отслеживание выполнения вызовов</li>
+                        <li><i class="fas fa-check"></i> Аналитика работы службы</li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Административная панель</h3>
+                    <p>Полное управление системой и пользователями</p>
+                    <ul class="platform-features">
+                        <li><i class="fas fa-check"></i> Управление пользователями</li>
+                        <li><i class="fas fa-check"></i> Система ролей и доступов</li>
+                        <li><i class="fas fa-check"></i> Аналитика и отчетность</li>
+                        <li><i class="fas fa-check"></i> Мониторинг системы</li>
+                        <li><i class="fas fa-check"></i> Настройка интеграций</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+      <!-- Новая секция: Мобильные приложения -->
+    <section id="mobile-apps" class="mobile-apps-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Специализированные приложения</h2>
+                <p>Интуитивные интерфейсы для разных пользователей системы</p>
+            </div>
+            
+            <div class="apps-container">
+                <div class="app-preview">
+                    <div class="app-mockup">
+                        <div class="app-screen">
+                            <i class="fas fa-user-shield" style="font-size: 50px;"></i>
+                            <h4>CareLink Guardian</h4>
+                            <p>Приложение для опекунов</p>
+                            <div style="margin-top: 30px; text-align: left;">
+                                <p style="font-size: 12px; margin: 10px 0;">✓ Мониторинг здоровья</p>
+                                <p style="font-size: 12px; margin: 10px 0;">✓ Геолокация в реальном времени</p>
+                                <p style="font-size: 12px; margin: 10px 0;">✓ Уведомления и оповещения</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="apps-info">
+                    <h3>Интуитивные приложения для каждой роли</h3>
+                    <p>CareLink предоставляет специализированные интерфейсы, адаптированные под конкретные задачи пользователей:</p>
+                    
+                    <div class="app-features">
+                        <div class="app-feature">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div>
+                                <h4>Приложение для опекуна</h4>
+                                <p>Мониторинг состояния подопечного, получение уведомлений, просмотр истории активности</p>
+                            </div>
+                        </div>
+                        
+                        <div class="app-feature">
+                            <i class="fas fa-desktop"></i>
+                            <div>
+                                <h4>Веб-интерфейс диспетчера</h4>
+                                <p>Обработка экстренных вызовов, управление бригадами, координация с экстренными службами</p>
+                            </div>
+                        </div>
+                        
+                        <div class="app-feature">
+                            <i class="fas fa-chart-bar"></i>
+                            <div>
+                                <h4>Административная панель</h4>
+                                <p>Управление пользователями, аналитика работы системы, настройка и мониторинг</p>
+                            </div>
+                        </div>
+                        
+                        <div class="app-feature">
+                            <i class="fas fa-sync-alt"></i>
+                            <div>
+                                <h4>Полная синхронизация</h4>
+                                <p>Все приложения работают в реальном времени с полной синхронизацией данных</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Новая секция: Безопасность и соответствие -->
+    <section class="security-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Безопасность и соответствие требованиям</h2>
+                <p>Мы обеспечиваем полную защиту данных и соответствие законодательству</p>
+            </div>
+            
+            <div class="security-features">
+                <div class="security-feature">
+                    <div class="security-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Соответствие 152-ФЗ</h3>
+                    <p>Полное соблюдение требований законодательства о защите персональных данных</p>
+                </div>
+                
+                <div class="security-feature">
+                    <div class="security-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Шифрование данных</h3>
+                    <p>Все передаваемые данные защищены современными алгоритмами шифрования</p>
+                </div>
+                
+                <div class="security-feature">
+                    <div class="security-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h3>RBAC-авторизация</h3>
+                    <p>Гибкая система ролей и разрешений для контроля доступа к данным</p>
+                </div>
+                
+                <div class="security-feature">
+                    <div class="security-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h3>Сертифицировано Росздравнадзором</h3>
+                    <p>Продукт имеет все необходимые разрешения и сертификаты</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>CareLink — ваш надежный помощник</h2>
+                <p>Инновационные технологии для безопасности и здоровья ваших близких</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Автоматический вызов помощи</h3>
+                    <p>При падении или критическом изменении пульса/давления браслет автоматически отправляет сигнал SOS</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Точная геолокация</h3>
+                    <p>Всегда знайте, где ваш близкий, в реальном времени на карте приложения. Построение маршрутов, анализ активности, обнаружение аномальных перемещений и автоматическое оповещение</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>Контроль здоровья</h3>
+                    <p>Отслеживание ключевых показателей здоровья: пульс, давление, активность, сон с построением детальной аналитики и трендов с оповещениями об отклонениях</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Кнопка SOS</h3>
+                    <p>Простое нажатие кнопки на браслете для мгновенного вызова помощи</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Защита данных</h3>
+                    <p>Полное соответствие 152-ФЗ. Все передаваемые данные защищены современными алгоритмами шифрования. Ваши данные в безопасности</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-battery-full"></i>
+                    </div>
+                    <h3>Долгая работа</h3>
+                    <p>До 7 дней работы от одного заряда. Приложение предупредит о низком заряде</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section how-it-works">
+        <div class="container">
+            <div class="section-title">
+                <h2>Как работает CareLink</h2>
+                <p>Простая и надежная система заботы о ваших близких</p>
+            </div>
+        
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Регистрация и настройка</h3>
+                    <p>Создайте аккаунт, выберите тариф и добавьте профиль подопечного. Установите мобильное приложение на телефон близкого человека</p>
+                </div>
+            
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Активация браслета</h3>
+                    <p>Сопрягите браслет с мобильным приложением через Bluetooth. Система автоматически активирует устройство и начинает мониторинг</p>
+                </div>
+            
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Непрерывный мониторинг</h3>
+                    <p>Браслет отслеживает пульс, активность, сон и местоположение. Данные передаются в реальном времени через мобильное приложение</p>
+                </div>
+            
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Экстренное реагирование</h3>
+                    <p>При падении или нажатии SOS система мгновенно создает вызов. Диспетчер связывается для оценки ситуации и направляет помощь</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Выберите подходящий вариант</h2>
+                <p>Индивидуальные решения для разных потребностей</p>
+            </div>
+            
+            <div class="pricing-cards">
+                <div class="pricing-card basic">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Базовый</h3>
+                        <div class="pricing-price">199 ₽</div>
+                        <div class="pricing-period">в месяц</div>
+                    </div>
+                    
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> SOS-кнопка и геолокация</li>
+                            <li><i class="fas fa-check"></i> Уведомление опекуну в Telegram/Bot</li>
+                            <li><i class="fas fa-check"></i> Голосовая связь с опекуном</li>
+                            <li><i class="fas fa-times"></i> История перемещений</li>
+                            <li><i class="fas fa-times"></i> Мониторинг показателей</li>
+                            <li><i class="fas fa-times"></i> Детекция падения</li>
+                            <li><i class="fas fa-times"></i> Вызов СМП</li>
+                        </ul>
+                        
+                        <a href="#contact" class="btn btn-outline pricing-button">Выбрать тариф</a>
+                    </div>
+                </div>
+                
+                <div class="pricing-card standard">
+                    <div class="popular-tag">Популярный</div>
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Стандарт</h3>
+                        <div class="pricing-price">490 ₽</div>
+                        <div class="pricing-period">в месяц</div>
+                    </div>
+                    
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> SOS-кнопка и геолокация</li>
+                            <li><i class="fas fa-check"></i> История перемещений (7 дней)</li>
+                            <li><i class="fas fa-check"></i> Мониторинг показателей (HR, активность)</li>
+                            <li><i class="fas fa-check"></i> Детекция падения</li>
+                            <li><i class="fas fa-check"></i> Замыкание на СМП (ручной вызов)</li>
+                            <li><i class="fas fa-check"></i> Голосовая связь с оператором</li>
+                            <li><i class="fas fa-times"></i> Включены вызовы СМП</li>
+                        </ul>
+                        
+                        <a href="#contact" class="btn btn-primary pricing-button">Выбрать тариф</a>
+                    </div>
+                </div>
+                
+                <div class="pricing-card careplus">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Забота+</h3>
+                        <div class="pricing-price">1190 ₽</div>
+                        <div class="pricing-period">в месяц</div>
+                    </div>
+                    
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Всё из тарифа "Стандарт"</li>
+                            <li><i class="fas fa-check"></i> История перемещений (30 дней)</li>
+                            <li><i class="fas fa-check"></i> Мониторинг показателей (HR, SpO₂, активность)</li>
+                            <li><i class="fas fa-check"></i> Подтвержденная детекция падения</li>
+                            <li><i class="fas fa-check"></i> Автоматический вызов СМП</li>
+                            <li><i class="fas fa-check"></i> Персональный оператор (базовый)</li>
+                            <li><i class="fas fa-check"></i> Скидка на полис страхования</li>
+                        </ul>
+                        
+                        <a href="#contact" class="btn btn-outline pricing-button">Выбрать тариф</a>
+                    </div>
+                </div>
+                
+                <div class="pricing-card allinclusive">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Все включено</h3>
+                        <div class="pricing-price">2990 ₽</div>
+                        <div class="pricing-period">в месяц</div>
+                    </div>
+                    
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Всё из тарифа "Забота+"</li>
+                            <li><i class="fas fa-check"></i> История перемещений (90 дней)</li>
+                            <li><i class="fas fa-check"></i> Премиум-аналитика здоровья</li>
+                            <li><i class="fas fa-check"></i> Выносные датчики (ЭКГ, температура, давление)</li>
+                            <li><i class="fas fa-check"></i> 1 вызов СМП в месяц включен</li>
+                            <li><i class="fas fa-check"></i> Персональный менеджер</li>
+                            <li><i class="fas fa-check"></i> Полис страхования от несчастных случаев</li>
+                        </ul>
+                        
+                        <a href="#contact" class="btn btn-outline pricing-button">Выбрать тариф</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>Нам доверяют</h2>
+                <p>Реальные истории спасения и отзывы благодарных клиентов</p>
+            </div>
+            
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-name">
+                            <h4>Ольга, 42 года</h4>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"Мама упала в саду, браслет сам вызвал скорую. Приехали за 12 минут! Без CareLink она бы лежала там часами. Спасибо за ваш продукт!"</p>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-name">
+                            <h4>Михаил, 55 лет</h4>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"Живу в Москве, а отец в Краснодаре. Благодаря геолокации всегда знаю, где он. А когда у него скакнуло давление - получил уведомление и успел вызвать врача."</p>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-name">
+                            <h4>Елена, 38 лет</h4>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p>"Бабушка с деменцией иногда уходит из дома. Теперь мы сразу видим, где она, и можем быстро найти. Браслет легкий, она даже не замечает его."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Часто задаваемые вопросы</h2>
+                <p>Найдите ответы на самые популярные вопросы</p>
+            </div>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Как происходит вызов МЧС/Скорой из другого региона?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Через нашу диспетчерскую службу, интегрированную с ЕДДС по всей РФ. При срабатывании сигнала SOS браслет передает точные координаты, и наш оператор связывается с ближайшей экстренной службой в регионе нахождения пользователя.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Нужен ли смартфон пожилому человеку?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Нет! Браслет работает автономно благодаря встроенной SIM-карте. Все функции доступны без смартфона. Приложение нужно только родственникам для мониторинга и управления настройками.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Что если браслет сработает случайно (ложный вызов)?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Система имеет многоуровневый алгоритм проверки падения. После сигнала SOS наш диспетчер сначала звонит на браслет. Если в течение 30 секунд нет ответа или пользователь подтверждает ЧП, только тогда вызывается помощь.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Как часто нужно заряжать браслет?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>В среднем браслет работает 7 дней от одного заряда. Приложение предупредит вас, когда заряд опустится ниже 20%. Зарядка осуществляется с помощью магнитного кабеля (входит в комплект).</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Защищены ли персональные данные?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Да, мы строго соблюдаем требования 152-ФЗ "О персональных данных". Все данные шифруются при передаче и хранении. Доступ к информации имеют только вы и авторизованные медицинские службы при экстренном вызове.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Есть ли скидки для пенсионеров/соцучреждений?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Да! Для пенсионеров предусмотрена скидка 15% при покупке. Для социальных учреждений (дома престарелых, пансионаты) действуют специальные корпоративные тарифы с дополнительными скидками. Подробности уточняйте у менеджера.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Useful Knowledge Section -->
+    <section id="useful-knowledge" class="section useful-knowledge">
+        <div class="container">
+            <div class="section-title">
+                <h2>Полезно знать</h2>
+                <p>Важная информация для заботы о пожилых близких</p>
+            </div>
+            
+            <div class="articles">
+                <div class="article">
+                    <h3>Для кого-то это просто падение. Для кого-то — начало большой беды.</h3>
+                    <div class="article-content">
+                        <p><strong>Вступление:</strong><br>Каждый из нас хоть раз поскальзывался на льду, неловко спускался по ступенькам или просто терял равновесие. Для большинства это заканчивается парой синяков и парой минут смущения. Но для пожилого человека, особенно одиноко живущего, обычное падение может стать точкой отсчета для серьезных проблем, а в худшем случае — трагедией.</p>
+                        
+                        <h4>Почему падение так опасно?</h4>
+                        <p>С возрастом кости становятся более хрупкими (это состояние называется остеопороз), а время восстановления после травм значительно увеличивается. Самые частые и опасные последствия падений — это перелом шейки бедра, травмы головы, повреждения позвоночника.</p>
+                        <p>Но опасность не только в самой травме. Представьте: ваш близкий человек упал дома, не может подняться, а телефон лежит в другой комнате. Он остается один на один с болью, страхом и беспомощностью. Часы, проведенные на холодном полу, могут привести к обезвоживанию, переохлаждению, пневмонии и резкому ухудшению общего состояния.</p>
+                        
+                        <h4>Тихие сигналы, которые нельзя игнорировать:</h4>
+                        <p>Часто падения — не случайность, а следствие других проблем:</p>
+                        <ul>
+                            <li><strong>Головокружение и слабость:</strong> Могут быть вызваны скачками давления, побочными эффектами лекарств, низким уровнем сахара в крови.</li>
+                            <li><strong>Ухудшение зрения и слуха:</strong> Человек может не заметить препятствие или не услышать предупреждающий звук.</li>
+                            <li><strong>Потеря мышечной массы:</strong> Слабые ноги просто не могут удержать тело в равновесии.</li>
+                        </ul>
+                        
+                        <h4>Как снизить риски?</h4>
+                        <ul>
+                            <li><strong>Создайте безопасное пространство:</strong> Уберите с пути провода, закрепите ковры, установите поручни в ванной и рядом с унитазом, обеспечьте хорошее освещение.</li>
+                            <li><strong>Позаботьтесь о здоровье:</strong> Регулярные визиты к терапевту для контроля давления и корректировки лекарств, упражнения для поддержания силы мышц и равновесия.</li>
+                            <li><strong>Продумайте систему экстренной связи:</strong> Самое важное — обеспечить возможность позвать на помощь в любой момент. Современные технологии, такие как умный браслет с кнопкой SOS и датчиком падения, решают эту проблему. Браслет всегда на руке, и помощь будет вызвана даже если человек не может дотянуться до телефона.</li>
+                        </ul>
+                        
+                        <h4>Вывод:</h4>
+                        <p>Не ждите, пока беда постучится в дверь. Простая забота и современные средства безопасности помогут предотвратить трагедию и подарить вам и вашим близким бесценное чувство уверенности и спокойствия.</p>
+                    </div>
+                </div>
+                
+                <div class="article">
+                    <h3>Невидимые угрозы: когда сердце молчит, а время уходит.</h3>
+                    <div class="article-content">
+                        <p><strong>Вступление:</strong><br>Мы привыкли, что серьезная болезнь громко заявляет о себе: острая боль, высокая температура, потеря сознания. Но самые коварные угрозы нашему здоровью часто подкрадываются тихо, маскируясь под усталость или легкое недомогание. Речь идет о проблемах с сердцем, давлением и сосудами, которые могут годами оставаться незамеченными.</p>
+                        
+                        <h4>Тихий инфаркт и незаметный инсульт.</h4>
+                        <p>Вы знали, что инфаркт может пройти почти бессимптомно? Человек может чувствовать лишь слабость, легкую тошноту или дискомфорт в груди, списав это на переутомление. То же самое с микроинсультом: временное онемение руки, легкая спутанность речи, которые проходят через несколько минут. Но эти "тихие" атаки — грозное предупреждение о том, что следующая может быть фатальной.</p>
+                        
+                        <h4>Почему мы не замечаем опасность?</h4>
+                        <ul>
+                            <li><strong>Привыкание:</strong> Постепенное ухудшение самочувствия становится новой нормой.</li>
+                            <li><strong>Страх:</strong> Многие боятся врачей, больниц и потенциального диагноза, предпочитая не знать о проблеме.</li>
+                            <li><strong>Недооценка симптомов:</strong> Одышка, отеки ног, постоянная усталость кажутся "возрастными" особенностями, а не симптомами сердечной недостаточности.</li>
+                        </ul>
+                        
+                        <h4>Кто в группе риска?</h4>
+                        <p>В зоне повышенного внимания должны быть не только пожилые, но и люди с наследственной предрасположенностью, диабетом, лишним весом, курильщики и те, кто испытывает хронический стресс.</p>
+                        
+                        <h4>Технологии на страже здоровья.</h4>
+                        <p>Сегодня забота о здоровье близких стала проще. Умные браслеты способны круглосуточно отслеживать ключевые показатели:</p>
+                        <ul>
+                            <li><strong>Пульс:</strong> Резкое учащение или замедление ритма может быть сигналом тревоги.</li>
+                            <li><strong>Артериальное давление:</strong> Контроль за давлением помогает предотвратить гипертонический криз.</li>
+                            <li><strong>Физическая активность:</strong> Резкое снижение активности может говорить о плохом самочувствии.</li>
+                        </ul>
+                        <p>Главное преимущество таких устройств — мгновенное оповещение. Если у вашей мамы или папы случится приступ, вы узнаете об этом одним из первых, даже находясь за сотни километров, и успеете вызвать помощь.</p>
+                        
+                        <h4>Вывод:</h4>
+                        <p>Здоровье сердца и сосудов — это не та область, где можно полагаться на авось. Регулярные проверки и современные средства мониторинга — это не проявление излишней тревожности, а разумная забота о самом главном. Потому что когда дело касается здоровья, лучше перебдеть.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section id="contact" class="cta">
+        <div class="container">
+            <h2>Защитите своих близких уже сегодня</h2>
+            <p>Оставьте заявку, и наш менеджер свяжется с вами для консультации</p>
+            
+            <div class="contact-form">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Ваше имя</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Телефон</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Сообщение</label>
+                        <textarea id="message" placeholder="Расскажите, для кого нужен браслет..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-large" style="background: white; color: var(--primary); width: 100%;">
+                        Отправить заявку
+                    </button>
+                </form>
+                
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i> 
+                    Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map-section" class="map-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Наш офис в Санкт-Петербурге</h2>
+                <p>Приезжайте к нам для консультации и покупки браслета</p>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-info">
+                    <h3>CareLink - Центральный офис</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Санкт-Петербург, ул. Калинина, д.10</p>
+                    <p><i class="fas fa-phone-alt"></i> 8 (800) 123-45-67</p>
+                    <p><i class="fas fa-clock"></i> Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00</p>
+                </div>
+            </div>
+            
+            <div class="contact-info" style="margin-top: 40px; text-align: center;">
+                <h3>Контактная информация</h3>
+                <p style="margin-top: 15px; font-size: 18px;">
+                    <i class="fas fa-map-marker-alt"></i> Санкт-Петербург, ул. Калинина, д.10<br>
+                    <i class="fas fa-phone-alt"></i> 8 (800) 123-45-67<br>
+                    <i class="fas fa-envelope"></i> info@carelink.ru<br>
+                    <i class="fas fa-clock"></i> Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <div class="logo">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>CareLink</h3>
+                    </div>
+                    <p>Ваше сердце рядом с родителями. Даже на расстоянии.</p>
+                    
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-odnoklassniki"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Продукт</h3>
+                    <ul class="footer-links">
+                        <li><a href="#features">Возможности</a></li>
+                        <li><a href="#how-it-works">Как это работает</a></li>
+                        <li><a href="#pricing">Тарифы</a></li>
+                        <li><a href="#useful-knowledge">Полезно знать</a></li>
+                        <li><a href="#">Гарантия</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Компания</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Партнерам</a></li>
+                        <li><a href="#">Вакансии</a></li>
+                        <li><a href="#">Новости</a></li>
+                        <li><a href="#map-section">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>8 (800) 123-45-67</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@carelink.ru</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>СПб, ул. Калинина, д.10</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Пн-Пт: 9:00 - 20:00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2024 CareLink. ООО "КейрЛинк". Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+        
+        // FAQ accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            
+            question.addEventListener('click', () => {
+                item.classList.toggle('active');
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    document.querySelector('.nav-menu').classList.remove('active');
+                }
+            });
+        });
+        
+        // Add scroll event for header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+        });
+        
+        // Form submission handling
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            console.log('Form submitted:', { name, phone, email, message });
+            
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            
+            // Reset form
+            this.reset();
+            
+            // Scroll to success message
+            successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        });
+        
+        // Initialize Yandex Map
+        ymaps.ready(initMap);
+        
+        function initMap() {
+            // Create map instance
+            const map = new ymaps.Map('map', {
+                center: [59.934280, 30.335098], // Coordinates for Kalinina st, 10
+                zoom: 16,
+                controls: ['zoomControl', 'geolocationControl']
+            });
+            
+            // Add marker
+            const marker = new ymaps.Placemark([59.934280, 30.335098], {
+                hintContent: 'CareLink - Офис в Санкт-Петербурге',
+                balloonContent: 'ул. Калинина, д.10<br>Телефон: 8 (800) 123-45-67'
+            }, {
+                iconLayout: 'default#image',
+                iconImageHref: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                iconImageSize: [40, 40],
+                iconImageOffset: [-20, -40]
+            });
+            
+            map.geoObjects.add(marker);
+            
+            // Add controls
+            map.controls.add('zoomControl', { 
+                float: 'none', 
+                position: { right: 20, top: 200 } 
+            });
+            
+            // Add route button
+            const routeButton = new ymaps.control.Button({
+                data: { content: 'Проложить маршрут' },
+                options: { selectOnClick: false, maxWidth: 200 }
+            });
+            
+            routeButton.events.add('press', function() {
+                ymaps.route([
+                    [59.934280, 30.335098] // Destination
+                ], {
+                    mapStateAutoApply: true
+                });
+            });
+            
+            map.controls.add(routeButton, { float: 'none', position: { right: 20, top: 260 } });
+            
+            // Open balloon on marker click
+            marker.events.add('click', function() {
+                marker.balloon.open();
+            });
+        }
+        // Добавляем плавную прокрутку для новых якорей
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    document.querySelector('.nav-menu').classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Care Monitoring - Система мониторинга здоровья",
+  "short_name": "Care Monitoring",
+  "description": "Профессиональная система мониторинга здоровья с предиктивной аналитикой",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "ru"
+}

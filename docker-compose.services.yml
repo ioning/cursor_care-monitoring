@@ -1,0 +1,231 @@
+version: '3.9'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    env_file:
+      - api-gateway/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    ports:
+      - "3000:3000"
+    networks:
+      - care-monitoring-network
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: microservices/auth-service/Dockerfile
+    env_file:
+      - microservices/auth-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: microservices/user-service/Dockerfile
+    env_file:
+      - microservices/user-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  device-service:
+    build:
+      context: .
+      dockerfile: microservices/device-service/Dockerfile
+    env_file:
+      - microservices/device-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  telemetry-service:
+    build:
+      context: .
+      dockerfile: microservices/telemetry-service/Dockerfile
+    env_file:
+      - microservices/telemetry-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  ai-prediction-service:
+    build:
+      context: .
+      dockerfile: microservices/ai-prediction-service/Dockerfile
+    env_file:
+      - microservices/ai-prediction-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  alert-service:
+    build:
+      context: .
+      dockerfile: microservices/alert-service/Dockerfile
+    env_file:
+      - microservices/alert-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  integration-service:
+    build:
+      context: .
+      dockerfile: microservices/integration-service/Dockerfile
+    env_file:
+      - microservices/integration-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  dispatcher-service:
+    build:
+      context: .
+      dockerfile: microservices/dispatcher-service/Dockerfile
+    env_file:
+      - microservices/dispatcher-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  location-service:
+    build:
+      context: .
+      dockerfile: microservices/location-service/Dockerfile
+    env_file:
+      - microservices/location-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  billing-service:
+    build:
+      context: .
+      dockerfile: microservices/billing-service/Dockerfile
+    env_file:
+      - microservices/billing-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: microservices/analytics-service/Dockerfile
+    env_file:
+      - microservices/analytics-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  organization-service:
+    build:
+      context: .
+      dockerfile: microservices/organization-service/Dockerfile
+    env_file:
+      - microservices/organization-service/.env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - care-monitoring-network
+
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: cms_user
+      POSTGRES_PASSWORD: cms_password
+      POSTGRES_DB: care_monitoring
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cms_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - care-monitoring-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - care-monitoring-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: cms
+      RABBITMQ_DEFAULT_PASS: cms
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - care-monitoring-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  care-monitoring-network:
+    driver: bridge
+
