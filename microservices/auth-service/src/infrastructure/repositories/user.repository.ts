@@ -119,64 +119,20 @@ export class UserRepository {
     await db.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [id]);
   }
 
-  private mapRowToUser(row: any): User {
-    return {
-      id: row.id,
-      email: row.email,
-      passwordHash: row.password_hash,
-      fullName: row.full_name,
-      phone: row.phone,
-      role: row.role,
-      organizationId: row.organization_id,
-      status: row.status,
-      emailVerified: row.email_verified,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      lastLoginAt: row.last_login_at,
-    };
-  }
-}
-
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-    return this.mapRowToUser(result.rows[0]);
-  }
-
-  async updateLastLogin(id: string): Promise<void> {
+  async setEmailVerified(email: string): Promise<void> {
     const db = getDatabaseConnection();
-    await db.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [id]);
+    await db.query(
+      'UPDATE users SET email_verified = TRUE, updated_at = NOW() WHERE email = $1',
+      [email]
+    );
   }
 
-  private mapRowToUser(row: any): User {
-    return {
-      id: row.id,
-      email: row.email,
-      passwordHash: row.password_hash,
-      fullName: row.full_name,
-      phone: row.phone,
-      role: row.role,
-      organizationId: row.organization_id,
-      status: row.status,
-      emailVerified: row.email_verified,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      lastLoginAt: row.last_login_at,
-    };
-  }
-}
-
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-    return this.mapRowToUser(result.rows[0]);
-  }
-
-  async updateLastLogin(id: string): Promise<void> {
+  async setEmailVerifiedById(userId: string): Promise<void> {
     const db = getDatabaseConnection();
-    await db.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [id]);
+    await db.query(
+      'UPDATE users SET email_verified = TRUE, updated_at = NOW() WHERE id = $1',
+      [userId]
+    );
   }
 
   private mapRowToUser(row: any): User {
@@ -196,4 +152,3 @@ export class UserRepository {
     };
   }
 }
-

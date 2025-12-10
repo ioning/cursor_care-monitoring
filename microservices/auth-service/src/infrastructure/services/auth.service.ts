@@ -1,11 +1,14 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from '../repositories/user.repository';
 import { SessionRepository } from '../repositories/session.repository';
+import { EmailVerificationRepository } from '../repositories/email-verification.repository';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
+import { EmailService } from './email.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { VerifyEmailDto, ResendVerificationCodeDto } from '../dto/verify-email.dto';
 import { createLogger } from '../../../../shared/libs/logger';
 
 @Injectable()
@@ -15,8 +18,10 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly sessionRepository: SessionRepository,
+    private readonly emailVerificationRepository: EmailVerificationRepository,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly emailService: EmailService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -35,13 +40,23 @@ export class AuthService {
       role: registerDto.role,
     });
 
-    const tokens = await this.tokenService.generateTokens(user.id, user.email, user.role);
-    await this.sessionRepository.create({
-      userId: user.id,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      deviceInfo: {},
-    });
+    // Генерируем 4-значный код
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
+
+    // Сохраняем код
+    await this.emailVerificationRepository.createCode(registerDto.email, code, expiresAt, user.id);
+
+    // Отправляем код на email
+    try {
+      await this.emailService.sendVerificationCode(registerDto.email, code, registerDto.fullName);
+    } catch (error: any) {
+      this.logger.error('Failed to send verification email during registration', {
+        error: error.message,
+        email: registerDto.email,
+      });
+      // Не прерываем регистрацию, но логируем ошибку
+    }
 
     this.logger.info(`User registered: ${user.id}`, { userId: user.id, email: user.email });
 
@@ -53,10 +68,91 @@ export class AuthService {
           email: user.email,
           fullName: user.fullName,
           role: user.role,
+          emailVerified: false,
+        },
+      },
+      message: 'Registration successful. Please check your email for verification code.',
+      requiresEmailVerification: true,
+    };
+  }
+
+  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
+    const { email, code } = verifyEmailDto;
+
+    // Проверяем код
+    const verificationCode = await this.emailVerificationRepository.findValidCode(email, code);
+    if (!verificationCode) {
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    // Находим пользователя
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Помечаем код как использованный
+    await this.emailVerificationRepository.markConsumed(verificationCode.id);
+
+    // Устанавливаем email как подтверждённый
+    await this.userRepository.setEmailVerifiedById(user.id);
+
+    // Генерируем токены
+    const tokens = await this.tokenService.generateTokens(user.id, user.email, user.role);
+    await this.sessionRepository.create({
+      userId: user.id,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      deviceInfo: {},
+    });
+
+    this.logger.info(`Email verified: ${user.id}`, { userId: user.id, email: user.email });
+
+    return {
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          emailVerified: true,
         },
         tokens,
       },
-      message: 'User registered successfully',
+      message: 'Email verified successfully',
+    };
+  }
+
+  async resendVerificationCode(resendDto: ResendVerificationCodeDto) {
+    const { email } = resendDto;
+
+    // Проверяем существование пользователя
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Проверяем, не подтверждён ли уже email
+    if (user.emailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    // Генерируем новый код
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
+
+    // Сохраняем код
+    await this.emailVerificationRepository.createCode(email, code, expiresAt, user.id);
+
+    // Отправляем код
+    await this.emailService.sendVerificationCode(email, code, user.fullName);
+
+    this.logger.info(`Verification code resent: ${email}`);
+
+    return {
+      success: true,
+      message: 'Verification code sent to your email',
     };
   }
 
@@ -70,6 +166,11 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Проверяем, подтверждён ли email (опционально, можно разрешить вход без подтверждения)
+    // if (!user.emailVerified) {
+    //   throw new UnauthorizedException('Please verify your email before logging in');
+    // }
 
     const tokens = await this.tokenService.generateTokens(user.id, user.email, user.role);
     await this.sessionRepository.create({
@@ -91,6 +192,7 @@ export class AuthService {
           email: user.email,
           fullName: user.fullName,
           role: user.role,
+          emailVerified: user.emailVerified,
         },
         tokens,
       },

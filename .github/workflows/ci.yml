@@ -73,8 +73,16 @@ jobs:
       - name: Create service databases
         run: |
           export PGPASSWORD="${DB_PASSWORD}"
-          for db in auth_db user_db device_db telemetry_db alert_db location_db billing_db integration_db dispatcher_db analytics_db ai_prediction_db; do
+          for db in auth_db user_db device_db telemetry_db alert_db location_db billing_db integration_db dispatcher_db analytics_db ai_prediction_db organization_db ward_mobile_db; do
             psql -h ${DB_HOST} -U ${DB_USER} -p ${DB_PORT} -d postgres -c "CREATE DATABASE ${db};"
+          done
+
+      - name: Enable PostgreSQL extensions
+        run: |
+          export PGPASSWORD="${DB_PASSWORD}"
+          for db in auth_db user_db device_db telemetry_db alert_db location_db billing_db integration_db dispatcher_db analytics_db ai_prediction_db organization_db ward_mobile_db care_monitoring; do
+            psql -h ${DB_HOST} -U ${DB_USER} -p ${DB_PORT} -d ${db} -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+            psql -h ${DB_HOST} -U ${DB_USER} -p ${DB_PORT} -d ${db} -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
           done
 
       - name: Run migrations (all services)

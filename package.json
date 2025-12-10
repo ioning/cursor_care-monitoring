@@ -29,9 +29,14 @@
     "dev:all": "concurrently \"npm run dev:gateway\" \"npm run dev:services\" \"npm run dev:frontend\"",
     "db:migrate": "node scripts/migrate.js",
     "db:migrate:up": "node scripts/migrate.js up",
-    "db:migrate:down": "node scripts/migrate.js down"
+    "db:migrate:down": "node scripts/migrate.js down",
+    "db:seed": "ts-node scripts/seed.ts"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "bcrypt": "^5.1.1",
+    "@types/bcrypt": "^5.0.2",
+    "ts-node": "^10.9.2",
+    "dotenv": "^16.3.1"
   }
 }

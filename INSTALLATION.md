@@ -1112,7 +1112,7 @@ Test-Path microservices/auth-service/node_modules
 
 ```powershell
 # Из корня проекта
-npm run dev:infra
+   npm run dev:infra
 
 # Или вручную
 cd infrastructure
@@ -1131,15 +1131,15 @@ docker compose -f infrastructure/docker-compose.yml ps
 ### 2. Примените миграции базы данных
 
 ```powershell
-npm run db:migrate
-```
+   npm run db:migrate
+   ```
 
 ### 3. Запустите все сервисы
 
 ```powershell
 # Запуск всех сервисов одновременно
-npm run dev:all
-```
+   npm run dev:all
+   ```
 
 **Или по отдельности в разных окнах PowerShell:**
 
@@ -1172,7 +1172,7 @@ npm run dev
 # Landing App (http://localhost:5175)
 cd frontend/apps/landing-app
 npm run dev
-```
+   ```
 
 **Подробная инструкция:** [DEPLOYMENT.md](DEPLOYMENT.md)
 
@@ -1394,7 +1394,7 @@ Windows имеет ограничение на длину пути (260 симв
    ```powershell
    # Установите проект ближе к корню диска
    # Например: C:\dev\care-monitoring
-   ```
+```
 
 ---
 

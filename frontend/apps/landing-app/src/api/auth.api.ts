@@ -38,8 +38,42 @@ export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   return response.data;
 };
 
-export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>('/auth/register', data);
+export interface RegisterResponse {
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      fullName: string;
+      role: string;
+      emailVerified: boolean;
+    };
+  };
+  message?: string;
+  requiresEmailVerification?: boolean;
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+export interface ResendVerificationCodeRequest {
+  email: string;
+}
+
+export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
+  const response = await apiClient.post<RegisterResponse>('/auth/register', data);
+  return response.data;
+};
+
+export const verifyEmail = async (data: VerifyEmailRequest): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/verify-email', data);
+  return response.data;
+};
+
+export const resendVerificationCode = async (data: ResendVerificationCodeRequest): Promise<{ success: boolean; message: string }> => {
+  const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-verification-code', data);
   return response.data;
 };
 

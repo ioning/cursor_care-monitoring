@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { VerifyEmailDto, ResendVerificationCodeDto } from '../dto/verify-email.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @ApiTags('auth')
@@ -55,6 +56,24 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User information' })
   async getMe(@Request() req) {
     return this.authService.getCurrentUser(req.user.id);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify email with 4-digit code' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired code' })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto);
+  }
+
+  @Post('resend-verification-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend email verification code' })
+  @ApiResponse({ status: 200, description: 'Verification code sent' })
+  @ApiResponse({ status: 400, description: 'User not found or email already verified' })
+  async resendVerificationCode(@Body() resendDto: ResendVerificationCodeDto) {
+    return this.authService.resendVerificationCode(resendDto);
   }
 }
 

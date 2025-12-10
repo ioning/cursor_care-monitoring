@@ -6,10 +6,12 @@ import { AuthController } from './infrastructure/controllers/auth.controller';
 import { AuthService } from './infrastructure/services/auth.service';
 import { UserRepository } from './infrastructure/repositories/user.repository';
 import { SessionRepository } from './infrastructure/repositories/session.repository';
+import { EmailVerificationRepository } from './infrastructure/repositories/email-verification.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
 import { PasswordService } from './infrastructure/services/password.service';
 import { TokenService } from './infrastructure/services/token.service';
+import { EmailService } from './infrastructure/services/email.service';
 
 @Module({
   imports: [
@@ -38,8 +40,10 @@ import { TokenService } from './infrastructure/services/token.service';
     AuthService,
     UserRepository,
     SessionRepository,
+    EmailVerificationRepository,
     PasswordService,
     TokenService,
+    EmailService,
     JwtStrategy,
     LocalStrategy,
   ],
@@ -48,26 +52,12 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly sessionRepository: SessionRepository,
+    private readonly emailVerificationRepository: EmailVerificationRepository,
   ) {}
 
   async onModuleInit() {
     await this.userRepository.initialize();
     await this.sessionRepository.initialize();
-  }
-}
-
-  ) {}
-
-  async onModuleInit() {
-    await this.userRepository.initialize();
-    await this.sessionRepository.initialize();
-  }
-}
-
-  ) {}
-
-  async onModuleInit() {
-    await this.userRepository.initialize();
-    await this.sessionRepository.initialize();
+    await this.emailVerificationRepository.initialize();
   }
 }
