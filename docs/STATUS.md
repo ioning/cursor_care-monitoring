@@ -116,5 +116,5 @@
 
 ---
 
-**Полный отчет:** [PROJECT_REPORT.md](PROJECT_REPORT.md)
+**Полный отчет:** [audit/PROJECT_REPORT.md](audit/PROJECT_REPORT.md)
 

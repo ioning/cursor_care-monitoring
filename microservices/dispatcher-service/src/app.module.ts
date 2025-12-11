@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DispatcherController } from './infrastructure/controllers/dispatcher.controller';
 import { SMPController } from './infrastructure/controllers/smp.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { DispatcherService } from './application/services/dispatcher.service';
 import { SMPService } from './application/services/smp.service';
 import { CallRepository } from './infrastructure/repositories/call.repository';
@@ -32,7 +34,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [DispatcherController, SMPController],
+  controllers: [DispatcherController, SMPController, HealthController, MetricsController],
   providers: [
     DispatcherService,
     SMPService,
@@ -40,52 +42,6 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     DispatcherRepository,
     SMPProviderRepository,
     ServicePriceRepository,
-    SMPCallRepository,
-    JwtStrategy,
-  ],
-})
-export class AppModule implements OnModuleInit {
-  constructor(
-    private readonly callRepository: CallRepository,
-    private readonly dispatcherRepository: DispatcherRepository,
-    private readonly smpProviderRepository: SMPProviderRepository,
-    private readonly servicePriceRepository: ServicePriceRepository,
-    private readonly smpCallRepository: SMPCallRepository,
-  ) {}
-
-  async onModuleInit() {
-    await this.callRepository.initialize();
-    await this.dispatcherRepository.initialize();
-    await this.smpProviderRepository.initialize();
-    await this.servicePriceRepository.initialize();
-    await this.smpCallRepository.initialize();
-  }
-}
-
-
-    SMPCallRepository,
-    JwtStrategy,
-  ],
-})
-export class AppModule implements OnModuleInit {
-  constructor(
-    private readonly callRepository: CallRepository,
-    private readonly dispatcherRepository: DispatcherRepository,
-    private readonly smpProviderRepository: SMPProviderRepository,
-    private readonly servicePriceRepository: ServicePriceRepository,
-    private readonly smpCallRepository: SMPCallRepository,
-  ) {}
-
-  async onModuleInit() {
-    await this.callRepository.initialize();
-    await this.dispatcherRepository.initialize();
-    await this.smpProviderRepository.initialize();
-    await this.servicePriceRepository.initialize();
-    await this.smpCallRepository.initialize();
-  }
-}
-
-
     SMPCallRepository,
     JwtStrategy,
   ],

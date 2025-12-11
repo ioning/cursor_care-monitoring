@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthController } from './controllers/health.controller';
+import { MetricsController } from './controllers/metrics.controller';
 import { AuthController } from './controllers/auth.controller';
 import { UserController } from './controllers/user.controller';
 import { DeviceController } from './controllers/device.controller';
@@ -31,6 +32,7 @@ import { GatewayConfig } from './config/gateway.config';
   ],
   controllers: [
     HealthController,
+    MetricsController,
     AuthController,
     UserController,
     DeviceController,

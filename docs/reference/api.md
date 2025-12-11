@@ -1,5 +1,7 @@
 # API Specification
 
+> **Примечание:** Для примеров использования API см. [API Examples](./API_EXAMPLES.md)
+
 Базовые entrypoints через API Gateway (`api-gateway/`):
 - Auth: `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`
 - Telemetry: `POST /telemetry`

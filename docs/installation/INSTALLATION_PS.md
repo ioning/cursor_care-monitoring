@@ -366,7 +366,7 @@ npm ls --workspaces --depth=0
    cd frontend/apps/admin-app; npm run dev           # http://localhost:5185
    ```
 
-**Подробная инструкция:** [DEPLOYMENT.md](DEPLOYMENT.md)
+**Подробная инструкция:** [../deployment/DEPLOYMENT.md](../deployment/DEPLOYMENT.md)
 
 ---
 
@@ -485,9 +485,9 @@ git clone https://github.com/username/repository.git
 
 ## Дополнительная помощь
 
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Руководство по развертыванию
+- [../deployment/DEPLOYMENT.md](../deployment/DEPLOYMENT.md) - Руководство по развертыванию
 - [README.md](README.md) - Общая информация
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Руководство по разработке
+- [docs/development/DEVELOPMENT.md](../development/DEVELOPMENT.md) - Руководство по разработке
 
 ---
 
@@ -525,9 +525,9 @@ git clone https://github.com/username/repository.git
 
 ## Дополнительная помощь
 
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Руководство по развертыванию
+- [../deployment/DEPLOYMENT.md](../deployment/DEPLOYMENT.md) - Руководство по развертыванию
 - [README.md](README.md) - Общая информация
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Руководство по разработке
+- [docs/development/DEVELOPMENT.md](../development/DEVELOPMENT.md) - Руководство по разработке
 
 ---
 
@@ -565,9 +565,9 @@ git clone https://github.com/username/repository.git
 
 ## Дополнительная помощь
 
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Руководство по развертыванию
+- [../deployment/DEPLOYMENT.md](../deployment/DEPLOYMENT.md) - Руководство по развертыванию
 - [README.md](README.md) - Общая информация
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Руководство по разработке
+- [docs/development/DEVELOPMENT.md](../development/DEVELOPMENT.md) - Руководство по разработке
 
 ---
 

@@ -1,32 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Dimensions, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { colors, spacing, typography, radii, shadows } from '../theme/designSystem';
+import { WardStatusService, WardStatus } from '../services/WardStatusService';
 
-const mockWards = [
-  {
-    id: 'w1',
-    name: 'Анна Иванова',
-    status: 'stable',
-    lastSeen: '2 мин назад',
-    location: 'Петроградская, 10',
-  },
-  {
-    id: 'w2',
-    name: 'Иван Петров',
-    status: 'alert',
-    lastSeen: '35 мин назад',
-    location: 'Парк Победы',
-  },
-  {
-    id: 'w3',
-    name: 'Мария Лебедева',
-    status: 'attention',
-    lastSeen: 'онлайн',
-    location: 'Дом, этаж 3',
-  },
-];
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const statusMap = {
   stable: { text: 'Стабильно', color: colors.success },
@@ -34,7 +15,51 @@ const statusMap = {
   alert: { text: 'Тревога', color: colors.danger },
 };
 
+/**
+ * Преобразует цвет в hex формат для маркеров на карте
+ */
+// Функция больше не нужна, так как используем кастомные маркеры
+
 const GuardianDashboardScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const [wards, setWards] = useState<WardStatus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const loadWards = async () => {
+    try {
+      const wardsStatus = await WardStatusService.getWardsStatus();
+      setWards(wardsStatus);
+    } catch (error) {
+      console.error('Failed to load wards:', error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWards();
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadWards();
+  };
+
+  const handleWardPress = (wardId: string) => {
+    navigation.navigate('WardDetail' as never, { wardId } as never);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Загрузка данных...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -49,11 +74,46 @@ const GuardianDashboardScreen: React.FC = () => {
       </View>
 
       <View style={[styles.mapCard, shadows.card]}>
-        <View style={styles.mapPlaceholder}>
-          <Icon name="map" size={64} color={colors.textMuted} />
-          <Text style={styles.mapText}>Здесь будет карта с пинами</Text>
-          <Text style={styles.mapHint}>Подключите react-native-maps и данные местоположения</Text>
-        </View>
+        {wards.length > 0 && wards.some(w => w.location) ? (
+          <MapView
+            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+            style={styles.map}
+            initialRegion={getInitialRegion()}
+            showsUserLocation={false}
+            showsMyLocationButton={false}
+            mapType="standard"
+          >
+            {wards.map((ward) => {
+              if (!ward.location) return null;
+              
+              const statusConfig = statusMap[ward.status] ?? statusMap.stable;
+              
+              return (
+                <Marker
+                  key={ward.wardId}
+                  coordinate={{
+                    latitude: ward.location.latitude,
+                    longitude: ward.location.longitude,
+                  }}
+                  title={ward.fullName}
+                  description={`${statusConfig.text} • ${ward.lastSeen}`}
+                  onPress={() => handleMarkerPress(ward.wardId)}
+                >
+                  <View style={styles.markerContainer}>
+                    <View style={[styles.markerDot, { backgroundColor: statusConfig.color }]} />
+                    <View style={[styles.markerPulse, { backgroundColor: statusConfig.color }]} />
+                  </View>
+                </Marker>
+              );
+            })}
+          </MapView>
+        ) : (
+          <View style={styles.mapPlaceholder}>
+            <Icon name="map" size={64} color={colors.textMuted} />
+            <Text style={styles.mapText}>Нет данных о местоположении</Text>
+            <Text style={styles.mapHint}>Местоположение подопечных появится здесь</Text>
+          </View>
+        )}
         <View style={styles.mapLegend}>
           {Object.entries(statusMap).map(([key, props]) => (
             <View key={key} style={styles.legendItem}>
@@ -66,34 +126,55 @@ const GuardianDashboardScreen: React.FC = () => {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Подопечные</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Wards' as never)}>
           <Text style={styles.link}>Открыть список</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={mockWards}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          const statusConfig = statusMap[item.status as keyof typeof statusMap] ?? statusMap.stable;
-          return (
-            <View style={[styles.wardCard, shadows.card]}>
-              <View>
-                <Text style={styles.wardName}>{item.name}</Text>
-                <Text style={styles.wardLocation}>{item.location}</Text>
-              </View>
-              <View style={styles.wardMeta}>
-                <View style={[styles.statusBadge, { backgroundColor: statusConfig.color }]}>
-                  <Text style={styles.statusText}>{statusConfig.text}</Text>
+      {wards.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Icon name="people-outline" size={64} color={colors.textMuted} />
+          <Text style={styles.emptyText}>Нет подопечных</Text>
+          <Text style={styles.emptyHint}>Добавьте подопечного, чтобы начать мониторинг</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={wards}
+          keyExtractor={(item) => item.wardId}
+          renderItem={({ item }: { item: WardStatus }) => {
+            const statusConfig = statusMap[item.status] ?? statusMap.stable;
+            const locationText = item.location?.address 
+              ? item.location.address 
+              : item.location 
+              ? `${item.location.latitude.toFixed(4)}, ${item.location.longitude.toFixed(4)}`
+              : 'Местоположение неизвестно';
+            
+            return (
+              <TouchableOpacity
+                style={[styles.wardCard, shadows.card]}
+                onPress={() => handleWardPress(item.wardId)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.wardContent}>
+                  <Text style={styles.wardName}>{item.fullName}</Text>
+                  <Text style={styles.wardLocation}>{locationText}</Text>
                 </View>
-                <Text style={styles.lastSeen}>{item.lastSeen}</Text>
-              </View>
-            </View>
-          );
-        }}
-        ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
-        contentContainerStyle={{ paddingBottom: spacing.xl }}
-      />
+                <View style={styles.wardMeta}>
+                  <View style={[styles.statusBadge, { backgroundColor: statusConfig.color }]}>
+                    <Text style={styles.statusText}>{statusConfig.text}</Text>
+                  </View>
+                  <Text style={styles.lastSeen}>{item.lastSeen}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
+          contentContainerStyle={{ paddingBottom: spacing.xl }}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+          }
+        />
+      )}
     </View>
   );
 };
@@ -141,6 +222,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
+  map: {
+    width: '100%',
+    height: 220,
+    borderRadius: radii.md,
+    marginBottom: spacing.md,
+  },
   mapPlaceholder: {
     backgroundColor: colors.background,
     borderRadius: radii.md,
@@ -150,6 +237,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.divider,
     marginBottom: spacing.md,
+  },
+  markerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  markerDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 2,
+  },
+  markerPulse: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    opacity: 0.3,
+    zIndex: 1,
   },
   mapText: {
     fontSize: typography.subtitle,
@@ -230,6 +343,37 @@ const styles = StyleSheet.create({
   lastSeen: {
     fontSize: typography.caption,
     color: colors.textMuted,
+  },
+  centerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: spacing.md,
+    fontSize: typography.body,
+    color: colors.textMuted,
+  },
+  wardContent: {
+    flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.xl * 2,
+  },
+  emptyText: {
+    marginTop: spacing.md,
+    fontSize: typography.subtitle,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  emptyHint: {
+    marginTop: spacing.sm,
+    fontSize: typography.body,
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
   },
 });
 

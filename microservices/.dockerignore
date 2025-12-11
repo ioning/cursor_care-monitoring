@@ -1,0 +1,10 @@
+# Service-specific ignores
+**/node_modules/
+**/dist/
+**/coverage/
+**/*.log
+**/.env*
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+

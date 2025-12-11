@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocationController } from './infrastructure/controllers/location.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { LocationService } from './application/services/location.service';
 import { LocationRepository } from './infrastructure/repositories/location.repository';
 import { GeofenceRepository } from './infrastructure/repositories/geofence.repository';
@@ -29,7 +31,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [LocationController],
+  controllers: [LocationController, HealthController, MetricsController],
   providers: [
     LocationService,
     LocationRepository,

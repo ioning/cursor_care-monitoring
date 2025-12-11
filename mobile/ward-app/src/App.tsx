@@ -7,18 +7,24 @@ import { AppNavigator } from './navigation/AppNavigator';
 import { NotificationService } from './services/NotificationService';
 import { LocationService } from './services/LocationService';
 import { BluetoothService } from './services/BluetoothService';
+import { OfflineService } from './services/OfflineService';
 
 const App: React.FC = () => {
   useEffect(() => {
     // Initialize services
+    OfflineService.initialize();
     NotificationService.initialize();
     LocationService.initialize();
     BluetoothService.initialize();
+
+    // Очищаем просроченный кэш при старте
+    OfflineService.clearExpiredCache();
 
     return () => {
       // Cleanup
       LocationService.cleanup();
       BluetoothService.cleanup();
+      NotificationService.unregisterToken();
     };
   }, []);
 

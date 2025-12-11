@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AnalyticsController } from './infrastructure/controllers/analytics.controller';
 import { ReportTemplateController } from './infrastructure/controllers/report-template.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { AnalyticsService } from './application/services/analytics.service';
 import { ReportTemplateService } from './application/services/report-template.service';
 import { ReportRepository } from './infrastructure/repositories/report.repository';
@@ -30,7 +32,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [AnalyticsController, ReportTemplateController],
+  controllers: [AnalyticsController, ReportTemplateController, HealthController, MetricsController],
   providers: [
     AnalyticsService,
     ReportTemplateService,

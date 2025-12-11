@@ -11,6 +11,9 @@ export * from './libs/env-validator';
 export * from './guards/jwt-auth.guard';
 export * from './guards/tenant.guard';
 export * from './middleware/tenant.middleware';
+export * from './controllers/health.controller';
+export * from './controllers/metrics.controller';
+export * from './libs/audit-logger';
 export * from './types/common.types';
 export * from './types/event.types';
 

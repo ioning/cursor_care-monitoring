@@ -7,5 +7,5 @@
 - Подписки и биллинг
 - Геоданные/диспетчеризация
 
-Инициализация: `npm run db:migrate` (см. `MIGRATIONS_GUIDE.md`).
+Инициализация: `npm run db:migrate` (см. `docs/database/MIGRATIONS_GUIDE.md`).
 

@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AlertController } from './infrastructure/controllers/alert.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { AlertService } from './application/services/alert.service';
 import { AlertRepository } from './infrastructure/repositories/alert.repository';
 import { AlertEventPublisher } from './infrastructure/messaging/alert-event.publisher';
@@ -28,24 +30,8 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [AlertController],
+  controllers: [AlertController, HealthController, MetricsController],
   providers: [AlertService, AlertRepository, AlertEventPublisher, UserServiceClient, JwtStrategy],
-})
-export class AppModule {}
-
-
-    }),
-  ],
-  controllers: [AlertController],
-  providers: [AlertService, AlertRepository, AlertEventPublisher, JwtStrategy],
-})
-export class AppModule {}
-
-
-    }),
-  ],
-  controllers: [AlertController],
-  providers: [AlertService, AlertRepository, AlertEventPublisher, JwtStrategy],
 })
 export class AppModule {}
 

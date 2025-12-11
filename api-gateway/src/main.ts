@@ -58,12 +58,58 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('Care Monitoring System API')
-    .setDescription('API Gateway for Care Monitoring System')
+    .setDescription(`
+      API Gateway for Care Monitoring System - система мониторинга и предиктивной аналитики здоровья.
+      
+      ## Аутентификация
+      
+      Большинство endpoints требуют аутентификации через JWT токен. Получите токен через `/api/v1/auth/login` и используйте его в заголовке:
+      \`Authorization: Bearer YOUR_TOKEN\`
+      
+      ## Примеры использования
+      
+      См. [API Examples](../../docs/reference/API_EXAMPLES.md) для подробных примеров использования всех endpoints.
+      
+      ## Health Checks
+      
+      - \`GET /api/v1/health\` - общий health check
+      - \`GET /api/v1/health/ready\` - readiness check
+      - \`GET /api/v1/health/live\` - liveness check
+      - \`GET /api/v1/metrics\` - Prometheus метрики
+    `)
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('auth', 'Аутентификация и авторизация')
+    .addTag('users', 'Управление пользователями и подопечными')
+    .addTag('devices', 'Управление устройствами')
+    .addTag('telemetry', 'Телеметрия и метрики')
+    .addTag('alerts', 'Алерты и уведомления')
+    .addTag('locations', 'Местоположение и геозоны')
+    .addTag('billing', 'Биллинг и подписки')
+    .addTag('dispatcher', 'Диспетчеризация вызовов')
+    .addTag('analytics', 'Аналитика и отчеты')
+    .addTag('organizations', 'Управление организациями')
+    .addTag('health', 'Health checks и мониторинг')
+    .addTag('metrics', 'Prometheus метрики')
+    .addServer('http://localhost:3000', 'Development')
+    .addServer('https://api.caremonitoring.com', 'Production')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'Care Monitoring API Documentation',
+    customfavIcon: '/favicon.ico',
+    customCss: '.swagger-ui .topbar { display: none }',
+  });
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

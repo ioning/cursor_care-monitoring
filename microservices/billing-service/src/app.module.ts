@@ -3,13 +3,15 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BillingController } from './infrastructure/controllers/billing.controller';
+import { YooKassaWebhookController } from './infrastructure/payment-providers/yookassa/yookassa.webhook.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { BillingService } from './application/services/billing.service';
 import { SubscriptionRepository } from './infrastructure/repositories/subscription.repository';
 import { PaymentRepository } from './infrastructure/repositories/payment.repository';
 import { InvoiceRepository } from './infrastructure/repositories/invoice.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { YooKassaAdapter } from './infrastructure/payment-providers/yookassa/yookassa.adapter';
-import { YooKassaWebhookController } from './infrastructure/payment-providers/yookassa/yookassa.webhook.controller';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { YooKassaWebhookController } from './infrastructure/payment-providers/yo
       },
     }),
   ],
-  controllers: [BillingController, YooKassaWebhookController],
+  controllers: [BillingController, YooKassaWebhookController, HealthController, MetricsController],
   providers: [
     BillingService,
     SubscriptionRepository,
@@ -44,28 +46,6 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly subscriptionRepository: SubscriptionRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly invoiceRepository: InvoiceRepository,
-  ) {}
-
-  async onModuleInit() {
-    await this.subscriptionRepository.initialize();
-    await this.paymentRepository.initialize();
-    await this.invoiceRepository.initialize();
-  }
-}
-
-
-    private readonly invoiceRepository: InvoiceRepository,
-  ) {}
-
-  async onModuleInit() {
-    await this.subscriptionRepository.initialize();
-    await this.paymentRepository.initialize();
-    await this.invoiceRepository.initialize();
-  }
-}
-
-
     private readonly invoiceRepository: InvoiceRepository,
   ) {}
 

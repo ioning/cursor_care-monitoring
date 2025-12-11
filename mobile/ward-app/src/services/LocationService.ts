@@ -45,13 +45,14 @@ class LocationService {
 
         store.dispatch(setLocation(location));
 
-        // Send to API
+        // Send to API (с поддержкой офлайн режима)
         ApiLocationService.sendLocation(wardId, {
           latitude: location.latitude,
           longitude: location.longitude,
           accuracy: location.accuracy,
         }).catch((error) => {
           console.error('Failed to send location:', error);
+          // В офлайн режиме данные будут сохранены и отправлены позже
         });
       },
       (error) => {
@@ -65,6 +66,35 @@ class LocationService {
         distanceFilter: 10, // Update every 10 meters
       }
     );
+  }
+
+  /**
+   * Получить текущую позицию (одноразовый запрос)
+   */
+  async getCurrentPosition(): Promise<{ latitude: number; longitude: number } | null> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    return new Promise((resolve) => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Failed to get current position:', error);
+          resolve(null);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 5000,
+        }
+      );
+    });
   }
 
   stopTracking() {

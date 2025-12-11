@@ -10,10 +10,12 @@ import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { VerifyEmailDto, ResendVerificationCodeDto } from '../dto/verify-email.dto';
 import { createLogger } from '../../../../shared/libs/logger';
+import { createAuditLogger } from '../../../../shared/libs/audit-logger';
 
 @Injectable()
 export class AuthService {
   private readonly logger = createLogger({ serviceName: 'auth-service' });
+  private readonly auditLogger = createAuditLogger('auth-service');
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -25,9 +27,15 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, context?: { ipAddress?: string; userAgent?: string }) {
     const existingUser = await this.userRepository.findByEmail(registerDto.email);
     if (existingUser) {
+      this.auditLogger.logAuth('login_failed', {
+        email: registerDto.email,
+        reason: 'User already exists',
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent,
+      });
       throw new ConflictException('User with this email already exists');
     }
 
@@ -59,6 +67,14 @@ export class AuthService {
     }
 
     this.logger.info(`User registered: ${user.id}`, { userId: user.id, email: user.email });
+    
+    // Audit log
+    this.auditLogger.logAuth('register', {
+      userId: user.id,
+      email: user.email,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
 
     return {
       success: true,
@@ -156,14 +172,27 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, context?: { ipAddress?: string; userAgent?: string }) {
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) {
+      this.auditLogger.logAuth('login_failed', {
+        email: loginDto.email,
+        reason: 'User not found',
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent,
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await this.passwordService.compare(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
+      this.auditLogger.logAuth('login_failed', {
+        userId: user.id,
+        email: user.email,
+        reason: 'Invalid password',
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent,
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -183,6 +212,14 @@ export class AuthService {
     await this.userRepository.updateLastLogin(user.id);
 
     this.logger.info(`User logged in: ${user.id}`, { userId: user.id, email: user.email });
+    
+    // Audit log
+    this.auditLogger.logAuth('login', {
+      userId: user.id,
+      email: user.email,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
 
     return {
       success: true,
@@ -199,7 +236,7 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string, context?: { ipAddress?: string; userAgent?: string }) {
     const session = await this.sessionRepository.findByRefreshToken(refreshToken);
     if (!session) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -213,15 +250,31 @@ export class AuthService {
     const tokens = await this.tokenService.generateTokens(user.id, user.email, user.role);
     await this.sessionRepository.updateTokens(session.id, tokens.accessToken, tokens.refreshToken);
 
+    // Audit log
+    this.auditLogger.logAuth('token_refresh', {
+      userId: user.id,
+      email: user.email,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
     return {
       success: true,
       data: tokens,
     };
   }
 
-  async logout(userId: string) {
+  async logout(userId: string, context?: { ipAddress?: string; userAgent?: string }) {
     await this.sessionRepository.deleteByUserId(userId);
     this.logger.info(`User logged out: ${userId}`, { userId });
+    
+    // Audit log
+    this.auditLogger.logAuth('logout', {
+      userId,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent,
+    });
+
     return {
       success: true,
       message: 'Logout successful',

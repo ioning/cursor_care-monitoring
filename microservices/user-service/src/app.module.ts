@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { UserController } from './infrastructure/controllers/user.controller';
 import { FamilyAccessController } from './infrastructure/controllers/family-access.controller';
 import { InternalController } from './infrastructure/controllers/internal.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { UserService } from './application/services/user.service';
 import { WardService } from './application/services/ward.service';
 import { WardAccessPermissionService } from './application/services/ward-access-permission.service';
@@ -36,7 +38,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [UserController, FamilyAccessController, InternalController],
+  controllers: [UserController, FamilyAccessController, InternalController, HealthController, MetricsController],
   providers: [
     UserService,
     WardService,

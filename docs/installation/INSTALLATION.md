@@ -1174,7 +1174,7 @@ cd frontend/apps/landing-app
 npm run dev
    ```
 
-**Подробная инструкция:** [DEPLOYMENT.md](DEPLOYMENT.md)
+**Подробная инструкция:** [docs/deployment/DEPLOYMENT.md](docs/deployment/DEPLOYMENT.md)
 
 ---
 
@@ -1403,8 +1403,8 @@ Windows имеет ограничение на длину пути (260 симв
 - [DEPLOYMENT.md](DEPLOYMENT.md) - Руководство по развертыванию
 - [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) - Развертывание в Docker
 - [README.md](README.md) - Общая информация
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Руководство по разработке
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Решение проблем
+- [docs/development/DEVELOPMENT.md](docs/development/DEVELOPMENT.md) - Руководство по разработке
+- [../operations/TROUBLESHOOTING.md](../operations/TROUBLESHOOTING.md) - Решение проблем
 
 ---
 

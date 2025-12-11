@@ -15,5 +15,28 @@ export class HealthController {
       service: 'api-gateway',
     };
   }
+
+  @Get('ready')
+  @ApiOperation({ summary: 'Readiness check endpoint' })
+  @ApiResponse({ status: 200, description: 'Service is ready' })
+  async readiness() {
+    return {
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+      service: 'api-gateway',
+    };
+  }
+
+  @Get('live')
+  @ApiOperation({ summary: 'Liveness check endpoint' })
+  @ApiResponse({ status: 200, description: 'Service is alive' })
+  async liveness() {
+    return {
+      status: 'alive',
+      timestamp: new Date().toISOString(),
+      service: 'api-gateway',
+      uptime: process.uptime(),
+    };
+  }
 }
 

@@ -1,14 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Vibration } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Vibration, Alert } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { colors, spacing, typography, radii, shadows } from '../theme/designSystem';
+import { CallService } from '../services/CallService';
 
 const AUTO_ANSWER_SECONDS = 10;
 
 export const IncomingCallScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const callId = (route.params as any)?.callId;
   const [remaining, setRemaining] = useState(AUTO_ANSWER_SECONDS);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const caller = useMemo(
     () => ({
@@ -19,9 +25,16 @@ export const IncomingCallScreen: React.FC = () => {
   );
 
   useEffect(() => {
+    if (!callId) {
+      Alert.alert('Ошибка', 'ID звонка не указан', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+      return;
+    }
+
     Vibration.vibrate([0, 400, 400], true);
     intervalRef.current = setInterval(() => {
-      setRemaining((prev) => (prev <= 1 ? 0 : prev - 1));
+      setRemaining((prev: number) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
 
     return () => {
@@ -30,23 +43,49 @@ export const IncomingCallScreen: React.FC = () => {
       }
       Vibration.cancel();
     };
-  }, []);
+  }, [callId, navigation]);
 
   useEffect(() => {
-    if (remaining === 0 && intervalRef.current) {
+    if (remaining === 0 && intervalRef.current && !isProcessing) {
       clearInterval(intervalRef.current);
       handleAnswer();
     }
-  }, [remaining]);
+  }, [remaining, isProcessing]);
 
-  const handleAnswer = () => {
+  const handleAnswer = async () => {
+    if (isProcessing || !callId) return;
+
+    setIsProcessing(true);
     Vibration.cancel();
-    // TODO: integrate with CallService.accept();
+
+    try {
+      await CallService.accept(callId);
+      Alert.alert('Успешно', 'Звонок принят', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Ошибка', error.message || 'Не удалось принять звонок');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleDecline = () => {
+  const handleDecline = async () => {
+    if (isProcessing || !callId) return;
+
+    setIsProcessing(true);
     Vibration.cancel();
-    // TODO: integrate with CallService.decline();
+
+    try {
+      await CallService.decline(callId, 'Отклонено пользователем');
+      Alert.alert('Звонок отклонен', '', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Ошибка', error.message || 'Не удалось отклонить звонок');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -67,18 +106,20 @@ export const IncomingCallScreen: React.FC = () => {
 
       <View style={styles.actions}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.declineButton]}
+          style={[styles.actionButton, styles.declineButton, isProcessing && styles.disabledButton]}
           onPress={handleDecline}
           activeOpacity={0.85}
+          disabled={isProcessing}
         >
           <Icon name="call-end" size={36} color="#fff" />
           <Text style={styles.actionLabel}>Отклонить</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, styles.answerButton]}
+          style={[styles.actionButton, styles.answerButton, isProcessing && styles.disabledButton]}
           onPress={handleAnswer}
           activeOpacity={0.85}
+          disabled={isProcessing}
         >
           <Icon name="call" size={36} color="#fff" />
           <Text style={styles.actionLabel}>Ответить</Text>
@@ -182,6 +223,9 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     textAlign: 'center',
     marginBottom: spacing.xs,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 

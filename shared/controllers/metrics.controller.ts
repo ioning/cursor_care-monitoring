@@ -1,13 +1,16 @@
-import { Request, Response } from 'express';
-import { getMetrics } from '../libs/metrics';
+import { Controller, Get, Res } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { register } from '../libs/metrics';
 
-export async function getMetricsEndpoint(req: Request, res: Response) {
-  try {
-    const metrics = await getMetrics();
-    res.set('Content-Type', 'text/plain');
-    res.send(metrics);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get metrics' });
+@ApiTags('metrics')
+@Controller()
+export class MetricsController {
+  @Get('metrics')
+  @ApiOperation({ summary: 'Prometheus metrics endpoint' })
+  @ApiResponse({ status: 200, description: 'Prometheus metrics' })
+  async metrics(@Res() res: Response) {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
   }
 }
-

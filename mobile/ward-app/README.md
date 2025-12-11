@@ -184,20 +184,36 @@ Flipper включен по умолчанию. Установите [Flipper De
 
 ## Публикация
 
-### Google Play Store
+Подробные инструкции по запуску, созданию APK/AAB/IPA и публикации в магазинах:
 
-1. Создайте AAB: `npm run build:android:bundle`
-2. Загрузите в [Google Play Console](https://play.google.com/console)
+📖 **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Полное руководство по запуску и публикации ⭐
 
-### Apple App Store
+### Краткая справка
 
-1. Создайте Archive в Xcode
-2. Загрузите через App Store Connect
+#### Android (APK/AAB)
+
+```bash
+# Создать APK
+cd android && ./gradlew assembleRelease
+
+# Создать AAB для Google Play
+cd android && ./gradlew bundleRelease
+```
+
+#### iOS (IPA)
+
+1. Откройте `ios/CareMonitoringWard.xcworkspace` в Xcode
+2. Product → Archive
+3. Distribute App → App Store Connect
 
 ## Документация
 
-- [BUILD_GUIDE.md](./BUILD_GUIDE.md) - подробное руководство по сборке
-- [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md) - общее руководство по мобильному приложению
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Полное руководство по запуску и публикации ⭐
+- **[MAPS_AND_CHARTS_SETUP.md](./MAPS_AND_CHARTS_SETUP.md)** - Настройка карт и графиков ⭐
+- [BUILD_GUIDE.md](./BUILD_GUIDE.md) - Подробное руководство по сборке
+- [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md) - Общее руководство по мобильному приложению
+- [DEVELOPMENT_STATUS.md](./DEVELOPMENT_STATUS.md) - Текущий статус разработки
+- [QUICK_START.md](./QUICK_START.md) - Быстрый старт
 
 ## Поддержка
 

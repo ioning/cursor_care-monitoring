@@ -14,7 +14,10 @@ import AlertsScreen from '../screens/AlertsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import GuardianWardsScreen from '../screens/GuardianWardsScreen';
 import GuardianWardDetailScreen from '../screens/GuardianWardDetailScreen';
+import GuardianDashboardScreen from '../screens/GuardianDashboardScreen';
 import CreateWardScreen from '../screens/CreateWardScreen';
+import IncomingCallScreen from '../screens/IncomingCallScreen';
+import TelemetryHistoryScreen from '../screens/TelemetryHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -128,6 +131,11 @@ export const AppNavigator = () => {
           {isGuardian && (
             <>
               <Stack.Screen 
+                name="GuardianDashboard" 
+                component={GuardianDashboardScreen}
+                options={{ headerShown: true, title: 'Дашборд' }}
+              />
+              <Stack.Screen 
                 name="WardDetail" 
                 component={GuardianWardDetailScreen}
                 options={{ headerShown: true, title: 'Детали подопечного' }}
@@ -139,6 +147,16 @@ export const AppNavigator = () => {
               />
             </>
           )}
+          <Stack.Screen 
+            name="IncomingCall" 
+            component={IncomingCallScreen}
+            options={{ headerShown: false, presentation: 'modal' }}
+          />
+          <Stack.Screen 
+            name="TelemetryHistory"
+            component={TelemetryHistoryScreen}
+            options={{ headerShown: true, title: 'История телеметрии' }}
+          />
         </>
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} />

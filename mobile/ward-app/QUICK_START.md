@@ -1,68 +1,69 @@
-# Быстрый старт - Мобильное приложение
+# Быстрый старт мобильного приложения
 
-## 🚀 Быстрая сборка APK
-
-### Android (Debug)
+## Установка зависимостей
 
 ```bash
 cd mobile/ward-app
 npm install
-npm run build:android:debug
+
+# Для iOS (только на macOS)
+cd ios && pod install && cd ..
 ```
 
-APK будет в: `android/app/build/outputs/apk/debug/app-debug.apk`
-
-### Android (Release)
-
-1. Создайте keystore:
-```bash
-cd mobile/ward-app
-./scripts/generate-keystore.sh
-```
-
-2. Настройте `android/gradle.properties`:
-```properties
-MYAPP_RELEASE_STORE_FILE=release.keystore
-MYAPP_RELEASE_KEY_ALIAS=care-monitoring-release
-MYAPP_RELEASE_STORE_PASSWORD=ваш-пароль
-MYAPP_RELEASE_KEY_PASSWORD=ваш-пароль
-```
-
-3. Соберите APK:
-```bash
-npm run build:android
-```
-
-APK будет в: `android/app/build/outputs/apk/release/app-release.apk`
-
-## 📱 Установка на устройство
+## Запуск для разработки
 
 ### Android
 
 ```bash
-# Через ADB
-adb install android/app/build/outputs/apk/debug/app-debug.apk
+# Запустить Metro bundler
+npm start
 
-# Или просто подключите устройство и запустите
+# В другом терминале - запустить на Android
 npm run android
 ```
 
 ### iOS
 
 ```bash
-# Откройте в Xcode
-open ios/CareMonitoringWard.xcworkspace
+# Запустить Metro bundler
+npm start
 
-# Выберите устройство и нажмите Run (⌘R)
+# В другом терминале - запустить на iOS
+npm run ios
 ```
 
-## ⚙️ Предварительные требования
+## Настройка API URL
 
-- **Node.js** >= 18.0.0
-- **Android**: Android Studio, JDK 11+
-- **iOS**: Xcode 14+, CocoaPods (только macOS)
+По умолчанию используется `http://localhost:3000/api/v1`.
 
-## 📚 Подробная документация
+Для изменения создайте файл `.env`:
 
-- [BUILD_GUIDE.md](./BUILD_GUIDE.md) - полное руководство по сборке
-- [README.md](./README.md) - общая информация о проекте
+```env
+API_BASE_URL=http://your-api-url.com/api/v1
+```
+
+## Быстрая сборка релиза
+
+### Android APK
+
+```bash
+cd android
+./gradlew assembleRelease
+# APK: android/app/build/outputs/apk/release/app-release.apk
+```
+
+### Android AAB (для Google Play)
+
+```bash
+cd android
+./gradlew bundleRelease
+# AAB: android/app/build/outputs/bundle/release/app-release.aab
+```
+
+### iOS
+
+1. Откройте `ios/CareMonitoringWard.xcworkspace` в Xcode
+2. Product → Archive
+3. Distribute App
+
+**Подробные инструкции:** См. [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)

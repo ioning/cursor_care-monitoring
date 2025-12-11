@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Request } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Request, Ip, Headers } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
@@ -17,8 +17,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'Validation failed' })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+    return this.authService.register(registerDto, { ipAddress: ip, userAgent });
   }
 
   @Post('login')
@@ -26,8 +26,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+    return this.authService.login(loginDto, { ipAddress: ip, userAgent });
   }
 
   @Post('refresh')
@@ -35,8 +35,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(refreshTokenDto.refreshToken);
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+    return this.authService.refreshToken(refreshTokenDto.refreshToken, { ipAddress: ip, userAgent });
   }
 
   @Post('logout')
@@ -45,8 +45,8 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
-  async logout(@Request() req) {
-    return this.authService.logout(req.user.id);
+  async logout(@Request() req, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+    return this.authService.logout(req.user.id, { ipAddress: ip, userAgent });
   }
 
   @Get('me')

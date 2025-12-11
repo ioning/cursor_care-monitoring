@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { IntegrationController } from './infrastructure/controllers/integration.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { IntegrationService } from './application/services/integration.service';
 import { EmailService } from './infrastructure/services/email.service';
 import { SendGridService } from './infrastructure/services/email/sendgrid.service';
@@ -20,7 +22,7 @@ import { UserServiceClient } from './infrastructure/clients/user-service.client'
       envFilePath: ['.env', '.env.local'],
     }),
   ],
-  controllers: [IntegrationController],
+  controllers: [IntegrationController, HealthController, MetricsController],
   providers: [
     IntegrationService,
     EmailService,
@@ -32,11 +34,5 @@ import { UserServiceClient } from './infrastructure/clients/user-service.client'
     UserServiceClient,
   ],
 })
-export class AppModule {}
-
-
-export class AppModule {}
-
-
 export class AppModule {}
 

@@ -3,7 +3,7 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy shared package first (dependency)
+# Copy shared package first (dependency) for better caching
 COPY shared/package.json shared/tsconfig.json ./shared/
 COPY shared/src ./shared/src
 COPY shared/index.ts ./shared/
@@ -47,59 +47,6 @@ USER nodejs
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/auth/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 CMD ["node", "dist/main.js"]
-
-
-WORKDIR /app
-
-# Install production dependencies only
-COPY microservices/auth-service/package*.json ./
-RUN npm ci --production && npm cache clean --force
-
-# Copy built files
-COPY --from=builder /app/microservices/auth-service/dist ./dist
-COPY --from=builder /app/shared/dist ./node_modules/@care-monitoring/shared/dist
-COPY --from=builder /app/shared/package.json ./node_modules/@care-monitoring/shared/
-COPY --from=builder /app/shared/index.ts ./node_modules/@care-monitoring/shared/
-
-# Non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
-USER nodejs
-
-EXPOSE 3001
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/auth/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
-CMD ["node", "dist/main.js"]
-
-
-WORKDIR /app
-
-# Install production dependencies only
-COPY microservices/auth-service/package*.json ./
-RUN npm ci --production && npm cache clean --force
-
-# Copy built files
-COPY --from=builder /app/microservices/auth-service/dist ./dist
-COPY --from=builder /app/shared/dist ./node_modules/@care-monitoring/shared/dist
-COPY --from=builder /app/shared/package.json ./node_modules/@care-monitoring/shared/
-COPY --from=builder /app/shared/index.ts ./node_modules/@care-monitoring/shared/
-
-# Non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
-USER nodejs
-
-EXPOSE 3001
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/auth/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
-CMD ["node", "dist/main.js"]
-
