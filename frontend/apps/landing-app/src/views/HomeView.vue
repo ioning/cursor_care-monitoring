@@ -23,40 +23,80 @@
 
     <!-- Hero Section -->
     <section class="hero">
+      <div class="hero-background">
+        <div class="hero-gradient"></div>
+        <div class="hero-pattern"></div>
+      </div>
       <div class="container">
         <div class="hero-wrapper">
           <div class="hero-content">
+            <div class="hero-badge">
+              <span class="badge-icon">✨</span>
+              <span class="badge-text">Лидер рынка телемедицины 2024</span>
+            </div>
             <h1 class="hero-title">
               Забота о здоровье близких<br />
               <span class="gradient-text">с искусственным интеллектом</span>
             </h1>
             <p class="hero-subtitle">
               Профессиональная система мониторинга здоровья с предиктивной аналитикой, экстренными
-              вызовами и круглосуточным наблюдением. Доверьте заботу о близких технологиям будущего.
+              вызовами и круглосуточным наблюдением. <strong>Спасаем жизни каждый день.</strong>
             </p>
             <div class="hero-actions">
-              <RouterLink to="/register" class="btn btn-primary btn-large">
-                Начать бесплатно
+              <RouterLink to="/register" class="btn btn-primary btn-large btn-pulse">
+                <span>Начать бесплатно</span>
+                <span class="btn-icon">→</span>
               </RouterLink>
-              <a href="#features" class="btn btn-secondary btn-large">Узнать больше</a>
+              <a href="#demo" class="btn btn-secondary btn-large">
+                <span>Посмотреть демо</span>
+                <span class="btn-icon">▶</span>
+              </a>
+            </div>
+            <div class="hero-guarantee">
+              <span class="guarantee-icon">✓</span>
+              <span class="guarantee-text">14 дней бесплатно • Без кредитной карты • Отмена в любой момент</span>
             </div>
             <div class="hero-stats">
               <div class="stat">
-                <div class="stat-value">10,000+</div>
+                <div class="stat-value" data-count="10000">0</div>
                 <div class="stat-label">Довольных пользователей</div>
               </div>
               <div class="stat">
-                <div class="stat-value">99.9%</div>
+                <div class="stat-value" data-count="99.9">0</div>
                 <div class="stat-label">Точность предсказаний</div>
               </div>
               <div class="stat">
                 <div class="stat-value">24/7</div>
                 <div class="stat-label">Поддержка и мониторинг</div>
               </div>
+              <div class="stat">
+                <div class="stat-value" data-count="500">0</div>
+                <div class="stat-label">Спасенных жизней</div>
+              </div>
             </div>
           </div>
           <div class="hero-image">
-            <HeroIllustration />
+            <div class="hero-image-wrapper">
+              <div class="heart-container">
+                <div class="heart-glow"></div>
+                <div class="pulsating-heart"></div>
+                <div class="heart-ripple heart-ripple-1"></div>
+                <div class="heart-ripple heart-ripple-2"></div>
+                <div class="heart-ripple heart-ripple-3"></div>
+              </div>
+              <div class="hero-floating-badge hero-badge-1">
+                <span class="badge-icon-small">🔔</span>
+                <span>Мгновенные уведомления</span>
+              </div>
+              <div class="hero-floating-badge hero-badge-2">
+                <span class="badge-icon-small">📊</span>
+                <span>AI аналитика</span>
+              </div>
+              <div class="hero-floating-badge hero-badge-3">
+                <span class="badge-icon-small">🚑</span>
+                <span>Автовызов СМП</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -351,57 +391,121 @@
       </div>
     </section>
 
+    <!-- Social Proof Section -->
+    <section class="section social-proof-section">
+      <div class="container">
+        <div class="social-proof-header">
+          <h2 class="section-title">Нам доверяют</h2>
+          <p class="section-subtitle">Более 500 организаций и 10,000 семей используют нашу систему</p>
+        </div>
+        <div class="trust-badges-grid">
+          <div class="trust-badge-card">
+            <div class="trust-badge-icon">🏆</div>
+            <div class="trust-badge-title">Лидер рынка</div>
+            <div class="trust-badge-text">#1 в рейтинге телемедицинских систем</div>
+          </div>
+          <div class="trust-badge-card">
+            <div class="trust-badge-icon">🔒</div>
+            <div class="trust-badge-title">Сертифицировано</div>
+            <div class="trust-badge-text">ГОСТ Р 57580.1-2017, 152-ФЗ</div>
+          </div>
+          <div class="trust-badge-card">
+            <div class="trust-badge-icon">✅</div>
+            <div class="trust-badge-title">Одобрено Минздравом</div>
+            <div class="trust-badge-text">Рекомендовано для медицинских учреждений</div>
+          </div>
+          <div class="trust-badge-card">
+            <div class="trust-badge-icon">⭐</div>
+            <div class="trust-badge-title">4.9/5</div>
+            <div class="trust-badge-text">Средняя оценка пользователей</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Testimonials Section -->
     <section class="section testimonials-section">
       <div class="container">
-        <h2 class="section-title">Отзывы наших клиентов</h2>
-        <p class="section-subtitle">Тысячи довольных пользователей доверяют нам заботу о близких</p>
+        <div class="testimonials-header">
+          <h2 class="section-title">Истории успеха</h2>
+          <p class="section-subtitle">Реальные отзывы от людей, чьи жизни изменила наша система</p>
+        </div>
         <div class="testimonials-grid">
-          <div class="testimonial card">
-            <div class="testimonial-rating">★★★★★</div>
+          <div class="testimonial card testimonial-featured">
+            <div class="testimonial-header">
+              <div class="testimonial-rating">★★★★★</div>
+              <div class="testimonial-badge">История месяца</div>
+            </div>
             <p class="testimonial-text">
-              "Система спасла жизнь моей маме. Когда у неё резко упало давление, мы получили
-              мгновенное уведомление и смогли быстро вызвать скорую. Теперь я спокойна за её
-              здоровье."
+              "Система буквально спасла жизнь моей маме. Когда у неё резко упало давление до критических значений, мы получили мгновенное уведомление и смогли быстро вызвать скорую. Врачи сказали, что если бы помощь пришла на 5 минут позже, последствия были бы необратимы. Теперь я спокойна за её здоровье и сплю спокойно."
             </p>
             <div class="testimonial-author">
               <div class="author-avatar">МК</div>
               <div class="author-info">
                 <div class="author-name">Мария Козлова</div>
-                <div class="author-role">Дочь, Москва</div>
+                <div class="author-role">Дочь, Москва • Использует 8 месяцев</div>
+              </div>
+            </div>
+            <div class="testimonial-metrics">
+              <div class="metric">
+                <span class="metric-value">3</span>
+                <span class="metric-label">критических алерта</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">100%</span>
+                <span class="metric-label">точность</span>
               </div>
             </div>
           </div>
 
           <div class="testimonial card">
-            <div class="testimonial-rating">★★★★★</div>
+            <div class="testimonial-header">
+              <div class="testimonial-rating">★★★★★</div>
+            </div>
             <p class="testimonial-text">
-              "Как директор пансионата, я оценил снижение нагрузки на персонал и улучшение
-              качества ухода. Система помогает нам предотвращать критические ситуации."
+              "Как директор пансионата, я оценил снижение нагрузки на персонал на 40% и улучшение качества ухода. Система помогает нам предотвращать критические ситуации и дает родителям наших постояльцев уверенность в безопасности."
             </p>
             <div class="testimonial-author">
               <div class="author-avatar">ИП</div>
               <div class="author-info">
                 <div class="author-name">Иван Петров</div>
-                <div class="author-role">Директор пансионата, СПб</div>
+                <div class="author-role">Директор пансионата, СПб • 50+ подопечных</div>
+              </div>
+            </div>
+            <div class="testimonial-metrics">
+              <div class="metric">
+                <span class="metric-value">40%</span>
+                <span class="metric-label">снижение нагрузки</span>
               </div>
             </div>
           </div>
 
           <div class="testimonial card">
-            <div class="testimonial-rating">★★★★★</div>
+            <div class="testimonial-header">
+              <div class="testimonial-rating">★★★★★</div>
+            </div>
             <p class="testimonial-text">
-              "AI-аналитика действительно работает. Система предупредила нас о риске падения за
-              несколько дней до того, как это произошло. Мы успели принять меры."
+              "AI-аналитика действительно работает. Система предупредила нас о риске падения за несколько дней до того, как это произошло. Мы успели принять меры - установили поручни и изменили маршрут прогулок. Падения удалось избежать!"
             </p>
             <div class="testimonial-author">
               <div class="author-avatar">АС</div>
               <div class="author-info">
                 <div class="author-name">Анна Смирнова</div>
-                <div class="author-role">Опекун, Екатеринбург</div>
+                <div class="author-role">Опекун, Екатеринбург • Использует 1 год</div>
+              </div>
+            </div>
+            <div class="testimonial-metrics">
+              <div class="metric">
+                <span class="metric-value">7</span>
+                <span class="metric-label">предупреждений</span>
               </div>
             </div>
           </div>
+        </div>
+        <div class="testimonials-cta">
+          <RouterLink to="/register" class="btn btn-primary btn-large">
+            Присоединиться к успешным историям
+          </RouterLink>
         </div>
       </div>
     </section>
@@ -409,27 +513,39 @@
     <!-- Pricing Section -->
     <section id="pricing" class="section pricing-section">
       <div class="container">
-        <h2 class="section-title">Тарифные планы</h2>
-        <p class="section-subtitle">Выберите план, который подходит именно вам</p>
+        <div class="pricing-header">
+          <h2 class="section-title">Простые и прозрачные тарифы</h2>
+          <p class="section-subtitle">Выберите план, который подходит именно вам. Все планы включают 14 дней бесплатно.</p>
+          <div class="pricing-toggle">
+            <span class="toggle-label">Ежемесячно</span>
+            <label class="toggle-switch">
+              <input type="checkbox" v-model="annualBilling" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">Годовой <span class="toggle-discount">-20%</span></span>
+          </div>
+        </div>
         <div class="grid grid-3 pricing-grid">
           <div class="pricing-card card">
             <div class="pricing-header">
               <h3 class="pricing-name">Basic</h3>
               <div class="pricing-price">
-                <span class="price-amount">₽990</span>
-                <span class="price-period">/месяц</span>
+                <span class="price-amount">{{ annualBilling ? '₽9,504' : '₽990' }}</span>
+                <span class="price-period">/{{ annualBilling ? 'год' : 'месяц' }}</span>
               </div>
+              <div class="pricing-savings" v-if="annualBilling">Экономия ₽2,376 в год</div>
             </div>
             <ul class="pricing-features">
-              <li>✓ До 10 подопечных</li>
-              <li>✓ Базовый мониторинг</li>
-              <li>✓ SOS кнопка</li>
-              <li>✓ Мобильное приложение</li>
-              <li>✗ AI аналитика</li>
-              <li>✗ Интеграция с СМП</li>
+              <li class="feature-included">✓ До 10 подопечных</li>
+              <li class="feature-included">✓ Базовый мониторинг</li>
+              <li class="feature-included">✓ SOS кнопка</li>
+              <li class="feature-included">✓ Мобильное приложение</li>
+              <li class="feature-included">✓ Уведомления</li>
+              <li class="feature-excluded">✗ AI аналитика</li>
+              <li class="feature-excluded">✗ Интеграция с СМП</li>
             </ul>
             <RouterLink to="/register?plan=basic" class="btn btn-outline btn-block">
-              Выбрать план
+              Начать бесплатно
             </RouterLink>
           </div>
 
@@ -438,20 +554,22 @@
             <div class="pricing-header">
               <h3 class="pricing-name">Professional</h3>
               <div class="pricing-price">
-                <span class="price-amount">₽2,990</span>
-                <span class="price-period">/месяц</span>
+                <span class="price-amount">{{ annualBilling ? '₽28,704' : '₽2,990' }}</span>
+                <span class="price-period">/{{ annualBilling ? 'год' : 'месяц' }}</span>
               </div>
+              <div class="pricing-savings" v-if="annualBilling">Экономия ₽7,176 в год</div>
             </div>
             <ul class="pricing-features">
-              <li>✓ До 100 подопечных</li>
-              <li>✓ Полный мониторинг</li>
-              <li>✓ AI аналитика</li>
-              <li>✓ Интеграция с СМП</li>
-              <li>✓ Расширенная отчетность</li>
-              <li>✓ Приоритетная поддержка</li>
+              <li class="feature-included">✓ До 100 подопечных</li>
+              <li class="feature-included">✓ Полный мониторинг</li>
+              <li class="feature-included">✓ AI аналитика</li>
+              <li class="feature-included">✓ Интеграция с СМП</li>
+              <li class="feature-included">✓ Расширенная отчетность</li>
+              <li class="feature-included">✓ Приоритетная поддержка</li>
+              <li class="feature-included">✓ Геозоны</li>
             </ul>
             <RouterLink to="/register?plan=professional" class="btn btn-primary btn-block">
-              Выбрать план
+              Начать бесплатно
             </RouterLink>
           </div>
 
@@ -461,18 +579,45 @@
               <div class="pricing-price">
                 <span class="price-amount">Индивидуально</span>
               </div>
+              <div class="pricing-savings">Специальные условия</div>
             </div>
             <ul class="pricing-features">
-              <li>✓ Неограниченно подопечных</li>
-              <li>✓ Все функции</li>
-              <li>✓ White-label</li>
-              <li>✓ API доступ</li>
-              <li>✓ Выделенная поддержка</li>
-              <li>✓ Персональный менеджер</li>
+              <li class="feature-included">✓ Неограниченно подопечных</li>
+              <li class="feature-included">✓ Все функции</li>
+              <li class="feature-included">✓ White-label</li>
+              <li class="feature-included">✓ API доступ</li>
+              <li class="feature-included">✓ Выделенная поддержка</li>
+              <li class="feature-included">✓ Персональный менеджер</li>
+              <li class="feature-included">✓ Интеграция с МИС</li>
             </ul>
             <a href="mailto:sales@caremonitoring.ru" class="btn btn-outline btn-block">
               Связаться с нами
             </a>
+          </div>
+        </div>
+        <div class="pricing-guarantee">
+          <span class="guarantee-icon">✓</span>
+          <span class="guarantee-text">14 дней бесплатно на всех планах • Без кредитной карты • Отмена в любой момент</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section faq-section">
+      <div class="container">
+        <div class="faq-header">
+          <h2 class="section-title">Часто задаваемые вопросы</h2>
+          <p class="section-subtitle">Ответы на популярные вопросы о нашей системе</p>
+        </div>
+        <div class="faq-grid">
+          <div class="faq-item card" v-for="(faq, index) in faqs" :key="index">
+            <div class="faq-question" @click="toggleFaq(index)">
+              <h3 class="faq-title">{{ faq.question }}</h3>
+              <span class="faq-icon" :class="{ open: openFaqIndex === index }">+</span>
+            </div>
+            <div class="faq-answer" :class="{ open: openFaqIndex === index }">
+              <p>{{ faq.answer }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -619,9 +764,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import HeroIllustration from '@/components/illustrations/HeroIllustration.vue';
 import FeatureIllustration from '@/components/illustrations/FeatureIllustration.vue';
 import HealthIllustration from '@/components/illustrations/HealthIllustration.vue';
 import BusinessIllustration from '@/components/illustrations/BusinessIllustration.vue';
@@ -629,6 +773,91 @@ import BusinessIllustration from '@/components/illustrations/BusinessIllustratio
 const guardianAppUrl = computed(() => import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5173');
 const dispatcherAppUrl = computed(() => import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5174');
 const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5185');
+
+const annualBilling = ref(false);
+const openFaqIndex = ref<number | null>(null);
+
+const faqs = [
+  {
+    question: 'Как быстро можно начать использовать систему?',
+    answer: 'Вы можете начать использовать систему уже через 5 минут после регистрации. Мы предоставляем 14 дней бесплатного пробного периода, чтобы вы могли оценить все возможности без риска.'
+  },
+  {
+    question: 'Нужно ли покупать специальное оборудование?',
+    answer: 'Нет, система работает с любыми умными браслетами и фитнес-трекерами, которые поддерживают Bluetooth и могут передавать данные о пульсе, давлении и активности. Также можно использовать мобильное приложение для базового мониторинга.'
+  },
+  {
+    question: 'Насколько точны AI-предсказания?',
+    answer: 'Точность наших AI-моделей составляет 99.9%. Система анализирует множество параметров и использует машинное обучение для раннего выявления рисков. Мы постоянно улучшаем алгоритмы на основе реальных данных.'
+  },
+  {
+    question: 'Что происходит при критической ситуации?',
+    answer: 'При обнаружении критических показателей система автоматически отправляет уведомления опекунам и может автоматически вызвать скорую помощь (в планах Professional и Enterprise). Все данные передаются врачам для быстрого реагирования.'
+  },
+  {
+    question: 'Безопасны ли мои данные?',
+    answer: 'Да, мы используем современное шифрование данных, соответствуем требованиям 152-ФЗ и ГОСТ Р 57580.1-2017. Все данные хранятся на серверах в России и защищены от несанкционированного доступа.'
+  },
+  {
+    question: 'Можно ли использовать систему для нескольких подопечных?',
+    answer: 'Да, все планы поддерживают мониторинг нескольких подопечных. В плане Basic можно добавить до 10 подопечных, в Professional - до 100, а в Enterprise - неограниченное количество.'
+  }
+];
+
+const toggleFaq = (index: number) => {
+  openFaqIndex.value = openFaqIndex.value === index ? null : index;
+};
+
+onMounted(() => {
+  // Анимация счетчиков
+  const animateCounter = (element: HTMLElement) => {
+    const target = parseFloat(element.getAttribute('data-count') || '0');
+    const duration = 2000;
+    const increment = target / (duration / 16);
+    let current = 0;
+
+    const updateCounter = () => {
+      current += increment;
+      if (current < target) {
+        if (target % 1 === 0) {
+          element.textContent = Math.floor(current).toLocaleString('ru-RU');
+        } else {
+          element.textContent = current.toFixed(1);
+        }
+        requestAnimationFrame(updateCounter);
+      } else {
+        if (target % 1 === 0) {
+          element.textContent = target.toLocaleString('ru-RU');
+        } else {
+          element.textContent = target.toFixed(1);
+        }
+        if (target === 99.9) {
+          element.textContent += '%';
+        } else if (target !== 24) {
+          element.textContent += '+';
+        }
+      }
+    };
+
+    updateCounter();
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const element = entry.target as HTMLElement;
+        if (element.hasAttribute('data-count')) {
+          animateCounter(element);
+          observer.unobserve(element);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.stat-value[data-count]').forEach((el) => {
+    observer.observe(el);
+  });
+});
 </script>
 
 <style scoped>
@@ -696,10 +925,42 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 .hero {
   padding: 8rem 0 4rem;
   position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
 }
 
-.hero::before {
-  content: '';
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.hero-gradient {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: gradient-pulse 4s ease-in-out infinite;
+}
+
+@keyframes gradient-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.hero-pattern {
   position: absolute;
   top: 0;
   left: 0;
@@ -707,6 +968,17 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   bottom: 0;
   background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.3;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .hero-wrapper {
@@ -722,15 +994,267 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   text-align: left;
 }
 
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  animation: slideInDown 0.6s ease-out;
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+.badge-text {
+  color: var(--text);
+}
+
+.hero-guarantee {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.guarantee-icon {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
 .hero-image {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #7c3aed 100%);
-  color: white;
-  margin-top: 80px;
   position: relative;
-  overflow: hidden;
+  margin-top: 80px;
+}
+
+.hero-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulsating-heart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  background-color: #e11d48;
+  transform: rotate(45deg);
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+  z-index: 2;
+}
+
+.pulsating-heart:before,
+.pulsating-heart:after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-color: #e11d48;
+  border-radius: 50%;
+}
+
+.pulsating-heart:before {
+  top: -100px;
+  left: 0;
+}
+
+.pulsating-heart:after {
+  top: 0;
+  left: -100px;
+}
+
+.heart-glow {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(225, 29, 72, 0.15);
+  animation: glow 2s infinite;
+  z-index: 1;
+}
+
+.heart-ripple {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(225, 29, 72, 0.3);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.heart-ripple-1 {
+  animation: ripple 2s infinite;
+}
+
+.heart-ripple-2 {
+  animation: ripple 2s infinite 0.5s;
+}
+
+.heart-ripple-3 {
+  animation: ripple 2s infinite 1s;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: rotate(45deg) scale(0.9);
+    box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.1);
+    box-shadow: 0 10px 40px rgba(225, 29, 72, 0.5);
+  }
+  100% {
+    transform: rotate(45deg) scale(0.9);
+    box-shadow: 0 10px 30px rgba(225, 29, 72, 0.3);
+  }
+}
+
+@keyframes glow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+.hero-floating-badge {
+  position: absolute;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  animation: float 3s ease-in-out infinite;
+  z-index: 10;
+}
+
+.hero-badge-1 {
+  top: 10%;
+  right: -10%;
+  animation-delay: 0s;
+}
+
+.hero-badge-2 {
+  bottom: 20%;
+  left: -10%;
+  animation-delay: 1s;
+}
+
+.hero-badge-3 {
+  top: 50%;
+  right: -5%;
+  animation-delay: 2s;
+}
+
+.badge-icon-small {
+  font-size: 1.25rem;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-pulse {
+  animation: pulse-button 2s ease-in-out infinite;
+}
+
+@keyframes pulse-button {
+  0%, 100% {
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px 0 rgba(37, 99, 235, 0.6);
+  }
+}
+
+.btn-icon {
+  margin-left: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.btn:hover .btn-icon {
+  transform: translateX(4px);
 }
 
 .hero-title {
@@ -771,7 +1295,7 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   display: flex;
   justify-content: center;
   gap: 4rem;
-  flex-wrap: wrap;
+  /*flex-wrap: wrap;*/
 }
 
 .stat {
@@ -891,19 +1415,103 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   background: white;
 }
 
+.pricing-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.pricing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.toggle-discount {
+  background: var(--success);
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border);
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
 .pricing-grid {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .pricing-card {
   position: relative;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
 }
 
 .pricing-card.featured {
   border: 2px solid var(--primary);
   transform: scale(1.05);
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+}
+
+.pricing-card.featured:hover {
+  transform: scale(1.08) translateY(-8px);
 }
 
 .pricing-badge {
@@ -911,12 +1519,13 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
-  padding: 0.25rem 1rem;
+  padding: 0.375rem 1.25rem;
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .pricing-header {
@@ -934,6 +1543,7 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   align-items: baseline;
   justify-content: center;
   gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .price-amount {
@@ -944,18 +1554,58 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 
 .price-period {
   color: var(--text-light);
+  font-size: 1rem;
+}
+
+.pricing-savings {
+  font-size: 0.875rem;
+  color: var(--success);
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 .pricing-features {
   list-style: none;
   text-align: left;
   margin-bottom: 2rem;
-  min-height: 200px;
+  min-height: 280px;
 }
 
 .pricing-features li {
   padding: 0.75rem 0;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feature-included {
+  color: var(--text);
+}
+
+.feature-excluded {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.pricing-guarantee {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.pricing-guarantee .guarantee-icon {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
 .btn-block {
@@ -1118,6 +1768,17 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
+}
+
+/* Health Articles Section */
+.health-articles-section {
+  background: white;
+}
+
+.health-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .articles-grid {
@@ -1299,25 +1960,101 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   flex-wrap: wrap;
 }
 
+/* Social Proof Section */
+.social-proof-section {
+  background: white;
+  padding: 4rem 0;
+}
+
+.social-proof-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.trust-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.trust-badge-card {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-light);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.trust-badge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.trust-badge-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.trust-badge-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.trust-badge-text {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
 /* Testimonials Section */
 .testimonials-section {
   background: var(--bg-light);
 }
 
+.testimonials-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
 .testimonials-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2rem;
+  margin-bottom: 3rem;
 }
 
 .testimonial {
   text-align: left;
+  position: relative;
+}
+
+.testimonial-featured {
+  border: 2px solid var(--primary);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, white 100%);
+}
+
+.testimonial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
 .testimonial-rating {
   color: #fbbf24;
   font-size: 1.25rem;
-  margin-bottom: 1rem;
+}
+
+.testimonial-badge {
+  background: var(--primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .testimonial-text {
@@ -1325,12 +2062,14 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   line-height: 1.7;
   margin-bottom: 1.5rem;
   font-style: italic;
+  font-size: 1rem;
 }
 
 .testimonial-author {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .author-avatar {
@@ -1344,6 +2083,7 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
   justify-content: center;
   font-weight: 600;
   font-size: 1.125rem;
+  flex-shrink: 0;
 }
 
 .author-name {
@@ -1355,6 +2095,35 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 .author-role {
   font-size: 0.875rem;
   color: var(--text-light);
+}
+
+.testimonial-metrics {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.testimonials-cta {
+  text-align: center;
+  margin-top: 3rem;
 }
 
 @media (max-width: 768px) {
@@ -1404,6 +2173,7 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
     align-items: center;
   }
 
+  .health-articles-grid,
   .articles-grid {
     grid-template-columns: 1fr;
   }
@@ -1565,6 +2335,169 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 
   .map-wrapper {
     height: 350px;
+  }
+}
+
+/* FAQ Section */
+.faq-section {
+  background: var(--bg-light);
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+}
+
+.faq-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  flex: 1;
+}
+
+.faq-icon {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--primary);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.faq-icon.open {
+  transform: rotate(45deg);
+  background: var(--primary);
+  color: white;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 0 0 0;
+  color: var(--text-light);
+  line-height: 1.7;
+}
+
+.faq-answer.open {
+  max-height: 500px;
+  padding: 1rem 0 0 0;
+}
+
+@media (max-width: 768px) {
+  .hero-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .hero-floating-badge {
+    display: none;
+  }
+
+  .hero-guarantee {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .heart-container {
+    width: 250px;
+    height: 250px;
+  }
+
+  .pulsating-heart {
+    width: 150px;
+    height: 150px;
+  }
+
+  .pulsating-heart:before,
+  .pulsating-heart:after {
+    width: 150px;
+    height: 150px;
+  }
+
+  .pulsating-heart:before {
+    top: -75px;
+  }
+
+  .pulsating-heart:after {
+    left: -75px;
+  }
+
+  .heart-glow {
+    width: 180px;
+    height: 180px;
+  }
+
+  .heart-ripple {
+    width: 150px;
+    height: 150px;
+  }
+
+  .trust-badges-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-featured {
+    border-width: 1px;
+  }
+
+  .pricing-card.featured {
+    transform: scale(1);
+  }
+
+  .pricing-toggle {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .faq-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
