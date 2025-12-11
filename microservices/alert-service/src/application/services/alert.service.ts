@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { AlertRepository } from '../../infrastructure/repositories/alert.repository';
 import { AlertEventPublisher } from '../../infrastructure/messaging/alert-event.publisher';
+import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
 import { RiskAlertEvent } from '../../../../shared/types/event.types';
 import { UpdateAlertStatusDto } from '../../infrastructure/dto/update-alert-status.dto';
 import { createLogger } from '../../../../shared/libs/logger';
@@ -13,6 +14,7 @@ export class AlertService {
   constructor(
     private readonly alertRepository: AlertRepository,
     private readonly eventPublisher: AlertEventPublisher,
+    private readonly userServiceClient: UserServiceClient,
   ) {}
 
   async handleRiskAlert(event: RiskAlertEvent): Promise<void> {
@@ -89,8 +91,12 @@ export class AlertService {
       throw new NotFoundException('Alert not found');
     }
 
-    // Verify user has access (should check guardian-ward relationship)
-    // For MVP, simplified check
+    // Verify user has access to the ward through guardian-ward relationship
+    const hasAccess = await this.userServiceClient.hasAccessToWard(userId, alert.wardId);
+    if (!hasAccess) {
+      throw new ForbiddenException('You do not have access to this alert');
+    }
+
     return {
       success: true,
       data: alert,

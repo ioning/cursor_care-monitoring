@@ -4,6 +4,7 @@ import { TelemetryController } from './infrastructure/controllers/telemetry.cont
 import { TelemetryService } from './application/services/telemetry.service';
 import { TelemetryRepository } from './infrastructure/repositories/telemetry.repository';
 import { TelemetryEventPublisher } from './infrastructure/messaging/telemetry-event.publisher';
+import { DeviceServiceClient } from './infrastructure/clients/device-service.client';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { TelemetryEventPublisher } from './infrastructure/messaging/telemetry-ev
     }),
   ],
   controllers: [TelemetryController],
-  providers: [TelemetryService, TelemetryRepository, TelemetryEventPublisher],
+  providers: [TelemetryService, TelemetryRepository, TelemetryEventPublisher, DeviceServiceClient],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly telemetryRepository: TelemetryRepository) {}

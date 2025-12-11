@@ -5,6 +5,7 @@ import { PushService } from '../../infrastructure/services/push.service';
 import { TelegramService } from '../../infrastructure/services/telegram.service';
 import { NotificationRepository } from '../../infrastructure/repositories/notification.repository';
 import { NotificationTemplateService } from './notification-template.service';
+import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
 import { AlertCreatedEvent } from '../../../../shared/types/event.types';
 import { createLogger } from '../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
@@ -20,6 +21,7 @@ export class IntegrationService {
     private readonly telegramService: TelegramService,
     private readonly notificationRepository: NotificationRepository,
     private readonly templateService: NotificationTemplateService,
+    private readonly userServiceClient: UserServiceClient,
   ) {}
 
   async handleAlertCreated(event: AlertCreatedEvent): Promise<void> {
@@ -144,23 +146,30 @@ export class IntegrationService {
   }
 
   private async getGuardiansForWard(wardId: string): Promise<any[]> {
-    // In real implementation, this would query user-service
-    // For MVP, return mock data
-    return [
-      {
-        id: 'guardian-1',
-        email: 'guardian@example.com',
-        phone: '+79991234567',
-        pushToken: 'push-token-123',
-        telegramChatId: '123456789',
-        preferences: {
-          email: true,
-          sms: true,
-          push: true,
-          telegram: false,
-        },
-      },
-    ];
+    try {
+      // Call user-service to get real guardians for the ward
+      const guardians = await this.userServiceClient.getGuardiansForWard(wardId);
+      
+      if (guardians.length === 0) {
+        this.logger.warn('No guardians found for ward', { wardId });
+        return [];
+      }
+
+      this.logger.info(`Retrieved ${guardians.length} guardians for ward`, {
+        wardId,
+        guardianIds: guardians.map((g) => g.id),
+      });
+
+      return guardians;
+    } catch (error: any) {
+      this.logger.error('Failed to get guardians for ward', {
+        wardId,
+        error: error.message,
+      });
+      // Return empty array on error to prevent notification sending failures
+      // In production, you might want to retry or use a fallback mechanism
+      return [];
+    }
   }
 }
 

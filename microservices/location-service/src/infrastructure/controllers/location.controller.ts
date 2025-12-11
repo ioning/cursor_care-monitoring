@@ -65,11 +65,39 @@ export class LocationController {
   async getGeofences(@Query('wardId') wardId: string) {
     return this.locationService.getGeofences(wardId);
   }
-}
 
+  @Get('geocode/reverse')
+  @ApiOperation({ summary: 'Reverse geocode: convert coordinates to address' })
+  @ApiResponse({ status: 200, description: 'Address retrieved successfully' })
+  async reverseGeocode(
+    @Query('lat') lat: string,
+    @Query('lon') lon: string,
+  ) {
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
 
-}
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return {
+        success: false,
+        error: 'Invalid coordinates. lat and lon must be valid numbers.',
+      };
+    }
 
+    return this.locationService.reverseGeocode(latitude, longitude);
+  }
 
+  @Get('geocode')
+  @ApiOperation({ summary: 'Geocode: convert address to coordinates' })
+  @ApiResponse({ status: 200, description: 'Coordinates retrieved successfully' })
+  async geocode(@Query('address') address: string) {
+    if (!address || address.trim().length === 0) {
+      return {
+        success: false,
+        error: 'Address parameter is required.',
+      };
+    }
+
+    return this.locationService.geocode(address.trim());
+  }
 }
 

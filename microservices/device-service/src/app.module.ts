@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DeviceController } from './infrastructure/controllers/device.controller';
+import { InternalController } from './infrastructure/controllers/internal.controller';
 import { DeviceService } from './application/services/device.service';
 import { DeviceRepository } from './infrastructure/repositories/device.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
@@ -26,7 +27,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [DeviceController],
+  controllers: [DeviceController, InternalController],
   providers: [DeviceService, DeviceRepository, JwtStrategy],
 })
 export class AppModule implements OnModuleInit {

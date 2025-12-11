@@ -154,6 +154,19 @@ export class DeviceService {
     };
   }
 
+  /**
+   * Internal method to get ward ID for device (for service-to-service calls)
+   * Skips access check - trusts internal service calls
+   */
+  async getWardIdByDeviceIdInternal(deviceId: string): Promise<string | null> {
+    const device = await this.deviceRepository.findById(deviceId);
+    if (!device) {
+      this.logger.warn('Device not found for internal call', { deviceId });
+      return null;
+    }
+    return device.wardId || null;
+  }
+
   private generateApiKey(): string {
     // Generate a secure API key
     const prefix = 'cms_';

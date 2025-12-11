@@ -102,11 +102,7 @@ export class TelemetryRepository {
     );
   }
 
-  async getWardIdByDeviceId(deviceId: string): Promise<string | null> {
-    // In real implementation, this would query device_service
-    // For MVP, return a placeholder
-    return 'ward-placeholder';
-  }
+  // Removed getWardIdByDeviceId - this is now handled by DeviceServiceClient in TelemetryService
 
   async findByWardId(wardId: string, query: any): Promise<[any[], number]> {
     const db = getDatabaseConnection();

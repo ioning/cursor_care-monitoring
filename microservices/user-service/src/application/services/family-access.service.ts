@@ -109,6 +109,23 @@ export class FamilyAccessService {
   }
 
   /**
+   * Internal method to get guardians for ward (for service-to-service calls)
+   * Skips access check - trusts internal service calls
+   */
+  async getGuardiansForWardInternal(wardId: string) {
+    const guardians = await this.guardianWardRepository.findGuardiansByWardId(wardId);
+    return guardians;
+  }
+
+  /**
+   * Internal method to check access (for service-to-service calls)
+   * Checks if user has access to ward
+   */
+  async hasAccessToWardInternal(userId: string, wardId: string): Promise<boolean> {
+    return await this.guardianWardRepository.hasAccess(userId, wardId);
+  }
+
+  /**
    * Обновить расписание дежурств опекуна
    */
   async updateDutySchedule(

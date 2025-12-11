@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LocationRepository } from '../../infrastructure/repositories/location.repository';
 import { GeofenceRepository } from '../../infrastructure/repositories/geofence.repository';
+import { LocationEventPublisher } from '../../infrastructure/messaging/location-event.publisher';
+import { YandexGeocoderService } from '../../infrastructure/services/geocoding/yandex-geocoder.service';
 import { createLogger } from '../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
@@ -21,6 +23,8 @@ export class LocationService {
   constructor(
     private readonly locationRepository: LocationRepository,
     private readonly geofenceRepository: GeofenceRepository,
+    private readonly eventPublisher: LocationEventPublisher,
+    private readonly geocodingService: YandexGeocoderService,
   ) {}
 
   async recordLocation(data: LocationData): Promise<void> {
@@ -46,9 +50,25 @@ export class LocationService {
       );
 
       if (!isInside && geofence.type === 'safe_zone') {
-        // Ward left safe zone
+        // Ward left safe zone - publish event
         this.logger.warn(`Ward ${data.wardId} left safe zone ${geofence.id}`);
-        // In real implementation, would publish event
+        await this.eventPublisher.publishGeofenceViolation({
+          eventId: randomUUID(),
+          eventType: 'location.geofence.violation',
+          timestamp: new Date().toISOString(),
+          version: '1.0',
+          correlationId: randomUUID(),
+          source: 'location-service',
+          wardId: data.wardId,
+          geofenceId: geofence.id,
+          geofenceType: geofence.type,
+          location: {
+            latitude: data.latitude,
+            longitude: data.longitude,
+            accuracy: data.accuracy,
+          },
+          violationType: 'exit',
+        });
       }
     }
 
@@ -61,9 +81,24 @@ export class LocationService {
 
   async getLatestLocation(wardId: string) {
     const location = await this.locationRepository.findLatest(wardId);
+    
+    // Если геолокация найдена, пытаемся получить адрес через геокодинг
+    let address: string | null = null;
+    if (location) {
+      address = await this.geocodingService.reverseGeocode(
+        location.latitude,
+        location.longitude,
+      );
+    }
+
     return {
       success: true,
-      data: location,
+      data: location
+        ? {
+            ...location,
+            address, // Добавляем адрес к данным геолокации
+          }
+        : null,
     };
   }
 
@@ -152,6 +187,38 @@ export class LocationService {
 
   private toRad(degrees: number): number {
     return (degrees * Math.PI) / 180;
+  }
+
+  /**
+   * Обратный геокодинг: преобразование координат в адрес
+   */
+  async reverseGeocode(lat: number, lon: number) {
+    const address = await this.geocodingService.reverseGeocode(lat, lon);
+    return {
+      success: true,
+      data: {
+        latitude: lat,
+        longitude: lon,
+        address: address || null,
+      },
+    };
+  }
+
+  /**
+   * Прямой геокодинг: преобразование адреса в координаты
+   */
+  async geocode(address: string) {
+    const coordinates = await this.geocodingService.geocode(address);
+    return {
+      success: true,
+      data: coordinates
+        ? {
+            address,
+            latitude: coordinates.lat,
+            longitude: coordinates.lon,
+          }
+        : null,
+    };
   }
 }
 

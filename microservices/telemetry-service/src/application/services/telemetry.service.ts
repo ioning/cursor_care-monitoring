@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TelemetryRepository } from '../../infrastructure/repositories/telemetry.repository';
 import { TelemetryEventPublisher } from '../../infrastructure/messaging/telemetry-event.publisher';
+import { DeviceServiceClient } from '../../infrastructure/clients/device-service.client';
 import { CreateTelemetryDto } from '../../infrastructure/dto/create-telemetry.dto';
 import { createLogger } from '../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
@@ -12,12 +13,12 @@ export class TelemetryService {
   constructor(
     private readonly telemetryRepository: TelemetryRepository,
     private readonly eventPublisher: TelemetryEventPublisher,
+    private readonly deviceServiceClient: DeviceServiceClient,
   ) {}
 
   async create(createTelemetryDto: CreateTelemetryDto) {
-    // In real implementation, we would get wardId from deviceId
-    // For MVP, we'll use a placeholder
-    const wardId = await this.telemetryRepository.getWardIdByDeviceId(createTelemetryDto.deviceId);
+    // Get wardId from device-service
+    const wardId = await this.deviceServiceClient.getWardIdByDeviceId(createTelemetryDto.deviceId);
 
     const telemetryId = randomUUID();
     const timestamp = new Date();

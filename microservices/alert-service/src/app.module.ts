@@ -6,6 +6,7 @@ import { AlertController } from './infrastructure/controllers/alert.controller';
 import { AlertService } from './application/services/alert.service';
 import { AlertRepository } from './infrastructure/repositories/alert.repository';
 import { AlertEventPublisher } from './infrastructure/messaging/alert-event.publisher';
+import { UserServiceClient } from './infrastructure/clients/user-service.client';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 
 @Module({
@@ -28,7 +29,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     }),
   ],
   controllers: [AlertController],
-  providers: [AlertService, AlertRepository, AlertEventPublisher, JwtStrategy],
+  providers: [AlertService, AlertRepository, AlertEventPublisher, UserServiceClient, JwtStrategy],
 })
 export class AppModule {}
 

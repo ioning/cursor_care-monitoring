@@ -11,6 +11,7 @@ import { FCMService } from './infrastructure/services/push/fcm.service';
 import { TelegramService } from './infrastructure/services/telegram.service';
 import { NotificationRepository } from './infrastructure/repositories/notification.repository';
 import { NotificationTemplateService } from './application/services/notification-template.service';
+import { UserServiceClient } from './infrastructure/clients/user-service.client';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificationTemplateService } from './application/services/notification
     TelegramService,
     NotificationRepository,
     NotificationTemplateService,
+    UserServiceClient,
   ],
 })
 export class AppModule {}
