@@ -100,7 +100,7 @@
 - **Target SDK**: 33 (Android 13)
 - **Compile SDK**: 33
 - **Kotlin**: 1.8.0
-- **Gradle**: 7.6.1
+- **Gradle**: 8.5
 - **Hermes**: включен
 
 ### iOS
@@ -271,7 +271,7 @@
 - **Target SDK**: 33 (Android 13)
 - **Compile SDK**: 33
 - **Kotlin**: 1.8.0
-- **Gradle**: 7.6.1
+- **Gradle**: 8.5
 - **Hermes**: включен
 
 ### iOS

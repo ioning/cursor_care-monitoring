@@ -9,7 +9,7 @@
 - Java Development Kit (JDK) 11 или выше
 - Android Studio (последняя версия)
 - Android SDK (API Level 23+)
-- Gradle 7.6.1+
+- Gradle 8.5+
 
 ### Для iOS:
 - Node.js >= 18.0.0
@@ -239,7 +239,7 @@ pod install
 - Java Development Kit (JDK) 11 или выше
 - Android Studio (последняя версия)
 - Android SDK (API Level 23+)
-- Gradle 7.6.1+
+- Gradle 8.5+
 
 ### Для iOS:
 - Node.js >= 18.0.0
