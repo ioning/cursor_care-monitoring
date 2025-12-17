@@ -1,11 +1,10 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 import { generateTestUser, generateTestDevice } from '../../shared/test-utils/test-helpers';
 
 describe('Telemetry Integration Tests', () => {
-  let app: Express;
+  let app: any;
   let authToken: string;
   let deviceId: string;
   let wardId: string;

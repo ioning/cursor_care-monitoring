@@ -14,7 +14,8 @@ export async function createRabbitMQConnection(config: RabbitMQConfig): Promise<
     return { connection, channel };
   }
 
-  connection = await amqp.connect(config.url);
+  const conn = await amqp.connect(config.url);
+  connection = conn;
   channel = await connection.createChannel();
 
   // Declare exchange if provided

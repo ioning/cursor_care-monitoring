@@ -1,12 +1,10 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 
 describe('E2E: Guardian Dashboard Data Flow', () => {
-  let app: Express;
+  let app: any;
   let authToken: string;
-  let userId: string;
   let wardId: string;
   let deviceId: string;
 
@@ -22,11 +20,9 @@ describe('E2E: Guardian Dashboard Data Flow', () => {
       role: 'guardian',
     };
 
-    const registerResponse = await request(app)
+    await request(app)
       .post('/api/v1/auth/register')
       .send(userData);
-
-    userId = registerResponse.body.data.user.id;
 
     const loginResponse = await request(app)
       .post('/api/v1/auth/login')
@@ -131,7 +127,7 @@ describe('E2E: Guardian Dashboard Data Flow', () => {
 
     it('should handle multiple wards for guardian', async () => {
       // Create second ward
-      const ward2Response = await request(app)
+      await request(app)
         .post('/api/v1/users/wards')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
@@ -140,8 +136,6 @@ describe('E2E: Guardian Dashboard Data Flow', () => {
           gender: 'female',
         })
         .expect(201);
-
-      const ward2Id = ward2Response.body.id;
 
       // Get all wards for guardian
       const wardsResponse = await request(app)

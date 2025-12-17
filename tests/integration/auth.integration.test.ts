@@ -1,10 +1,9 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 
 describe('Auth Integration Tests', () => {
-  let app: Express;
+  let app: any;
 
   beforeAll(async () => {
     await setupTestEnvironment();
@@ -34,7 +33,7 @@ describe('Auth Integration Tests', () => {
     });
 
     it('should return 400 for invalid data', async () => {
-      const response = await request(app)
+      await request(app)
         .post('/api/v1/auth/register')
         .send({
           email: 'invalid-email',

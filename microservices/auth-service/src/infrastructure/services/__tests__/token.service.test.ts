@@ -1,4 +1,4 @@
-import { TokenService } from '../../token.service';
+import { TokenService } from '../token.service';
 import { UserRole } from '../../../../../../shared/types/common.types';
 
 describe('TokenService', () => {

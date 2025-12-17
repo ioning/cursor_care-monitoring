@@ -63,30 +63,3 @@ async function bootstrap() {
 bootstrap();
 
 
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('users/docs', app, document);
-
-  const port = process.env.PORT || 3002;
-  await app.listen(port);
-
-  logger.info(`User Service is running on: http://localhost:${port}`);
-}
-
-bootstrap();
-
-
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('users/docs', app, document);
-
-  const port = process.env.PORT || 3002;
-  await app.listen(port);
-
-  logger.info(`User Service is running on: http://localhost:${port}`);
-}
-
-bootstrap();
-

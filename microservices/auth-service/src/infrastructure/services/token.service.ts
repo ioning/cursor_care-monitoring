@@ -48,16 +48,3 @@ export class TokenService {
 }
 
 
-
-  async verifyToken(token: string): Promise<any> {
-    return this.jwtService.verify(token);
-  }
-}
-
-
-
-  async verifyToken(token: string): Promise<any> {
-    return this.jwtService.verify(token);
-  }
-}
-

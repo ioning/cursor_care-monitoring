@@ -1,10 +1,9 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 
 describe('E2E: Health Checks', () => {
-  let app: Express;
+  let app: any;
 
   beforeAll(async () => {
     await setupTestEnvironment();

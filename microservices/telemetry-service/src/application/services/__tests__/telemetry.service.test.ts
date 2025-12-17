@@ -1,4 +1,4 @@
-import { TelemetryService } from '../../telemetry.service';
+import { TelemetryService } from '../telemetry.service';
 
 const mockLogger = {
   info: jest.fn(),
@@ -14,10 +14,10 @@ describe('TelemetryService', () => {
   let telemetryService: TelemetryService;
   let telemetryRepository: any;
   let eventPublisher: any;
+  let deviceServiceClient: any;
 
   beforeEach(() => {
     telemetryRepository = {
-      getWardIdByDeviceId: jest.fn(),
       create: jest.fn(),
       findByWardId: jest.fn(),
       findLatest: jest.fn(),
@@ -27,7 +27,11 @@ describe('TelemetryService', () => {
       publishTelemetryReceived: jest.fn(),
     };
 
-    telemetryService = new TelemetryService(telemetryRepository, eventPublisher);
+    deviceServiceClient = {
+      getWardIdByDeviceId: jest.fn(),
+    };
+
+    telemetryService = new TelemetryService(telemetryRepository, eventPublisher, deviceServiceClient);
     jest.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
   });
 
@@ -38,7 +42,7 @@ describe('TelemetryService', () => {
 
   describe('create', () => {
     it('persists telemetry data and publishes event', async () => {
-      telemetryRepository.getWardIdByDeviceId.mockResolvedValue('ward-1');
+      deviceServiceClient.getWardIdByDeviceId.mockResolvedValue('ward-1');
 
       const dto = {
         deviceId: 'device-1',
@@ -46,7 +50,11 @@ describe('TelemetryService', () => {
           { type: 'heart_rate', value: 80, unit: 'bpm' },
           { type: 'steps', value: 120, unit: 'count' },
         ],
-        location: { lat: 1, lng: 2 },
+        location: {
+          latitude: 1,
+          longitude: 2,
+          source: 'gps',
+        },
       };
 
       const result = await telemetryService.create(dto);
@@ -59,6 +67,7 @@ describe('TelemetryService', () => {
       expect(savedPayload.metrics).toEqual(dto.metrics);
       expect(savedPayload.wardId).toBe('ward-1');
 
+      expect(deviceServiceClient.getWardIdByDeviceId).toHaveBeenCalledWith(dto.deviceId);
       expect(eventPublisher.publishTelemetryReceived).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: 'telemetry.data.received',
@@ -73,8 +82,8 @@ describe('TelemetryService', () => {
       expect(result.data.telemetryId).toBe(savedPayload.id);
     });
 
-    it('falls back to placeholder ward when repository returns null', async () => {
-      telemetryRepository.getWardIdByDeviceId.mockResolvedValue(null);
+    it('falls back to placeholder ward when device service returns null', async () => {
+      deviceServiceClient.getWardIdByDeviceId.mockResolvedValue(null);
 
       await telemetryService.create({
         deviceId: 'device-2',

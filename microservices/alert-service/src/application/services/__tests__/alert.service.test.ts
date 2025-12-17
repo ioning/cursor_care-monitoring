@@ -1,4 +1,4 @@
-import { AlertService } from '../../alert.service';
+import { AlertService } from '../alert.service';
 import { AlertStatus, AlertSeverity } from '../../../../../../shared/types/common.types';
 import { RiskAlertEvent } from '../../../../../../shared/types/event.types';
 
@@ -20,6 +20,7 @@ jest.mock('../../../../../../shared/libs/logger', () => ({
 describe('AlertService', () => {
   let alertRepository: any;
   let eventPublisher: any;
+  let userServiceClient: any;
   let alertService: AlertService;
 
   beforeEach(() => {
@@ -34,7 +35,11 @@ describe('AlertService', () => {
       publishAlertCreated: jest.fn(),
     };
 
-    alertService = new AlertService(alertRepository, eventPublisher);
+    userServiceClient = {
+      hasAccessToWard: jest.fn(),
+    };
+
+    alertService = new AlertService(alertRepository, eventPublisher, userServiceClient);
     mockRandomUUID.mockReset();
     jest.clearAllMocks();
   });

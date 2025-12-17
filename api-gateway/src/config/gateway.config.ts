@@ -55,10 +55,3 @@ export class GatewayConfig {
 }
 
 
-  }
-}
-
-
-  }
-}
-

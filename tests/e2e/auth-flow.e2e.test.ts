@@ -1,10 +1,9 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 
 describe('E2E: Auth Flow', () => {
-  let app: Express;
+  let app: any;
   const testUser = {
     email: `e2e-auth-${Date.now()}@example.com`,
     password: 'Test1234!',
@@ -22,7 +21,6 @@ describe('E2E: Auth Flow', () => {
   });
 
   describe('Complete Auth Flow', () => {
-    let verificationCode: string;
     let accessToken: string;
     let refreshToken: string;
 

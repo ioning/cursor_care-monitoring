@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('alerts')
 @Controller('alerts')
@@ -18,7 +18,7 @@ export class AlertController {
 
   @Get()
   @ApiOperation({ summary: 'Get all alerts for current user' })
-  async getAlerts(@Request() req, @Query() query: any) {
+  async getAlerts(@Request() req: any, @Query() query: any) {
     const alertServiceUrl = this.gatewayConfig.getAlertServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${alertServiceUrl}/alerts`, {
@@ -31,7 +31,7 @@ export class AlertController {
 
   @Get(':alertId')
   @ApiOperation({ summary: 'Get alert by ID' })
-  async getAlert(@Request() req, @Param('alertId') alertId: string) {
+  async getAlert(@Request() req: any, @Param('alertId') alertId: string) {
     const alertServiceUrl = this.gatewayConfig.getAlertServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${alertServiceUrl}/alerts/${alertId}`, {
@@ -43,7 +43,7 @@ export class AlertController {
 
   @Put(':alertId/status')
   @ApiOperation({ summary: 'Update alert status' })
-  async updateStatus(@Request() req, @Param('alertId') alertId: string, @Body() updateDto: any) {
+  async updateStatus(@Request() req: any, @Param('alertId') alertId: string, @Body() updateDto: any) {
     const alertServiceUrl = this.gatewayConfig.getAlertServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${alertServiceUrl}/alerts/${alertId}/status`, updateDto, {

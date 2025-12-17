@@ -114,7 +114,7 @@ export const validators = {
   },
 };
 
-
+/**
  * Environment variables validator
  * Ensures all required environment variables are set before application startup
  */

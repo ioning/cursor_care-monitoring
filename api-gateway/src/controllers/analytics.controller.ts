@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -18,7 +18,7 @@ export class AnalyticsController {
 
   @Get('wards/:wardId/health-report')
   @ApiOperation({ summary: 'Get health report for ward' })
-  async getWardHealthReport(@Request() req, @Param('wardId') wardId: string, @Query('period') period: string) {
+  async getWardHealthReport(@Request() req: any, @Param('wardId') wardId: string, @Query('period') period: string) {
     const analyticsServiceUrl = this.gatewayConfig.getAnalyticsServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${analyticsServiceUrl}/analytics/wards/${wardId}/health-report`, {
@@ -31,7 +31,7 @@ export class AnalyticsController {
 
   @Get('system/stats')
   @ApiOperation({ summary: 'Get system statistics' })
-  async getSystemStats(@Request() req) {
+  async getSystemStats(@Request() req: any) {
     const analyticsServiceUrl = this.gatewayConfig.getAnalyticsServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${analyticsServiceUrl}/analytics/system/stats`, {
@@ -43,7 +43,7 @@ export class AnalyticsController {
 
   @Post('reports')
   @ApiOperation({ summary: 'Generate report' })
-  async generateReport(@Request() req, @Body() body: any) {
+  async generateReport(@Request() req: any, @Body() body: any) {
     const analyticsServiceUrl = this.gatewayConfig.getAnalyticsServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${analyticsServiceUrl}/analytics/reports`, body, {

@@ -1,5 +1,5 @@
-import { UserService } from '../../user.service';
-import { WardService } from '../../ward.service';
+import { UserService } from '../user.service';
+import { WardService } from '../ward.service';
 import { UserRepository } from '../../../infrastructure/repositories/user.repository';
 import { WardRepository } from '../../../infrastructure/repositories/ward.repository';
 import { GuardianWardRepository } from '../../../infrastructure/repositories/guardian-ward.repository';
@@ -10,23 +10,17 @@ jest.mock('../../../../../../shared/libs/database');
 
 describe('UserService', () => {
   let userService: UserService;
-  let wardService: WardService;
   let userRepository: UserRepository;
-  let wardRepository: WardRepository;
-  let guardianWardRepository: GuardianWardRepository;
 
   beforeEach(() => {
     jest.clearAllMocks();
     
     userRepository = new UserRepository();
-    wardRepository = new WardRepository();
-    guardianWardRepository = new GuardianWardRepository();
-    wardService = new WardService(wardRepository, guardianWardRepository);
-    userService = new UserService(userRepository, wardService);
+    userService = new UserService(userRepository);
   });
 
-  describe('getUserById', () => {
-    it('should return user by id', async () => {
+  describe('getProfile', () => {
+    it('should return user profile by id', async () => {
       const userData = generateTestUser();
 
       (mockDatabase.query as jest.Mock).mockResolvedValueOnce({
@@ -34,16 +28,21 @@ describe('UserService', () => {
           id: userData.id,
           email: userData.email,
           full_name: userData.fullName,
+          phone: null,
           role: userData.role,
           status: userData.status,
+          email_verified: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         }],
       });
 
-      const result = await userService.getUserById(userData.id);
+      const result = await userService.getProfile(userData.id);
 
-      expect(result).toBeDefined();
-      expect(result.id).toBe(userData.id);
-      expect(result.email).toBe(userData.email);
+      expect(result.success).toBe(true);
+      expect(result.data.id).toBe(userData.id);
+      expect(result.data.email).toBe(userData.email);
+      expect(result.data.fullName).toBe(userData.fullName);
     });
 
     it('should throw error if user not found', async () => {
@@ -52,32 +51,48 @@ describe('UserService', () => {
       });
 
       await expect(
-        userService.getUserById('non-existent-id')
+        userService.getProfile('non-existent-id')
       ).rejects.toThrow('User not found');
     });
   });
 
-  describe('updateUser', () => {
-    it('should update user successfully', async () => {
+  describe('updateProfile', () => {
+    it('should update user profile successfully', async () => {
       const userData = generateTestUser();
       const updates = { fullName: 'Updated Name' };
 
       (mockDatabase.query as jest.Mock)
         .mockResolvedValueOnce({
-          rows: [{ id: userData.id }],
+          rows: [{
+            id: userData.id,
+            email: userData.email,
+            full_name: userData.fullName,
+            phone: null,
+            role: userData.role,
+            status: userData.status,
+            email_verified: true,
+            created_at: new Date(),
+            updated_at: new Date(),
+          }],
         })
         .mockResolvedValueOnce({
           rows: [{
             id: userData.id,
             email: userData.email,
             full_name: updates.fullName,
+            phone: null,
             role: userData.role,
+            status: userData.status,
+            email_verified: true,
+            created_at: new Date(),
+            updated_at: new Date(),
           }],
         });
 
-      const result = await userService.updateUser(userData.id, updates);
+      const result = await userService.updateProfile(userData.id, updates);
 
-      expect(result.fullName).toBe(updates.fullName);
+      expect(result.success).toBe(true);
+      expect(result.data.fullName).toBe(updates.fullName);
     });
   });
 });
@@ -95,39 +110,38 @@ describe('WardService', () => {
     wardService = new WardService(wardRepository, guardianWardRepository);
   });
 
-  describe('createWard', () => {
+  describe('create', () => {
     it('should create ward successfully', async () => {
-      const wardData = generateTestWard();
-
-      (mockDatabase.query as jest.Mock).mockResolvedValueOnce({
-        rows: [{
-          id: wardData.id,
-          full_name: wardData.fullName,
-          date_of_birth: wardData.dateOfBirth,
-          status: wardData.status,
-        }],
-      });
-
-      const result = await wardService.createWard(wardData);
-
-      expect(result).toBeDefined();
-      expect(result.id).toBe(wardData.id);
-      expect(result.fullName).toBe(wardData.fullName);
-    });
-  });
-
-  describe('linkWardToGuardian', () => {
-    it('should link ward to guardian successfully', async () => {
       const guardianId = 'guardian-id';
-      const wardId = 'ward-id';
+      const wardData = generateTestWard();
+      const createWardDto = {
+        fullName: wardData.fullName,
+        dateOfBirth: wardData.dateOfBirth,
+        gender: wardData.gender,
+        relationship: 'ward',
+      };
 
-      (mockDatabase.query as jest.Mock).mockResolvedValueOnce({
-        rows: [{ id: 'link-id' }],
-      });
+      (mockDatabase.query as jest.Mock)
+        .mockResolvedValueOnce({
+          rows: [{
+            id: wardData.id,
+            full_name: wardData.fullName,
+            date_of_birth: wardData.dateOfBirth,
+            gender: wardData.gender,
+            status: wardData.status,
+            created_at: new Date(),
+            updated_at: new Date(),
+          }],
+        })
+        .mockResolvedValueOnce({
+          rows: [{ id: 'link-id' }],
+        });
 
-      await expect(
-        wardService.linkWardToGuardian(guardianId, wardId)
-      ).resolves.not.toThrow();
+      const result = await wardService.create(guardianId, createWardDto);
+
+      expect(result.success).toBe(true);
+      expect(result.data.id).toBe(wardData.id);
+      expect(result.data.fullName).toBe(wardData.fullName);
     });
   });
 });

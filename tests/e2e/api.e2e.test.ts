@@ -1,12 +1,10 @@
 import request from 'supertest';
-import { Express } from 'express';
 import { createApp } from '../../api-gateway/src/app.factory';
 import { setupTestEnvironment, teardownTestEnvironment } from '../../shared/test-utils/setup';
 
 describe('E2E API Tests', () => {
-  let app: Express;
+  let app: any;
   let authToken: string;
-  let userId: string;
   let wardId: string;
   let deviceId: string;
 
@@ -22,11 +20,9 @@ describe('E2E API Tests', () => {
       role: 'guardian',
     };
 
-    const registerResponse = await request(app)
+    await request(app)
       .post('/api/v1/auth/register')
       .send(userData);
-
-    userId = registerResponse.body.user.id;
 
     // Login
     const loginResponse = await request(app)

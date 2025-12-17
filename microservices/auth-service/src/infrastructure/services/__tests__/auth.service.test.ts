@@ -1,5 +1,5 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from '../../auth.service';
+import { AuthService } from '../auth.service';
 import { UserRole } from '../../../../../../shared/types/common.types';
 
 const mockLogger = {
@@ -26,8 +26,11 @@ describe('AuthService', () => {
   let authService: AuthService;
   let userRepository: any;
   let sessionRepository: any;
+  let emailVerificationRepository: any;
   let passwordService: any;
   let tokenService: any;
+  let emailService: any;
+  let jwtService: any;
 
   beforeEach(() => {
     userRepository = {
@@ -42,6 +45,11 @@ describe('AuthService', () => {
       updateTokens: jest.fn(),
       deleteByUserId: jest.fn(),
     };
+    emailVerificationRepository = {
+      create: jest.fn(),
+      findByEmailAndCode: jest.fn(),
+      deleteByEmail: jest.fn(),
+    };
     passwordService = {
       hash: jest.fn(),
       compare: jest.fn(),
@@ -49,13 +57,22 @@ describe('AuthService', () => {
     tokenService = {
       generateTokens: jest.fn(),
     };
+    emailService = {
+      sendVerificationEmail: jest.fn(),
+    };
+    jwtService = {
+      sign: jest.fn(),
+      verify: jest.fn(),
+    };
 
     authService = new AuthService(
       userRepository,
       sessionRepository,
+      emailVerificationRepository,
       passwordService,
       tokenService,
-      {} as any,
+      emailService,
+      jwtService,
     );
   });
 

@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('billing')
 @Controller('billing')
@@ -18,7 +18,7 @@ export class BillingController {
 
   @Get('subscription')
   @ApiOperation({ summary: 'Get user subscription' })
-  async getSubscription(@Request() req) {
+  async getSubscription(@Request() req: any) {
     const billingServiceUrl = this.gatewayConfig.getBillingServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${billingServiceUrl}/billing/subscription`, {
@@ -30,7 +30,7 @@ export class BillingController {
 
   @Post('subscription')
   @ApiOperation({ summary: 'Create subscription' })
-  async createSubscription(@Request() req, @Body() body: any) {
+  async createSubscription(@Request() req: any, @Body() body: any) {
     const billingServiceUrl = this.gatewayConfig.getBillingServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${billingServiceUrl}/billing/subscription`, body, {
@@ -42,7 +42,7 @@ export class BillingController {
 
   @Put('subscription/cancel')
   @ApiOperation({ summary: 'Cancel subscription' })
-  async cancelSubscription(@Request() req) {
+  async cancelSubscription(@Request() req: any) {
     const billingServiceUrl = this.gatewayConfig.getBillingServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${billingServiceUrl}/billing/subscription/cancel`, {}, {
@@ -54,7 +54,7 @@ export class BillingController {
 
   @Get('invoices')
   @ApiOperation({ summary: 'Get invoices' })
-  async getInvoices(@Request() req, @Query() query: any) {
+  async getInvoices(@Request() req: any, @Query() query: any) {
     const billingServiceUrl = this.gatewayConfig.getBillingServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${billingServiceUrl}/billing/invoices`, {
@@ -67,7 +67,7 @@ export class BillingController {
 
   @Post('payments')
   @ApiOperation({ summary: 'Process payment' })
-  async processPayment(@Request() req, @Body() body: any) {
+  async processPayment(@Request() req: any, @Body() body: any) {
     const billingServiceUrl = this.gatewayConfig.getBillingServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${billingServiceUrl}/billing/payments`, body, {

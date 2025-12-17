@@ -45,7 +45,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
-  async logout(@Request() req, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+  async logout(@Request() req: any, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
     return this.authService.logout(req.user.id, { ipAddress: ip, userAgent });
   }
 
@@ -54,7 +54,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user' })
   @ApiResponse({ status: 200, description: 'User information' })
-  async getMe(@Request() req) {
+  async getMe(@Request() req: any) {
     return this.authService.getCurrentUser(req.user.id);
   }
 
