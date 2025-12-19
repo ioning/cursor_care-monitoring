@@ -11,6 +11,7 @@
             <a href="#features" class="nav-link">Возможности</a>
             <a href="#mobile-apps" class="nav-link">Приложения</a>
             <a href="#health-articles" class="nav-link">О здоровье</a>
+            <RouterLink to="/articles" class="nav-link">База знаний</RouterLink>
             <a href="#business" class="nav-link">Для бизнеса</a>
             <a href="#pricing" class="nav-link">Тарифы</a>
             <a href="#contact" class="nav-link">Контакты</a>
@@ -440,7 +441,9 @@
               "Система буквально спасла жизнь моей маме. Когда у неё резко упало давление до критических значений, мы получили мгновенное уведомление и смогли быстро вызвать скорую. Врачи сказали, что если бы помощь пришла на 5 минут позже, последствия были бы необратимы. Теперь я спокойна за её здоровье и сплю спокойно."
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">МК</div>
+              <div class="author-avatar author-avatar--maria" aria-label="Аватар: Мария Козлова">
+                <span class="author-initials" aria-hidden="true">МК</span>
+              </div>
               <div class="author-info">
                 <div class="author-name">Мария Козлова</div>
                 <div class="author-role">Дочь, Москва • Использует 8 месяцев</div>
@@ -466,7 +469,9 @@
               "Как директор пансионата, я оценил снижение нагрузки на персонал на 40% и улучшение качества ухода. Система помогает нам предотвращать критические ситуации и дает родителям наших постояльцев уверенность в безопасности."
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">ИП</div>
+              <div class="author-avatar author-avatar--ivan" aria-label="Аватар: Иван Петров">
+                <span class="author-initials" aria-hidden="true">ИП</span>
+              </div>
               <div class="author-info">
                 <div class="author-name">Иван Петров</div>
                 <div class="author-role">Директор пансионата, СПб • 50+ подопечных</div>
@@ -488,7 +493,9 @@
               "AI-аналитика действительно работает. Система предупредила нас о риске падения за несколько дней до того, как это произошло. Мы успели принять меры - установили поручни и изменили маршрут прогулок. Падения удалось избежать!"
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">АС</div>
+              <div class="author-avatar author-avatar--anna" aria-label="Аватар: Анна Смирнова">
+                <span class="author-initials" aria-hidden="true">АС</span>
+              </div>
               <div class="author-info">
                 <div class="author-name">Анна Смирнова</div>
                 <div class="author-role">Опекун, Екатеринбург • Использует 1 год</div>
@@ -510,94 +517,145 @@
       </div>
     </section>
 
+    <!-- SEO / Expert Content Section -->
+    <section class="section seo-section">
+      <div class="container">
+        <div class="seo-header">
+          <h2 class="section-title">Система мониторинга здоровья для пожилых и людей с хроническими заболеваниями</h2>
+          <p class="section-subtitle">
+            Care Monitoring помогает семье, опекунам и организациям по уходу получать понятную картину состояния
+            человека: показатели, тренды, предупреждения о рисках и сценарии действий при ухудшении самочувствия.
+          </p>
+        </div>
+
+        <div class="seo-grid">
+          <article class="seo-card card">
+            <h3>Что такое «мониторинг здоровья» в Care Monitoring</h3>
+            <p>
+              Под мониторингом мы понимаем регулярный сбор и анализ данных (телеметрия, активность, сон, геолокация),
+              их визуализацию и своевременные уведомления. Это особенно важно при гипертонии, риске падений,
+              нарушениях дыхания и в период восстановления после болезни.
+            </p>
+          </article>
+
+          <article class="seo-card card">
+            <h3>Как работает предиктивная аналитика</h3>
+            <p>
+              Алгоритмы машинного обучения анализируют динамику показателей и события (например, резкие отклонения),
+              чтобы предупредить о повышенном риске. Предупреждение — это повод проверить самочувствие и при необходимости
+              связаться с врачом, а не медицинский диагноз.
+            </p>
+          </article>
+
+          <article class="seo-card card">
+            <h3>Безопасность данных и доверие</h3>
+            <p>
+              Мы проектируем систему с учетом принципов безопасности: разграничение доступа, аудит действий, шифрование
+              при передаче данных и контроль инцидентов. Для организаций предусмотрены роли и мульти‑тенантность
+              (разделение данных по организациям).
+            </p>
+          </article>
+        </div>
+
+        <div class="seo-note card">
+          <strong>Важно:</strong> Care Monitoring не заменяет консультацию врача и экстренную медицинскую помощь.
+          При симптомах угрозы жизни вызывайте 112/103.
+        </div>
+      </div>
+    </section>
+
     <!-- Pricing Section -->
     <section id="pricing" class="section pricing-section">
       <div class="container">
         <div class="pricing-header">
-          <h2 class="section-title">Простые и прозрачные тарифы</h2>
-          <p class="section-subtitle">Выберите план, который подходит именно вам. Все планы включают 14 дней бесплатно.</p>
-          <div class="pricing-toggle">
-            <span class="toggle-label">Ежемесячно</span>
-            <label class="toggle-switch">
-              <input type="checkbox" v-model="annualBilling" />
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Годовой <span class="toggle-discount">-20%</span></span>
+          <h2 class="section-title">Тарифы</h2>
+          <p class="section-subtitle">
+            Разделили планы для семьи (B2C) и для организаций (B2B). Выберите формат — и сравните возможности.
+          </p>
+
+          <div class="pricing-tabs" role="tablist" aria-label="Тарифы: B2C и B2B">
+            <button
+              class="pricing-tab"
+              :class="{ active: pricingSegment === 'b2c' }"
+              type="button"
+              role="tab"
+              :aria-selected="pricingSegment === 'b2c'"
+              @click="pricingSegment = 'b2c'"
+            >
+              Для семьи (B2C)
+            </button>
+            <button
+              class="pricing-tab"
+              :class="{ active: pricingSegment === 'b2b' }"
+              type="button"
+              role="tab"
+              :aria-selected="pricingSegment === 'b2b'"
+              @click="pricingSegment = 'b2b'"
+            >
+              Для бизнеса (B2B)
+            </button>
           </div>
         </div>
-        <div class="grid grid-3 pricing-grid">
-          <div class="pricing-card card">
-            <div class="pricing-header">
-              <h3 class="pricing-name">Basic</h3>
-              <div class="pricing-price">
-                <span class="price-amount">{{ annualBilling ? '₽9,504' : '₽990' }}</span>
-                <span class="price-period">/{{ annualBilling ? 'год' : 'месяц' }}</span>
+
+        <!-- B2C -->
+        <div v-if="pricingSegment === 'b2c'" class="pricing-segment" role="tabpanel">
+          <div class="grid grid-4 pricing-grid pricing-grid-b2c">
+            <div v-for="plan in b2cPlans" :key="plan.id" class="pricing-card card" :class="{ featured: plan.featured }">
+              <div v-if="plan.badge" class="pricing-badge">{{ plan.badge }}</div>
+              <div class="pricing-header">
+                <h3 class="pricing-name">{{ plan.name }}</h3>
+                <div class="pricing-price">
+                  <span class="price-amount">₽{{ plan.priceMonthly.toLocaleString('ru-RU') }}</span>
+                  <span class="price-period">/месяц</span>
+                </div>
+                <div class="pricing-audience">{{ plan.audience }}</div>
               </div>
-              <div class="pricing-savings" v-if="annualBilling">Экономия ₽2,376 в год</div>
+              <ul class="pricing-features">
+                <li v-for="(f, idx) in plan.features" :key="idx" :class="f.included ? 'feature-included' : 'feature-excluded'">
+                  <span class="feature-mark">{{ f.included ? '✓' : '✗' }}</span>
+                  <span>{{ f.text }}</span>
+                </li>
+              </ul>
+              <div class="pricing-ltv">Пример LTV (1 год): ₽{{ plan.ltvYear.toLocaleString('ru-RU') }}</div>
+              <RouterLink :to="`/register?plan=${plan.id}`" class="btn btn-primary btn-block">
+                Начать
+              </RouterLink>
             </div>
-            <ul class="pricing-features">
-              <li class="feature-included">✓ До 10 подопечных</li>
-              <li class="feature-included">✓ Базовый мониторинг</li>
-              <li class="feature-included">✓ SOS кнопка</li>
-              <li class="feature-included">✓ Мобильное приложение</li>
-              <li class="feature-included">✓ Уведомления</li>
-              <li class="feature-excluded">✗ AI аналитика</li>
-              <li class="feature-excluded">✗ Интеграция с СМП</li>
-            </ul>
-            <RouterLink to="/register?plan=basic" class="btn btn-outline btn-block">
-              Начать бесплатно
-            </RouterLink>
           </div>
 
-          <div class="pricing-card card featured">
-            <div class="pricing-badge">Популярный</div>
-            <div class="pricing-header">
-              <h3 class="pricing-name">Professional</h3>
-              <div class="pricing-price">
-                <span class="price-amount">{{ annualBilling ? '₽28,704' : '₽2,990' }}</span>
-                <span class="price-period">/{{ annualBilling ? 'год' : 'месяц' }}</span>
-              </div>
-              <div class="pricing-savings" v-if="annualBilling">Экономия ₽7,176 в год</div>
-            </div>
-            <ul class="pricing-features">
-              <li class="feature-included">✓ До 100 подопечных</li>
-              <li class="feature-included">✓ Полный мониторинг</li>
-              <li class="feature-included">✓ AI аналитика</li>
-              <li class="feature-included">✓ Интеграция с СМП</li>
-              <li class="feature-included">✓ Расширенная отчетность</li>
-              <li class="feature-included">✓ Приоритетная поддержка</li>
-              <li class="feature-included">✓ Геозоны</li>
-            </ul>
-            <RouterLink to="/register?plan=professional" class="btn btn-primary btn-block">
-              Начать бесплатно
-            </RouterLink>
-          </div>
-
-          <div class="pricing-card card">
-            <div class="pricing-header">
-              <h3 class="pricing-name">Enterprise</h3>
-              <div class="pricing-price">
-                <span class="price-amount">Индивидуально</span>
-              </div>
-              <div class="pricing-savings">Специальные условия</div>
-            </div>
-            <ul class="pricing-features">
-              <li class="feature-included">✓ Неограниченно подопечных</li>
-              <li class="feature-included">✓ Все функции</li>
-              <li class="feature-included">✓ White-label</li>
-              <li class="feature-included">✓ API доступ</li>
-              <li class="feature-included">✓ Выделенная поддержка</li>
-              <li class="feature-included">✓ Персональный менеджер</li>
-              <li class="feature-included">✓ Интеграция с МИС</li>
-            </ul>
-            <a href="mailto:sales@caremonitoring.ru" class="btn btn-outline btn-block">
-              Связаться с нами
-            </a>
+          <div class="pricing-guarantee">
+            <span class="guarantee-icon">✓</span>
+            <span class="guarantee-text">14 дней бесплатно на B2C тарифах • Без кредитной карты • Отмена в любой момент</span>
           </div>
         </div>
-        <div class="pricing-guarantee">
-          <span class="guarantee-icon">✓</span>
-          <span class="guarantee-text">14 дней бесплатно на всех планах • Без кредитной карты • Отмена в любой момент</span>
+
+        <!-- B2B -->
+        <div v-else class="pricing-segment" role="tabpanel">
+          <div class="grid grid-3 pricing-grid pricing-grid-b2b">
+            <div v-for="plan in b2bPlans" :key="plan.id" class="pricing-card card" :class="{ featured: plan.featured }">
+              <div v-if="plan.badge" class="pricing-badge">{{ plan.badge }}</div>
+              <div class="pricing-header">
+                <h3 class="pricing-name">{{ plan.name }}</h3>
+                <div class="pricing-price">
+                  <span class="price-amount">₽{{ plan.priceMonthly.toLocaleString('ru-RU') }}</span>
+                  <span class="price-period">/месяц</span>
+                </div>
+                <div class="pricing-audience">{{ plan.limitText }}</div>
+                <div class="pricing-savings" v-if="plan.extraText">{{ plan.extraText }}</div>
+              </div>
+              <ul class="pricing-features">
+                <li v-for="(f, idx) in plan.features" :key="idx" class="feature-included">
+                  <span class="feature-mark">✓</span>
+                  <span>{{ f }}</span>
+                </li>
+              </ul>
+              <a href="mailto:sales@caremonitoring.ru" class="btn btn-primary btn-block">Запросить предложение</a>
+            </div>
+          </div>
+          <div class="pricing-note card">
+            <strong>Для B2B:</strong> поможем с внедрением, обучением персонала и интеграциями. Напишите нам на
+            <a href="mailto:sales@caremonitoring.ru">sales@caremonitoring.ru</a>.
+          </div>
         </div>
       </div>
     </section>
@@ -734,9 +792,12 @@
             <ul class="footer-links">
               <li><a href="#features">Возможности</a></li>
               <li><a href="#mobile-apps">Приложения</a></li>
+              <li><RouterLink to="/articles">База знаний</RouterLink></li>
               <li><a href="#pricing">Тарифы</a></li>
               <li><RouterLink to="/login">Вход</RouterLink></li>
               <li><RouterLink to="/register">Регистрация</RouterLink></li>
+              <li><RouterLink to="/privacy">Политика конфиденциальности</RouterLink></li>
+              <li><RouterLink to="/terms">Пользовательское соглашение</RouterLink></li>
             </ul>
           </div>
           <div class="footer-section">
@@ -774,7 +835,155 @@ const guardianAppUrl = computed(() => import.meta.env.VITE_GUARDIAN_APP_URL || '
 const dispatcherAppUrl = computed(() => import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5174');
 const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5185');
 
-const annualBilling = ref(false);
+const pricingSegment = ref<'b2c' | 'b2b'>('b2c');
+
+const b2cPlans = [
+  {
+    id: 'b2c-basic',
+    name: 'Базовый',
+    badge: null,
+    featured: false,
+    priceMonthly: 299,
+    ltvYear: 3588,
+    audience: 'Самостоятельные пользователи, семья для контроля пожилого родственника',
+    features: [
+      { included: true, text: 'SOS‑кнопка и геолокация (уведомление опекуну в Telegram/Bot)' },
+      { included: false, text: 'История перемещений' },
+      { included: true, text: 'Мониторинг показателей (HR, SpO₂, активность): текущие показатели + базовые уведомления' },
+      { included: false, text: 'Мониторинг показателей (выносные датчики)' },
+      { included: true, text: 'Детекция падения: автоматическое уведомление' },
+      { included: false, text: 'Замыкание на СМП' },
+      { included: false, text: 'Включены вызовы СМП' },
+      { included: true, text: 'Голосовая связь через браслет (2‑сторонняя связь с опекуном)' },
+      { included: false, text: 'Персональный оператор' },
+      { included: false, text: 'Страхование' },
+    ],
+  },
+  {
+    id: 'b2c-standard',
+    name: 'Стандарт',
+    badge: 'Популярный',
+    featured: true,
+    priceMonthly: 490,
+    ltvYear: 5880,
+    audience: 'Основная масса пользователей, нуждающихся в безопасности',
+    features: [
+      { included: true, text: 'SOS‑кнопка и геолокация' },
+      { included: true, text: 'История перемещений (за 7 дней)' },
+      { included: true, text: 'Мониторинг показателей (HR, SpO₂, активность): текущие показатели + базовые уведомления' },
+      { included: false, text: 'Мониторинг показателей (выносные датчики)' },
+      { included: true, text: 'Детекция падения: автоматическое уведомление' },
+      { included: true, text: 'Замыкание на СМП: автоматический вызов при подтвержденном падении/SOS' },
+      { included: false, text: 'Включены вызовы СМП' },
+      { included: true, text: 'Голосовая связь через браслет (2‑сторонняя связь с оператором)' },
+      { included: false, text: 'Персональный оператор' },
+      { included: false, text: 'Страхование' },
+    ],
+  },
+  {
+    id: 'b2c-careplus',
+    name: 'Забота+',
+    badge: null,
+    featured: false,
+    priceMonthly: 1190,
+    ltvYear: 14280,
+    audience: 'Пользователи с хроническими заболеваниями, повышенными рисками',
+    features: [
+      { included: true, text: 'SOS‑кнопка и геолокация' },
+      { included: true, text: 'История перемещений (за 30 дней)' },
+      { included: true, text: 'Мониторинг: расширенный анализ, тренды, ранние оповещения об отклонениях' },
+      { included: false, text: 'Мониторинг показателей (выносные датчики)' },
+      { included: true, text: 'Детекция падения: подтвержденная (исключение ложных срабатываний)' },
+      { included: true, text: 'Замыкание на СМП: автоматический вызов при подтвержденном падении/SOS' },
+      { included: true, text: 'Включены вызовы СМП: скидка 50%' },
+      { included: true, text: 'Голосовая связь через браслет (2‑сторонняя связь с оператором)' },
+      { included: true, text: 'Персональный оператор (базовый)' },
+      { included: true, text: 'Страхование (скидка на полис)' },
+    ],
+  },
+  {
+    id: 'b2c-allin',
+    name: 'Все включено',
+    badge: 'Премиум',
+    featured: false,
+    priceMonthly: 2990,
+    ltvYear: 35880,
+    audience: 'Максимальная защита, premium‑сервис',
+    features: [
+      { included: true, text: 'SOS‑кнопка и геолокация' },
+      { included: true, text: 'История перемещений (за 90 дней)' },
+      { included: true, text: 'Мониторинг: премиум‑аналитика, персональные пороги тревог' },
+      { included: true, text: 'Мониторинг показателей (выносные датчики)' },
+      { included: true, text: 'Детекция падения: подтвержденная (исключение ложных срабатываний)' },
+      { included: true, text: 'Замыкание на СМП: приоритетный пул, мгновенная передача данных' },
+      { included: true, text: 'Включены вызовы СМП: 1 вызов/мес, далее скидка 50%' },
+      { included: true, text: 'Голосовая связь через браслет (2‑сторонняя связь с оператором)' },
+      { included: true, text: 'Персональный оператор (персональный менеджер, ежедневные check‑in)' },
+      { included: true, text: 'Страхование (включенный полис на несчастный случай)' },
+    ],
+  },
+];
+
+const b2bPlans = [
+  {
+    id: 'b2b-corp-basic',
+    name: 'Корпоративный базовый',
+    badge: null,
+    featured: false,
+    priceMonthly: 49900,
+    limitText: 'До 100 пользователей',
+    extraText: '+500 ₽ / доп. пользователь',
+    features: [
+      'Локальная установка на сервер организации',
+      'До 5 рабочих мест диспетчеров',
+      'Неограниченное количество браслетов',
+      'Базовая геолокация и SOS‑кнопка',
+      'Локальная база данных (внутри организации)',
+      'Техническая поддержка 8/5',
+      'Обновления безопасности',
+      'API для интеграции с внутренними системами',
+      'Белый лейбл (брендирование под организацию)',
+    ],
+  },
+  {
+    id: 'b2b-corp-extended',
+    name: 'Корпоративный расширенный',
+    badge: 'Для сетей',
+    featured: true,
+    priceMonthly: 99900,
+    limitText: 'До 250 пользователей',
+    extraText: '+400 ₽ / доп. пользователь',
+    features: [
+      'До 15 рабочих мест диспетчеров',
+      'Расширенная аналитика и отчетность',
+      'Кастомные сценарии оповещений',
+      'Интеграция с внутренними CRM/ERP системами',
+      'Мобильное приложение с брендированием',
+      'Резервное копирование и восстановление',
+      'Техническая поддержка 24/7',
+      'Обучение персонала',
+    ],
+  },
+  {
+    id: 'b2b-medical',
+    name: 'Медицинский комплекс',
+    badge: 'Мед. учреждения',
+    featured: false,
+    priceMonthly: 199900,
+    limitText: 'До 500 коек',
+    extraText: '+300 ₽ / доп. койка',
+    features: [
+      'Интеграция с медицинскими системами (ЕГИСЗ, МИС)',
+      'Хранение медицинских данных с соблюдением 152‑ФЗ',
+      'Медицинские протоколы оповещения',
+      'Автоматизация вызовов медперсонала',
+      'Учет лекарств и процедур',
+      'Отчетность для Росздравнадзора',
+      'Аварийное электропитание',
+      'Горячее резервирование',
+    ],
+  },
+];
 const openFaqIndex = ref<number | null>(null);
 
 const faqs = [
@@ -1420,73 +1629,36 @@ onMounted(() => {
   margin-bottom: 3rem;
 }
 
-.pricing-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.toggle-label {
-  font-size: 0.875rem;
-  color: var(--text);
-  font-weight: 500;
-}
-
-.toggle-discount {
-  background: var(--success);
-  color: white;
-  padding: 0.125rem 0.5rem;
+.pricing-tabs {
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.35rem;
   border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-left: 0.25rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin-top: 1.25rem;
 }
 
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 28px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
+.pricing-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--border);
-  transition: 0.3s;
-  border-radius: 28px;
+  transition: all 0.2s ease;
 }
 
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
+.pricing-tab:hover {
+  background: rgba(37, 99, 235, 0.08);
 }
 
-.toggle-switch input:checked + .toggle-slider {
-  background-color: var(--primary);
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(22px);
+.pricing-tab.active {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(124, 58, 237, 0.14));
+  box-shadow: var(--ring);
 }
 
 .pricing-grid {
@@ -1564,6 +1736,14 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
+.pricing-audience {
+  margin: 0.5rem auto 0;
+  max-width: 360px;
+  color: var(--text-light);
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
 .pricing-features {
   list-style: none;
   text-align: left;
@@ -1586,6 +1766,34 @@ onMounted(() => {
 .feature-excluded {
   color: var(--text-muted);
   text-decoration: line-through;
+}
+
+.feature-mark {
+  width: 1.2rem;
+  display: inline-flex;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.pricing-ltv {
+  margin-top: -0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.pricing-note {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.pricing-note a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.pricing-note a:hover {
+  text-decoration: underline;
 }
 
 .pricing-guarantee {
@@ -1966,6 +2174,42 @@ onMounted(() => {
   padding: 4rem 0;
 }
 
+/* SEO Section */
+.seo-section {
+  background: white;
+}
+.seo-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.seo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+.seo-card {
+  text-align: left;
+}
+.seo-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.seo-card p {
+  margin: 0;
+  color: var(--text-light);
+  line-height: 1.8;
+}
+.seo-note {
+  margin-top: 2rem;
+  text-align: left;
+  background: var(--bg-light);
+}
+.seo-note strong {
+  color: var(--text);
+}
+
 .social-proof-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -2076,6 +2320,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  /* Base layer (overridden per-person below) */
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   display: flex;
@@ -2084,6 +2329,63 @@ onMounted(() => {
   font-weight: 600;
   font-size: 1.125rem;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.author-initials {
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Decorative layers: glow + pattern + small accent dot */
+.author-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), transparent 45%),
+    radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.18), transparent 55%);
+  transform: rotate(-10deg);
+  opacity: 0.9;
+}
+
+.author-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.20), transparent 38%),
+    radial-gradient(circle at 20% 85%, rgba(0, 0, 0, 0.12), transparent 45%);
+  mix-blend-mode: overlay;
+  opacity: 1;
+}
+
+.author-avatar--maria {
+  background:
+    radial-gradient(circle at 25% 25%, #ffd1e8, transparent 45%),
+    radial-gradient(circle at 70% 70%, #a7f3d0, transparent 55%),
+    linear-gradient(135deg, #8b5cf6, #2563eb);
+}
+
+.author-avatar--ivan {
+  background:
+    radial-gradient(circle at 30% 30%, #bae6fd, transparent 45%),
+    radial-gradient(circle at 70% 75%, #fde68a, transparent 55%),
+    linear-gradient(135deg, #0ea5e9, #22c55e);
+}
+
+.author-avatar--anna {
+  background:
+    radial-gradient(circle at 28% 30%, #fecaca, transparent 45%),
+    radial-gradient(circle at 75% 70%, #ddd6fe, transparent 55%),
+    linear-gradient(135deg, #f43f5e, #7c3aed);
 }
 
 .author-name {
@@ -2491,9 +2793,9 @@ onMounted(() => {
     transform: scale(1);
   }
 
-  .pricing-toggle {
-    flex-direction: column;
-    gap: 0.5rem;
+  .pricing-tabs {
+    width: 100%;
+    justify-content: center;
   }
 
   .faq-grid {

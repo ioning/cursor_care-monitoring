@@ -1,42 +1,17 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://caremonitoring.com/sitemap.xml
-
-# Disallow admin and API routes
+# Service routes (not for indexing)
 Disallow: /api/
 Disallow: /admin/
 Disallow: /login
 Disallow: /register
 
-# Allow important pages
-Allow: /
-Allow: /#features
-Allow: /#health-articles
-Allow: /#business
-Allow: /#pricing
-Allow: /#contact
-
-
-Allow: /
-
 # Sitemap
 Sitemap: https://caremonitoring.com/sitemap.xml
 
-# Disallow admin and API routes
-Disallow: /api/
-Disallow: /admin/
-Disallow: /login
-Disallow: /register
-
-# Allow important pages
-Allow: /
-Allow: /#features
-Allow: /#health-articles
-Allow: /#business
-Allow: /#pricing
-Allow: /#contact
+# Yandex-specific (optional but useful)
+Host: caremonitoring.com
 
 
 

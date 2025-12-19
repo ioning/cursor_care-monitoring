@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { login, register, verifyEmail, resendVerificationCode, getDashboardUrl, type LoginRequest, type RegisterRequest, type VerifyEmailRequest, type ResendVerificationCodeRequest } from '@/api/auth.api';
-import { useRouter } from 'vue-router';
 
 interface User {
   id: string;
@@ -71,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
         }
         
         // Если токены есть, значит регистрация прошла успешно
-        if (response.data && 'tokens' in response.data) {
+        if (response.data.tokens) {
           localStorage.setItem('accessToken', response.data.tokens.accessToken);
           localStorage.setItem('refreshToken', response.data.tokens.refreshToken);
           this.user = response.data.user;

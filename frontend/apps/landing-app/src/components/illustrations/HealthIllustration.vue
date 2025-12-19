@@ -6,11 +6,29 @@
           <stop offset="0%" :style="`stop-color:${color};stop-opacity:0.1`" />
           <stop offset="100%" :style="`stop-color:${color};stop-opacity:0.3`" />
         </linearGradient>
+
+        <!-- Soft shadow -->
+        <filter :id="`softShadow-${type}`" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.18" />
+        </filter>
+
+        <!-- Subtle dot pattern (premium texture) -->
+        <pattern :id="`dots-${type}`" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.2" :fill="color" opacity="0.10" />
+        </pattern>
       </defs>
       
-      <rect width="400" height="300" rx="16" :fill="`url(#healthGradient-${type})`" />
-      
-      <component :is="illustrationComponent" />
+      <!-- Background -->
+      <rect width="400" height="300" rx="18" :fill="`url(#healthGradient-${type})`" />
+      <rect width="400" height="300" rx="18" :fill="`url(#dots-${type})`" opacity="0.75" />
+
+      <!-- Inner border -->
+      <rect x="10" y="10" width="380" height="280" rx="16" fill="none" stroke="#ffffff" opacity="0.55" />
+
+      <!-- Icon group -->
+      <g :filter="`url(#softShadow-${type})`">
+        <component :is="illustrationComponent" />
+      </g>
     </svg>
   </div>
 </template>
@@ -37,97 +55,153 @@ const color = computed(() => {
 });
 
 const illustrationComponent = computed(() => {
+  const stroke = 'rgba(15, 23, 42, 0.55)';
+  const strokeStrong = 'rgba(15, 23, 42, 0.75)';
+  const line = { stroke, 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' as const };
+  const lineThin = { stroke, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' as const };
+
   const components: Record<string, any> = {
     fall: () => h('g', [
-      // Person falling
-      h('circle', { cx: 200, cy: 120, r: 25, fill: '#fbbf24' }), // Head
-      h('ellipse', { cx: 200, cy: 180, rx: 20, ry: 40, fill: '#3b82f6', transform: 'rotate(-20 200 180)' }), // Body
-      h('line', { x1: 180, y1: 200, x2: 160, y2: 240, stroke: '#1f2937', 'stroke-width': 3 }), // Legs
-      h('line', { x1: 220, y1: 200, x2: 240, y2: 240, stroke: '#1f2937', 'stroke-width': 3 }),
-      h('line', { x1: 190, y1: 160, x2: 170, y2: 200, stroke: '#1f2937', 'stroke-width': 3 }), // Arms
-      h('line', { x1: 210, y1: 160, x2: 230, y2: 200, stroke: '#1f2937', 'stroke-width': 3 }),
-      // Warning symbol
-      h('path', { d: 'M 200 60 L 160 140 L 240 140 Z', fill: color.value, opacity: 0.8 }),
-      h('text', { x: 200, y: 110, 'font-size': 20, fill: '#ffffff', 'text-anchor': 'middle', 'font-weight': 'bold' }, '!'),
+      // Soft blob behind
+      h('circle', { cx: 200, cy: 150, r: 86, fill: color.value, opacity: 0.14 }),
+      h('circle', { cx: 200, cy: 150, r: 64, fill: color.value, opacity: 0.10 }),
+
+      // Minimal person
+      h('circle', { cx: 205, cy: 118, r: 18, fill: '#ffffff', opacity: 0.85 }),
+      h('circle', { cx: 205, cy: 118, r: 18, fill: color.value, opacity: 0.18 }),
+      h('path', { d: 'M 210 140 L 190 178', ...line }),
+      h('path', { d: 'M 190 178 L 168 204', ...line }),
+      h('path', { d: 'M 190 178 L 210 206', ...line }),
+      h('path', { d: 'M 203 158 L 178 168', ...lineThin }),
+      h('path', { d: 'M 203 158 L 226 174', ...lineThin }),
+
+      // Warning marker
+      h('path', { d: 'M 150 86 L 110 156 L 190 156 Z', fill: color.value, opacity: 0.92 }),
+      h('path', { d: 'M 150 98 L 126 146 L 174 146 Z', fill: '#ffffff', opacity: 0.18 }),
+      h('path', { d: 'M 150 112 L 150 134', stroke: '#fff', 'stroke-width': 4, 'stroke-linecap': 'round' }),
+      h('circle', { cx: 150, cy: 145, r: 3.2, fill: '#fff' }),
     ]),
     heart: () => h('g', [
-      // Heart
+      // Soft blob behind
+      h('circle', { cx: 200, cy: 150, r: 88, fill: color.value, opacity: 0.14 }),
+      h('circle', { cx: 200, cy: 150, r: 66, fill: color.value, opacity: 0.10 }),
+
+      // Proper heart shape (classic, symmetric)
       h('path', {
-        d: 'M 200 100 C 200 80, 180 80, 180 100 C 180 80, 160 80, 160 100 C 160 120, 200 160, 200 160 C 200 160, 240 120, 240 100 C 240 80, 220 80, 220 100 C 220 80, 200 80, 200 100',
+        d: 'M 200 208 C 188 196 158 174 146 150 C 132 120 152 98 176 104 C 190 108 197 120 200 128 C 203 120 210 108 224 104 C 248 98 268 120 254 150 C 242 174 212 196 200 208 Z',
         fill: color.value,
-        opacity: 0.8,
+        opacity: 0.92,
       }),
-      // ECG line
       h('path', {
-        d: 'M 100 200 L 120 200 L 130 180 L 140 200 L 160 200 L 170 160 L 180 200 L 200 200 L 210 140 L 220 200 L 240 200 L 250 180 L 260 200 L 300 200',
+        d: 'M 176 112 C 160 110 148 124 150 142 C 152 154 160 166 176 176',
+        stroke: '#ffffff',
+        'stroke-width': 5,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        opacity: 0.18,
+        fill: 'none',
+      }),
+
+      // ECG line (more premium)
+      h('path', {
+        d: 'M 104 214 H 132 L 144 188 L 158 224 L 176 202 L 190 238 L 206 164 L 222 224 L 238 206 L 252 214 H 296',
         stroke: color.value,
         'stroke-width': 3,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
         fill: 'none',
+        opacity: 0.95,
       }),
-      h('text', { x: 200, y: 50, 'font-size': 18, fill: color.value, 'text-anchor': 'middle', 'font-weight': 'bold' }, 'Сердце'),
     ]),
     breathing: () => h('g', [
-      // Lungs
+      h('circle', { cx: 200, cy: 150, r: 88, fill: color.value, opacity: 0.12 }),
+      // Trachea
+      h('path', { d: 'M 200 86 V 128', ...line }),
+      h('path', { d: 'M 200 128 C 200 138 190 140 184 148', ...lineThin }),
+      h('path', { d: 'M 200 128 C 200 138 210 140 216 148', ...lineThin }),
+
+      // Lungs (outline + duotone fill)
       h('path', {
-        d: 'M 150 100 Q 130 120 130 160 Q 130 200 150 220 Q 170 200 170 160 Q 170 120 150 100',
+        d: 'M 176 124 C 150 132 136 156 140 186 C 144 214 164 230 184 224 C 192 222 196 214 196 204 V 146 C 196 134 188 122 176 124 Z',
         fill: color.value,
-        opacity: 0.6,
+        opacity: 0.28,
       }),
       h('path', {
-        d: 'M 250 100 Q 270 120 270 160 Q 270 200 250 220 Q 230 200 230 160 Q 230 120 250 100',
+        d: 'M 224 124 C 250 132 264 156 260 186 C 256 214 236 230 216 224 C 208 222 204 214 204 204 V 146 C 204 134 212 122 224 124 Z',
         fill: color.value,
-        opacity: 0.6,
+        opacity: 0.28,
       }),
-      // Breathing waves
       h('path', {
-        d: 'M 100 180 Q 150 160 200 180 T 300 180',
-        stroke: color.value,
-        'stroke-width': 2,
+        d: 'M 176 124 C 150 132 136 156 140 186 C 144 214 164 230 184 224 C 192 222 196 214 196 204 V 146 C 196 134 188 122 176 124 Z',
+        stroke: strokeStrong,
+        'stroke-width': 2.5,
         fill: 'none',
-        opacity: 0.8,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        opacity: 0.9,
       }),
-      h('text', { x: 200, y: 50, 'font-size': 18, fill: color.value, 'text-anchor': 'middle', 'font-weight': 'bold' }, 'Дыхание'),
+      h('path', {
+        d: 'M 224 124 C 250 132 264 156 260 186 C 256 214 236 230 216 224 C 208 222 204 214 204 204 V 146 C 204 134 212 122 224 124 Z',
+        stroke: strokeStrong,
+        'stroke-width': 2.5,
+        fill: 'none',
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        opacity: 0.9,
+      }),
+
+      // Breath waves
+      h('path', { d: 'M 110 208 C 140 194 170 194 200 208 C 230 222 260 222 290 208', ...lineThin, opacity: 0.75 }),
     ]),
     temperature: () => h('g', [
-      // Thermometer
-      h('rect', { x: 180, y: 80, width: 40, height: 160, rx: 20, fill: '#e5e7eb' }),
-      h('rect', { x: 185, y: 85, width: 30, height: 150, rx: 15, fill: color.value, opacity: 0.8 }),
-      h('circle', { cx: 200, cy: 250, r: 25, fill: color.value, opacity: 0.8 }),
-      h('circle', { cx: 200, cy: 250, r: 20, fill: '#ffffff' }),
-      // Temperature indicator
-      h('line', { x1: 200, y1: 100, x2: 200, y2: 120, stroke: '#ffffff', 'stroke-width': 3 }),
-      h('text', { x: 200, y: 50, 'font-size': 18, fill: color.value, 'text-anchor': 'middle', 'font-weight': 'bold' }, 'Температура'),
+      h('circle', { cx: 200, cy: 150, r: 88, fill: color.value, opacity: 0.12 }),
+      // Outer thermometer
+      h('rect', { x: 182, y: 74, width: 36, height: 150, rx: 18, fill: '#ffffff', opacity: 0.85 }),
+      h('rect', { x: 182, y: 74, width: 36, height: 150, rx: 18, fill: color.value, opacity: 0.12 }),
+      h('rect', { x: 182, y: 74, width: 36, height: 150, rx: 18, fill: 'none', stroke: strokeStrong, 'stroke-width': 2 }),
+
+      // Mercury
+      h('rect', { x: 195, y: 106, width: 10, height: 100, rx: 6, fill: color.value, opacity: 0.9 }),
+      h('circle', { cx: 200, cy: 232, r: 22, fill: color.value, opacity: 0.92 }),
+      h('circle', { cx: 200, cy: 232, r: 22, fill: 'none', stroke: strokeStrong, 'stroke-width': 2 }),
+
+      // Tick marks
+      h('path', { d: 'M 226 108 H 238', ...lineThin, opacity: 0.55 }),
+      h('path', { d: 'M 226 132 H 242', ...lineThin, opacity: 0.55 }),
+      h('path', { d: 'M 226 156 H 238', ...lineThin, opacity: 0.55 }),
+      h('path', { d: 'M 226 180 H 242', ...lineThin, opacity: 0.55 }),
     ]),
     sleep: () => h('g', [
-      // Moon and stars
-      h('path', {
-        d: 'M 200 100 A 40 40 0 1 1 200 180 A 40 40 0 1 1 200 100',
-        fill: color.value,
-        opacity: 0.6,
-      }),
-      h('circle', { cx: 150, cy: 120, r: 3, fill: color.value }),
-      h('circle', { cx: 250, cy: 130, r: 2, fill: color.value }),
-      h('circle', { cx: 170, cy: 180, r: 2, fill: color.value }),
-      h('circle', { cx: 230, cy: 190, r: 3, fill: color.value }),
-      // Sleep waves
-      h('path', {
-        d: 'M 100 220 Q 150 210 200 220 T 300 220',
-        stroke: color.value,
-        'stroke-width': 2,
-        fill: 'none',
-        opacity: 0.6,
-      }),
-      h('text', { x: 200, y: 50, 'font-size': 18, fill: color.value, 'text-anchor': 'middle', 'font-weight': 'bold' }, 'Сон'),
+      h('circle', { cx: 200, cy: 150, r: 88, fill: color.value, opacity: 0.12 }),
+
+      // Crescent moon (two circles)
+      h('circle', { cx: 210, cy: 140, r: 44, fill: color.value, opacity: 0.9 }),
+      h('circle', { cx: 228, cy: 128, r: 42, fill: '#ffffff', opacity: 0.88 }),
+      h('circle', { cx: 210, cy: 140, r: 44, fill: 'none', stroke: strokeStrong, 'stroke-width': 2, opacity: 0.25 }),
+
+      // Stars
+      h('path', { d: 'M 130 112 L 134 124 L 146 128 L 134 132 L 130 144 L 126 132 L 114 128 L 126 124 Z', fill: '#ffffff', opacity: 0.7 }),
+      h('circle', { cx: 156, cy: 170, r: 3, fill: '#ffffff', opacity: 0.7 }),
+      h('circle', { cx: 268, cy: 186, r: 2.6, fill: '#ffffff', opacity: 0.7 }),
+
+      // Calm wave
+      h('path', { d: 'M 112 214 C 144 200 168 200 200 214 C 232 228 256 228 288 214', ...lineThin, opacity: 0.6 }),
     ]),
     emergency: () => h('g', [
-      // Emergency cross
-      h('rect', { x: 170, y: 100, width: 60, height: 60, rx: 8, fill: '#ffffff' }),
-      h('rect', { x: 190, y: 110, width: 20, height: 40, fill: color.value }),
-      h('rect', { x: 180, y: 120, width: 40, height: 20, fill: color.value }),
-      // Alert circle
-      h('circle', { cx: 200, cy: 200, r: 50, fill: color.value, opacity: 0.2 }),
-      h('circle', { cx: 200, cy: 200, r: 35, fill: color.value, opacity: 0.3 }),
-      h('text', { x: 200, y: 50, 'font-size': 18, fill: color.value, 'text-anchor': 'middle', 'font-weight': 'bold' }, 'Экстренная помощь'),
+      h('circle', { cx: 200, cy: 150, r: 88, fill: color.value, opacity: 0.12 }),
+
+      // Medical card
+      h('rect', { x: 140, y: 96, width: 120, height: 104, rx: 18, fill: '#ffffff', opacity: 0.9 }),
+      h('rect', { x: 140, y: 96, width: 120, height: 104, rx: 18, fill: color.value, opacity: 0.10 }),
+      h('rect', { x: 140, y: 96, width: 120, height: 104, rx: 18, fill: 'none', stroke: strokeStrong, 'stroke-width': 2 }),
+
+      // Cross
+      h('rect', { x: 193, y: 116, width: 14, height: 64, rx: 7, fill: color.value, opacity: 0.95 }),
+      h('rect', { x: 168, y: 141, width: 64, height: 14, rx: 7, fill: color.value, opacity: 0.95 }),
+
+      // Siren lines
+      h('path', { d: 'M 104 170 C 92 154 92 132 104 116', ...lineThin, opacity: 0.55 }),
+      h('path', { d: 'M 296 170 C 308 154 308 132 296 116', ...lineThin, opacity: 0.55 }),
     ]),
   };
   return components[props.type] || components.fall;
@@ -137,8 +211,11 @@ const illustrationComponent = computed(() => {
 <style scoped>
 .health-illustration {
   width: 100%;
-  height: 300px;
+  height: 240px;
   margin-bottom: 1rem;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.10);
 }
 
 .health-illustration svg {

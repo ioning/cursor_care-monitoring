@@ -2,6 +2,10 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '@/views/RegisterView.vue';
+import PrivacyView from '@/views/PrivacyView.vue';
+import TermsView from '@/views/TermsView.vue';
+import ArticlesView from '@/views/ArticlesView.vue';
+import ArticleView from '@/views/ArticleView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -21,6 +25,30 @@ const routes: RouteRecordRaw[] = [
     name: 'register',
     component: RegisterView,
     meta: { title: 'Регистрация' },
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: PrivacyView,
+    meta: { title: 'Политика конфиденциальности — Care Monitoring' },
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: TermsView,
+    meta: { title: 'Пользовательское соглашение — Care Monitoring' },
+  },
+  {
+    path: '/articles',
+    name: 'articles',
+    component: ArticlesView,
+    meta: { title: 'База знаний — Care Monitoring' },
+  },
+  {
+    path: '/articles/:slug',
+    name: 'article',
+    component: ArticleView,
+    meta: { title: 'Статья — Care Monitoring' },
   },
 ];
 

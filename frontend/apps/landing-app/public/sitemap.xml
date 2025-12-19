@@ -3,86 +3,56 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://caremonitoring.com/</loc>
-    <lastmod>2024-01-01</lastmod>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://caremonitoring.com/#features</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://caremonitoring.com/privacy</loc>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://caremonitoring.com/#health-articles</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://caremonitoring.com/terms</loc>
+    <lastmod>2025-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://caremonitoring.com/articles</loc>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://caremonitoring.com/#business</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://caremonitoring.com/articles/monitoring-zdorovya-chto-eto-i-zachem</loc>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://caremonitoring.com/#pricing</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://caremonitoring.com/articles/uhod-za-pozhilymi-kak-organizovat-bezopasno</loc>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://caremonitoring.com/#contact</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://caremonitoring.com/articles/profilaktika-padeniy-u-pozhilyh</loc>
+    <lastmod>2025-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://caremonitoring.com/articles/kontrol-davleniya-u-pozhilyh</loc>
+    <lastmod>2025-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://caremonitoring.com/articles/geozony-dlya-bezopasnosti-kak-nastroit</loc>
+    <lastmod>2025-12-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
-
-
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>https://caremonitoring.com/</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://caremonitoring.com/#features</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://caremonitoring.com/#health-articles</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://caremonitoring.com/#business</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://caremonitoring.com/#pricing</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://caremonitoring.com/#contact</loc>
-    <lastmod>2024-01-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-</urlset>
-
-
-
-
-
-
-

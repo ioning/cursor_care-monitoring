@@ -75,10 +75,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-const router = useRouter();
 const authStore = useAuthStore();
 
 const form = ref({

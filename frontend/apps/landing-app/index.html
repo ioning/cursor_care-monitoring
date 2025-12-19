@@ -18,6 +18,8 @@
     <meta name="robots" content="index, follow" />
     <meta name="language" content="Russian" />
     <meta name="revisit-after" content="7 days" />
+    <!-- Yandex Webmaster verification (set your value) -->
+    <meta name="yandex-verification" content="" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -134,6 +136,41 @@
         "target": "https://caremonitoring.com/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+
+    <!-- FAQ structured data (helps Yandex show rich snippets) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Как быстро можно начать использовать систему Care Monitoring?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Начать можно сразу после регистрации. Базовая настройка занимает несколько минут: создайте аккаунт, добавьте подопечного и подключите устройство (если используете носимый датчик)." }
+        },
+        {
+          "@type": "Question",
+          "name": "Какие показатели здоровья можно отслеживать?",
+          "acceptedAnswer": { "@type": "Answer", "text": "В зависимости от устройства и настроек: пульс, давление, сатурацию, температуру, активность, сон, события и уведомления о критических отклонениях." }
+        },
+        {
+          "@type": "Question",
+          "name": "Подходит ли система для пожилых людей?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Да. Сервис ориентирован на мониторинг состояния пожилых и людей с хроническими заболеваниями, а также на помощь родственникам и организациям по уходу." }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли подключить несколько подопечных?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Да. Вы можете вести несколько подопечных в рамках одного аккаунта. Ограничения зависят от выбранного тарифа." }
+        },
+        {
+          "@type": "Question",
+          "name": "Заменяет ли Care Monitoring врача?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Нет. Сервис помогает наблюдать динамику и получать уведомления, но не является медицинским заключением. При ухудшении самочувствия обращайтесь к врачу или в экстренные службы." }
+        }
+      ]
     }
     </script>
 

@@ -48,6 +48,11 @@ export interface RegisterResponse {
       role: string;
       emailVerified: boolean;
     };
+    tokens?: {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+    };
   };
   message?: string;
   requiresEmailVerification?: boolean;
@@ -77,7 +82,7 @@ export const resendVerificationCode = async (data: ResendVerificationCodeRequest
   return response.data;
 };
 
-export const getDashboardUrl = (role: string, organizationId?: string): string => {
+export const getDashboardUrl = (role: string, _organizationId?: string): string => {
   const baseUrls = {
     guardian: import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5173',
     dispatcher: import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5174',
