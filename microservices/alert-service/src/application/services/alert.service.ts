@@ -2,9 +2,10 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { AlertRepository } from '../../infrastructure/repositories/alert.repository';
 import { AlertEventPublisher } from '../../infrastructure/messaging/alert-event.publisher';
 import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
-import { RiskAlertEvent } from '../../../../shared/types/event.types';
+import { RiskAlertEvent } from '../../../../../shared/types/event.types';
 import { UpdateAlertStatusDto } from '../../infrastructure/dto/update-alert-status.dto';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
+import { AlertSeverity, AlertStatus } from '../../../../../shared/types/common.types';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -20,14 +21,18 @@ export class AlertService {
   async handleRiskAlert(event: RiskAlertEvent): Promise<void> {
     const alertId = randomUUID();
 
+    const severity = (Object.values(AlertSeverity) as string[]).includes(event.data.severity)
+      ? (event.data.severity as AlertSeverity)
+      : AlertSeverity.MEDIUM;
+
     const alert = await this.alertRepository.create({
       id: alertId,
       wardId: event.wardId || 'unknown',
       alertType: event.data.alertType,
       title: this.getAlertTitle(event.data.alertType),
       description: event.data.recommendation || 'AI detected potential risk',
-      severity: event.data.severity,
-      status: 'active',
+      severity,
+      status: AlertStatus.ACTIVE,
       aiConfidence: event.data.confidence,
       riskScore: event.data.riskScore,
       priority: event.data.priority,

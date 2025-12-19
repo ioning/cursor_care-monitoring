@@ -1,8 +1,27 @@
 // Re-export all shared modules for easier imports
-export * from './libs/database';
+// NOTE: Avoid exporting multiple `healthCheck` symbols from different modules.
+export {
+  createDatabaseConnection,
+  getDatabaseConnection,
+  closeDatabaseConnection,
+  healthCheck as databaseHealthCheck,
+} from './libs/database';
 export * from './libs/logger';
-export * from './libs/redis';
-export * from './libs/rabbitmq';
+export {
+  createRedisConnection,
+  getRedisClient,
+  closeRedisConnection,
+  healthCheck as redisHealthCheck,
+} from './libs/redis';
+export {
+  createRabbitMQConnection,
+  getChannel,
+  getRabbitMQChannel,
+  closeRabbitMQConnection,
+  publishEvent,
+  consumeEvent,
+  healthCheck as rabbitmqHealthCheck,
+} from './libs/rabbitmq';
 export * from './libs/retry';
 export * from './libs/circuit-breaker';
 export * from './libs/health-check';

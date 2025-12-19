@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Ward {
   id: string;
@@ -29,7 +29,7 @@ export class WardRepository {
         medical_info TEXT,
         emergency_contact TEXT,
         avatar_url TEXT,
-        organization_id UUID NOT NULL, -- Tenant isolation
+        organization_id UUID, -- Tenant isolation (optional in local/dev)
         status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -56,7 +56,7 @@ export class WardRepository {
     gender?: string;
     medicalInfo?: string;
     emergencyContact?: string;
-    organizationId: string; // Required for tenant isolation
+    organizationId?: string; // Optional in local/dev
   }): Promise<Ward> {
     const db = getDatabaseConnection();
     const result = await db.query(
@@ -70,7 +70,7 @@ export class WardRepository {
         data.gender || null,
         data.medicalInfo || null,
         data.emergencyContact || null,
-        data.organizationId,
+        data.organizationId || null,
       ],
     );
     return this.mapRowToWard(result.rows[0]);

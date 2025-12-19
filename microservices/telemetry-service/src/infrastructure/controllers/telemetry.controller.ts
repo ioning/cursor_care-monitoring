@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { TelemetryService } from '../application/services/telemetry.service';
+import { TelemetryService } from '../../application/services/telemetry.service';
 import { CreateTelemetryDto } from '../dto/create-telemetry.dto';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('telemetry')
 @Controller()

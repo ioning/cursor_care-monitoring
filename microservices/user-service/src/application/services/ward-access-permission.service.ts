@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { WardAccessPermissionRepository, CreateWardAccessPermissionDto } from '../../infrastructure/repositories/ward-access-permission.repository';
+import { WardAccessPermissionRepository } from '../../infrastructure/repositories/ward-access-permission.repository';
 import { WardAccessAuditRepository, CreateAuditLogDto } from '../../infrastructure/repositories/ward-access-audit.repository';
 import { GuardianWardRepository } from '../../infrastructure/repositories/guardian-ward.repository';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
+import { GrantAccessDto } from '../../infrastructure/dto/grant-access.dto';
 
 @Injectable()
 export class WardAccessPermissionService {
@@ -21,7 +22,7 @@ export class WardAccessPermissionService {
     grantorId: string,
     wardId: string,
     userId: string,
-    permissions: CreateWardAccessPermissionDto,
+    permissions: GrantAccessDto,
   ): Promise<WardAccessPermissionRepository['create'] extends (...args: any[]) => Promise<infer R> ? R : never> {
     // Проверяем, что grantor имеет право предоставлять доступ (является главным опекуном)
     const hasAccess = await this.guardianWardRepository.hasAccess(grantorId, wardId);
@@ -40,7 +41,12 @@ export class WardAccessPermissionService {
       wardId,
       userId,
       grantedBy: grantorId,
-      ...permissions,
+      accessLevel: permissions.accessLevel,
+      permissions: permissions.permissions,
+      accessStartDate: permissions.accessStartDate ? new Date(permissions.accessStartDate) : undefined,
+      accessEndDate: permissions.accessEndDate ? new Date(permissions.accessEndDate) : undefined,
+      isTemporary: permissions.isTemporary,
+      comment: permissions.comment,
     });
 
     // Логируем действие
@@ -93,7 +99,7 @@ export class WardAccessPermissionService {
   async updatePermission(
     updaterId: string,
     permissionId: string,
-    updates: Partial<CreateWardAccessPermissionDto['permissions']>,
+    updates: Partial<NonNullable<GrantAccessDto['permissions']>>,
   ) {
     // Получаем текущие права
     const permission = await this.permissionRepository.findById(permissionId);

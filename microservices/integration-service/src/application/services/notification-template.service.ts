@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AlertSeverity } from '../../../../shared/types/common.types';
+import { AlertSeverity } from '../../../../../shared/types/common.types';
 
 export interface NotificationTemplate {
   subject: string;

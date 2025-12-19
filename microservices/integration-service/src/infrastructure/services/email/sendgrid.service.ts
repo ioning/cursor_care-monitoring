@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { EmailMessage } from '../email.service';
-import { createLogger } from '../../../../../shared/libs/logger';
-import { retryWithBackoff } from '../../../../../shared/libs/retry';
-import { CircuitBreaker } from '../../../../../shared/libs/circuit-breaker';
+import { createLogger } from '../../../../../../shared/libs/logger';
+import { retryWithBackoff } from '../../../../../../shared/libs/retry';
+import { CircuitBreaker } from '../../../../../../shared/libs/circuit-breaker';
 
 export interface SendGridMessage {
   personalizations: Array<{

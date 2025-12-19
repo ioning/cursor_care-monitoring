@@ -3,7 +3,7 @@ import { TelemetryRepository } from '../../infrastructure/repositories/telemetry
 import { TelemetryEventPublisher } from '../../infrastructure/messaging/telemetry-event.publisher';
 import { DeviceServiceClient } from '../../infrastructure/clients/device-service.client';
 import { CreateTelemetryDto } from '../../infrastructure/dto/create-telemetry.dto';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -22,6 +22,11 @@ export class TelemetryService {
 
     const telemetryId = randomUUID();
     const timestamp = new Date();
+    const fallbackMetricTimestamp = timestamp.toISOString();
+    const metricsForEvent = createTelemetryDto.metrics.map((m) => ({
+      ...m,
+      timestamp: m.timestamp ?? fallbackMetricTimestamp,
+    }));
 
     // Save telemetry data
     await this.telemetryRepository.create({
@@ -44,7 +49,7 @@ export class TelemetryService {
       wardId: wardId || 'unknown',
       deviceId: createTelemetryDto.deviceId,
       data: {
-        metrics: createTelemetryDto.metrics,
+        metrics: metricsForEvent,
         location: createTelemetryDto.location,
         deviceInfo: {},
       },

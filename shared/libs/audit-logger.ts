@@ -51,7 +51,7 @@ export class AuditLogger {
   /**
    * Log authentication events
    */
-  logAuth(action: 'login' | 'logout' | 'login_failed' | 'token_refresh' | 'password_change', details: {
+  logAuth(action: 'login' | 'logout' | 'register' | 'login_failed' | 'token_refresh' | 'password_change', details: {
     userId?: string;
     email?: string;
     ipAddress?: string;

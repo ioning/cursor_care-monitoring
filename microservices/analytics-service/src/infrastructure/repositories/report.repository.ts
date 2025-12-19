@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 @Injectable()
 export class ReportRepository {
@@ -105,7 +105,7 @@ export class ReportRepository {
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset],
     );
-    return result.rows.map(row => this.mapRowToReport(row));
+    return result.rows.map((row: any) => this.mapRowToReport(row));
   }
 
   async findScheduledReports(): Promise<any[]> {
@@ -115,7 +115,7 @@ export class ReportRepository {
        WHERE scheduled_generation = TRUE AND status = 'generating'
        ORDER BY created_at ASC`,
     );
-    return result.rows.map(row => this.mapRowToReport(row));
+    return result.rows.map((row: any) => this.mapRowToReport(row));
   }
 
   private mapRowToReport(row: any): any {

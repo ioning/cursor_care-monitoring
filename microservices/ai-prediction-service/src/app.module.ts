@@ -7,7 +7,7 @@ import { AIPredictionService } from './application/services/ai-prediction.servic
 import { FallPredictionModel } from './infrastructure/ml-models/fall-prediction.model';
 import { PredictionRepository } from './infrastructure/repositories/prediction.repository';
 import { PredictionEventPublisher } from './infrastructure/messaging/prediction-event.publisher';
-import { createLogger } from '../../shared/libs/logger';
+import { createLogger } from '../../../shared/libs/logger';
 
 @Module({
   imports: [

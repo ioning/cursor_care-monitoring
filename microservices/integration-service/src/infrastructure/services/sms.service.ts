@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { SMSRuService } from './sms/smsru.service';
 
 export interface SmsMessage {

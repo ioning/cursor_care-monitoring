@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('dispatcher')
 @Controller('dispatcher')
@@ -18,7 +18,7 @@ export class DispatcherController {
 
   @Get('calls')
   @ApiOperation({ summary: 'Get emergency calls' })
-  async getCalls(@Request() req, @Query() query: any) {
+  async getCalls(@Request() req: any, @Query() query: any) {
     const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${dispatcherServiceUrl}/dispatcher/calls`, {
@@ -31,7 +31,7 @@ export class DispatcherController {
 
   @Get('calls/:callId')
   @ApiOperation({ summary: 'Get call by ID' })
-  async getCall(@Request() req, @Param('callId') callId: string) {
+  async getCall(@Request() req: any, @Param('callId') callId: string) {
     const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${dispatcherServiceUrl}/dispatcher/calls/${callId}`, {
@@ -43,7 +43,7 @@ export class DispatcherController {
 
   @Post('calls/:callId/assign')
   @ApiOperation({ summary: 'Assign call to dispatcher' })
-  async assignCall(@Request() req, @Param('callId') callId: string) {
+  async assignCall(@Request() req: any, @Param('callId') callId: string) {
     const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${dispatcherServiceUrl}/dispatcher/calls/${callId}/assign`, {}, {
@@ -55,7 +55,7 @@ export class DispatcherController {
 
   @Put('calls/:callId/status')
   @ApiOperation({ summary: 'Update call status' })
-  async updateStatus(@Request() req, @Param('callId') callId: string, @Body() body: any) {
+  async updateStatus(@Request() req: any, @Param('callId') callId: string, @Body() body: any) {
     const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${dispatcherServiceUrl}/dispatcher/calls/${callId}/status`, body, {
@@ -67,7 +67,7 @@ export class DispatcherController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Get dispatcher statistics' })
-  async getStats(@Request() req) {
+  async getStats(@Request() req: any) {
     const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${dispatcherServiceUrl}/dispatcher/stats`, {

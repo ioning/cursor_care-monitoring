@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ReportTemplateRepository, CreateReportTemplateDto } from '../../infrastructure/repositories/report-template.repository';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 
 @Injectable()
 export class ReportTemplateService {

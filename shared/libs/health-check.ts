@@ -16,7 +16,7 @@ interface HealthStatus {
   };
 }
 
-export async function healthCheck(req: Request, res: Response) {
+export async function httpHealthCheck(_req: Request, res: Response) {
   const health: HealthStatus = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -65,7 +65,7 @@ export async function healthCheck(req: Request, res: Response) {
   res.status(statusCode).json(health);
 }
 
-export async function readinessCheck(req: Request, res: Response) {
+export async function httpReadinessCheck(_req: Request, res: Response) {
   // Readiness check - all critical dependencies must be up
   const health: HealthStatus = {
     status: 'healthy',
@@ -89,7 +89,7 @@ export async function readinessCheck(req: Request, res: Response) {
   res.status(statusCode).json(health);
 }
 
-export async function livenessCheck(req: Request, res: Response) {
+export async function httpLivenessCheck(_req: Request, res: Response) {
   // Liveness check - service is alive
   res.status(200).json({
     status: 'alive',

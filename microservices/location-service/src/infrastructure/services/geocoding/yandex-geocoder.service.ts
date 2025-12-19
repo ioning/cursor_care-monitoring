@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { GeocodingService } from './geocoding.service';
-import { createLogger } from '../../../../../shared/libs/logger';
+import { createLogger } from '../../../../../../shared/libs/logger';
 
 interface YandexGeocodeResponse {
   response: {

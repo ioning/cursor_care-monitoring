@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface ReportTemplate {
   id: string;
@@ -152,7 +152,7 @@ export class ReportTemplateRepository {
        ORDER BY created_at DESC`,
       [userId],
     );
-    return result.rows.map(row => this.mapRowToTemplate(row));
+    return result.rows.map((row: any) => this.mapRowToTemplate(row));
   }
 
   async findGlobalTemplates(): Promise<ReportTemplate[]> {
@@ -162,7 +162,7 @@ export class ReportTemplateRepository {
        WHERE is_global = TRUE AND status = 'active'
        ORDER BY usage_count DESC, created_at DESC`,
     );
-    return result.rows.map(row => this.mapRowToTemplate(row));
+    return result.rows.map((row: any) => this.mapRowToTemplate(row));
   }
 
   async findPublicTemplates(): Promise<ReportTemplate[]> {
@@ -172,7 +172,7 @@ export class ReportTemplateRepository {
        WHERE is_public = TRUE AND status = 'active'
        ORDER BY usage_count DESC, created_at DESC`,
     );
-    return result.rows.map(row => this.mapRowToTemplate(row));
+    return result.rows.map((row: any) => this.mapRowToTemplate(row));
   }
 
   async findByWardId(wardId: string): Promise<ReportTemplate[]> {
@@ -184,7 +184,7 @@ export class ReportTemplateRepository {
        ORDER BY created_at DESC`,
       [wardId],
     );
-    return result.rows.map(row => this.mapRowToTemplate(row));
+    return result.rows.map((row: any) => this.mapRowToTemplate(row));
   }
 
   async update(id: string, updates: Partial<ReportTemplate>): Promise<ReportTemplate> {
@@ -193,22 +193,24 @@ export class ReportTemplateRepository {
     const values: any[] = [];
     let paramIndex = 1;
 
-    Object.keys(updates).forEach(key => {
-      if (key !== 'id' && updates[key] !== undefined) {
-        const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        if (['structure', 'visualizationConfig', 'metricsConfig'].includes(key)) {
-          fields.push(`${dbKey} = $${paramIndex}::jsonb`);
-          values.push(JSON.stringify(updates[key]));
-        } else if (key === 'tags') {
-          fields.push(`${dbKey} = $${paramIndex}::text[]`);
-          values.push(updates[key]);
-        } else {
-          fields.push(`${dbKey} = $${paramIndex}`);
-          values.push(updates[key]);
-        }
-        paramIndex++;
+    for (const key of Object.keys(updates) as Array<keyof ReportTemplate>) {
+      if (key === 'id') continue;
+      const value = updates[key];
+      if (value === undefined) continue;
+
+      const dbKey = String(key).replace(/([A-Z])/g, '_$1').toLowerCase();
+      if (key === 'structure' || key === 'visualizationConfig' || key === 'metricsConfig') {
+        fields.push(`${dbKey} = $${paramIndex}::jsonb`);
+        values.push(JSON.stringify(value));
+      } else if (key === 'tags') {
+        fields.push(`${dbKey} = $${paramIndex}::text[]`);
+        values.push(value as any);
+      } else {
+        fields.push(`${dbKey} = $${paramIndex}`);
+        values.push(value as any);
       }
-    });
+      paramIndex++;
+    }
 
     if (fields.length === 0) {
       throw new Error('No fields to update');

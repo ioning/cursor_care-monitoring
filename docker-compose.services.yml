@@ -22,10 +22,19 @@ services:
       dockerfile: microservices/auth-service/Dockerfile
     env_file:
       - microservices/auth-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3001:3001"
     networks:
       - care-monitoring-network
 
@@ -35,10 +44,19 @@ services:
       dockerfile: microservices/user-service/Dockerfile
     env_file:
       - microservices/user-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3002:3002"
     networks:
       - care-monitoring-network
 
@@ -48,10 +66,19 @@ services:
       dockerfile: microservices/device-service/Dockerfile
     env_file:
       - microservices/device-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3003:3003"
     networks:
       - care-monitoring-network
 
@@ -61,10 +88,20 @@ services:
       dockerfile: microservices/telemetry-service/Dockerfile
     env_file:
       - microservices/telemetry-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3004:3004"
     networks:
       - care-monitoring-network
 
@@ -74,10 +111,20 @@ services:
       dockerfile: microservices/ai-prediction-service/Dockerfile
     env_file:
       - microservices/ai-prediction-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3011:3011"
     networks:
       - care-monitoring-network
 
@@ -87,10 +134,19 @@ services:
       dockerfile: microservices/alert-service/Dockerfile
     env_file:
       - microservices/alert-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3005:3005"
     networks:
       - care-monitoring-network
 
@@ -100,10 +156,19 @@ services:
       dockerfile: microservices/integration-service/Dockerfile
     env_file:
       - microservices/integration-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3008:3008"
     networks:
       - care-monitoring-network
 
@@ -113,10 +178,20 @@ services:
       dockerfile: microservices/dispatcher-service/Dockerfile
     env_file:
       - microservices/dispatcher-service/.env
+    environment:
+      # Inside Docker network, services must use container DNS names (not localhost)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3009:3009"
     networks:
       - care-monitoring-network
 
@@ -126,10 +201,19 @@ services:
       dockerfile: microservices/location-service/Dockerfile
     env_file:
       - microservices/location-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3006:3006"
     networks:
       - care-monitoring-network
 
@@ -139,10 +223,19 @@ services:
       dockerfile: microservices/billing-service/Dockerfile
     env_file:
       - microservices/billing-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3007:3007"
     networks:
       - care-monitoring-network
 
@@ -152,10 +245,19 @@ services:
       dockerfile: microservices/analytics-service/Dockerfile
     env_file:
       - microservices/analytics-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3010:3010"
     networks:
       - care-monitoring-network
 
@@ -165,10 +267,19 @@ services:
       dockerfile: microservices/organization-service/Dockerfile
     env_file:
       - microservices/organization-service/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: cms_user
+      DB_PASSWORD: cms_password
+      DB_NAME: care_monitoring
+      RABBITMQ_URL: amqp://cms:cms@rabbitmq:5672
     depends_on:
       - postgres
       - redis
       - rabbitmq
+    ports:
+      - "3012:3012"
     networks:
       - care-monitoring-network
 
@@ -208,8 +319,9 @@ services:
       RABBITMQ_DEFAULT_PASS: cms
       RABBITMQ_DEFAULT_VHOST: /
     ports:
-      - "15672:15672"
-      - "5672:5672"
+      # Host ports changed to avoid collision with an already running RabbitMQ on the host
+      - "15673:15672"
+      - "5673:5672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:

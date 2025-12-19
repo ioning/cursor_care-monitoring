@@ -31,29 +31,16 @@ export class CircuitBreaker {
       resetTimeout = 300000, // 5 minutes
     } = options;
 
-    this.options = {
-      failureThreshold,
-      successThreshold,
-      timeout,
-      resetTimeout,
-    };
-
+    this.options = { failureThreshold, successThreshold, timeout, resetTimeout };
     this.logger = createLogger({ serviceName: 'circuit-breaker' });
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    // Check if circuit should transition
     this.checkState();
 
     if (this.state === CircuitState.OPEN) {
-      const error = new Error(
-        `Circuit breaker is OPEN for ${this.name}. Request rejected.`,
-      );
-      this.logger.warn('Circuit breaker is open', {
-        name: this.name,
-        state: this.state,
-      });
-      throw error;
+      this.logger.warn('Circuit breaker is open', { name: this.name, state: this.state });
+      throw new Error(`Circuit breaker is OPEN for ${this.name}. Request rejected.`);
     }
 
     try {
@@ -70,13 +57,8 @@ export class CircuitBreaker {
     const now = Date.now();
 
     // Reset failure count if reset timeout passed
-    if (
-      this.lastFailureTime &&
-      now - this.lastFailureTime > this.options.resetTimeout!
-    ) {
-      this.logger.info('Resetting circuit breaker failure count', {
-        name: this.name,
-      });
+    if (this.lastFailureTime && now - this.lastFailureTime > (this.options.resetTimeout as number)) {
+      this.logger.info('Resetting circuit breaker failure count', { name: this.name });
       this.failureCount = 0;
       this.lastFailureTime = null;
     }
@@ -85,11 +67,9 @@ export class CircuitBreaker {
     if (
       this.state === CircuitState.OPEN &&
       this.lastFailureTime &&
-      now - this.lastFailureTime > this.options.timeout!
+      now - this.lastFailureTime > (this.options.timeout as number)
     ) {
-      this.logger.info('Circuit breaker transitioning to HALF_OPEN', {
-        name: this.name,
-      });
+      this.logger.info('Circuit breaker transitioning to HALF_OPEN', { name: this.name });
       this.state = CircuitState.HALF_OPEN;
       this.successCount = 0;
     }
@@ -97,38 +77,34 @@ export class CircuitBreaker {
 
   private onSuccess(): void {
     if (this.state === CircuitState.HALF_OPEN) {
-      this.successCount++;
-      if (this.successCount >= this.options.successThreshold!) {
-        this.logger.info('Circuit breaker transitioning to CLOSED', {
-          name: this.name,
-        });
+      this.successCount += 1;
+      if (this.successCount >= (this.options.successThreshold as number)) {
+        this.logger.info('Circuit breaker transitioning to CLOSED', { name: this.name });
         this.state = CircuitState.CLOSED;
         this.failureCount = 0;
         this.successCount = 0;
+        this.lastFailureTime = null;
       }
     } else if (this.state === CircuitState.CLOSED) {
-      // Reset failure count on success
       this.failureCount = 0;
     }
   }
 
   private onFailure(): void {
-    this.failureCount++;
+    this.failureCount += 1;
     this.lastFailureTime = Date.now();
 
     if (this.state === CircuitState.HALF_OPEN) {
-      // Immediately open on failure in half-open
       this.logger.warn('Circuit breaker transitioning to OPEN (from HALF_OPEN)', {
         name: this.name,
         failureCount: this.failureCount,
       });
       this.state = CircuitState.OPEN;
       this.successCount = 0;
-    } else if (
-      this.state === CircuitState.CLOSED &&
-      this.failureCount >= this.options.failureThreshold!
-    ) {
-      // Open circuit after threshold failures
+      return;
+    }
+
+    if (this.state === CircuitState.CLOSED && this.failureCount >= (this.options.failureThreshold as number)) {
       this.logger.warn('Circuit breaker transitioning to OPEN', {
         name: this.name,
         failureCount: this.failureCount,
@@ -159,10 +135,5 @@ export class CircuitBreaker {
     this.lastFailureTime = null;
   }
 }
-
-
-
-
-
 
 

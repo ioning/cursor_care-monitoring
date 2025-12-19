@@ -3,7 +3,7 @@ import { LocationRepository } from '../../infrastructure/repositories/location.r
 import { GeofenceRepository } from '../../infrastructure/repositories/geofence.repository';
 import { LocationEventPublisher } from '../../infrastructure/messaging/location-event.publisher';
 import { YandexGeocoderService } from '../../infrastructure/services/geocoding/yandex-geocoder.service';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
 export interface LocationData {

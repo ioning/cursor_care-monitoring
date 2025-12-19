@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -19,7 +19,7 @@ export class LocationController {
   @Post('wards/:wardId')
   @ApiOperation({ summary: 'Record location for ward' })
   async recordLocation(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() body: any,
   ) {
@@ -34,7 +34,7 @@ export class LocationController {
 
   @Get('wards/:wardId/latest')
   @ApiOperation({ summary: 'Get latest location for ward' })
-  async getLatestLocation(@Request() req, @Param('wardId') wardId: string) {
+  async getLatestLocation(@Request() req: any, @Param('wardId') wardId: string) {
     const locationServiceUrl = this.gatewayConfig.getLocationServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${locationServiceUrl}/locations/wards/${wardId}/latest`, {
@@ -46,7 +46,7 @@ export class LocationController {
 
   @Get('wards/:wardId/history')
   @ApiOperation({ summary: 'Get location history for ward' })
-  async getLocationHistory(@Request() req, @Param('wardId') wardId: string, @Query() query: any) {
+  async getLocationHistory(@Request() req: any, @Param('wardId') wardId: string, @Query() query: any) {
     const locationServiceUrl = this.gatewayConfig.getLocationServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${locationServiceUrl}/locations/wards/${wardId}/history`, {
@@ -59,7 +59,7 @@ export class LocationController {
 
   @Get('geofences')
   @ApiOperation({ summary: 'Get geofences for ward' })
-  async getGeofences(@Request() req, @Query('wardId') wardId: string) {
+  async getGeofences(@Request() req: any, @Query('wardId') wardId: string) {
     const locationServiceUrl = this.gatewayConfig.getLocationServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${locationServiceUrl}/locations/geofences`, {
@@ -72,7 +72,7 @@ export class LocationController {
 
   @Post('geofences')
   @ApiOperation({ summary: 'Create geofence' })
-  async createGeofence(@Request() req, @Body() body: any) {
+  async createGeofence(@Request() req: any, @Body() body: any) {
     const locationServiceUrl = this.gatewayConfig.getLocationServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${locationServiceUrl}/locations/geofences`, body, {

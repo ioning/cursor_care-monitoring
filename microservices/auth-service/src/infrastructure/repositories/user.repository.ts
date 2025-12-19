@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { createDatabaseConnection, getDatabaseConnection } from '../../../../shared/libs/database';
-import { UserRole } from '../../../../shared/types/common.types';
+import { createDatabaseConnection, getDatabaseConnection } from '../../../../../shared/libs/database';
+import { UserRole } from '../../../../../shared/types/common.types';
 
 export interface User {
   id: string;

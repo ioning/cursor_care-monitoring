@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LocationService } from '../../application/services/location.service';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('locations')
 @Controller()
@@ -23,7 +23,7 @@ export class LocationController {
   @ApiOperation({ summary: 'Record location for ward' })
   @ApiResponse({ status: 201, description: 'Location recorded successfully' })
   async recordLocation(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() body: { latitude: number; longitude: number; accuracy?: number; source: string },
   ) {

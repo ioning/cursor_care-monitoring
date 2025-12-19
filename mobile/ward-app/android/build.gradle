@@ -2,19 +2,19 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "33.0.0"
+        buildToolsVersion = "34.0.0"
         minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        compileSdkVersion = 34
+        targetSdkVersion = 34
         ndkVersion = "23.1.7779620"
-        kotlinVersion = "1.8.0"
+        kotlinVersion = "1.7.22"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.4")
+        classpath("com.android.tools.build:gradle:8.2.2")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
@@ -23,16 +23,84 @@ buildscript {
 allprojects {
     repositories {
         maven {
-            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url("$rootDir/../node_modules/react-native/android")
         }
         maven {
-            // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")
         }
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+    }
+    
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                buildFeatures {
+                    buildConfig true
+                }
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_11
+                    targetCompatibility JavaVersion.VERSION_11
+                    coreLibraryDesugaringEnabled false
+                }
+                // Автоматически определяем namespace из AndroidManifest.xml
+                if (!project.android.hasProperty("namespace") || project.android.namespace == null) {
+                    def manifestFile = project.file("src/main/AndroidManifest.xml")
+                    if (!manifestFile.exists()) {
+                        manifestFile = project.file("AndroidManifest.xml")
+                    }
+                    if (manifestFile.exists()) {
+                        try {
+                            def manifest = new XmlSlurper().parse(manifestFile)
+                            def packageName = manifest.@package?.toString()
+                            if (packageName) {
+                                project.android.namespace = packageName
+                            }
+                        } catch (Exception e) {
+                            // Если не удалось распарсить, пробуем найти package в тексте
+                            def manifestText = manifestFile.text
+                            def packageMatch = manifestText =~ /package=["']([^"']+)["']/
+                            if (packageMatch) {
+                                project.android.namespace = packageMatch[0][1]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Добавляем AndroidX Activity для react-native-image-picker
+        if (project.name.contains("image-picker")) {
+            project.dependencies {
+                implementation("androidx.activity:activity:1.8.2")
+            }
+        }
+    }
+    
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.7.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.22'
+            // Keep AndroidX Core compatible with AGP 8.2.x (newer core may require AGP 8.6+)
+            force 'androidx.core:core:1.12.0'
+            force 'androidx.core:core-ktx:1.12.0'
+        }
+        // Исключаем androidJdkImage для решения проблемы с jlink
+        exclude group: 'com.android.tools.build', module: 'android-jlink-runtime'
+    }
+    
+    // Отключаем задачи, связанные с androidJdkImage
+    tasks.whenTaskAdded { task ->
+        if (task.name.contains("androidJdkImage") || task.name.contains("JdkImage")) {
+            task.enabled = false
+        }
+    }
+    
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = '11'
+        }
     }
 }
 

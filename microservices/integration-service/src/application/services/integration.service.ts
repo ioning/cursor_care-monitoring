@@ -6,8 +6,9 @@ import { TelegramService } from '../../infrastructure/services/telegram.service'
 import { NotificationRepository } from '../../infrastructure/repositories/notification.repository';
 import { NotificationTemplateService } from './notification-template.service';
 import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
-import { AlertCreatedEvent } from '../../../../shared/types/event.types';
-import { createLogger } from '../../../../shared/libs/logger';
+import { AlertCreatedEvent } from '../../../../../shared/types/event.types';
+import { createLogger } from '../../../../../shared/libs/logger';
+import { AlertSeverity } from '../../../../../shared/types/common.types';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -25,7 +26,17 @@ export class IntegrationService {
   ) {}
 
   async handleAlertCreated(event: AlertCreatedEvent): Promise<void> {
-    const { alertId, wardId, title, description, severity, status } = event.data;
+    const { alertId, title, description, severity } = event.data;
+    const wardId = event.wardId;
+
+    if (!wardId) {
+      this.logger.warn('AlertCreatedEvent missing wardId; skipping notifications', { alertId });
+      return;
+    }
+
+    const mappedSeverity = (Object.values(AlertSeverity) as string[]).includes(severity)
+      ? (severity as AlertSeverity)
+      : AlertSeverity.MEDIUM;
 
     // Get notification preferences for ward's guardians
     // In real implementation, this would query user-service
@@ -33,7 +44,7 @@ export class IntegrationService {
 
     for (const guardian of guardians) {
       const notificationId = randomUUID();
-      const template = this.templateService.getAlertTemplate(severity, title, description);
+      const template = this.templateService.getAlertTemplate(mappedSeverity, title, description);
 
       // Send notifications based on preferences
       const promises: Promise<any>[] = [];

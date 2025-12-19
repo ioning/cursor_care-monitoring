@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DispatcherService } from '../../application/services/dispatcher.service';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('dispatcher')
 @Controller()
@@ -37,7 +37,7 @@ export class DispatcherController {
   @Post('calls/:callId/assign')
   @ApiOperation({ summary: 'Assign call to dispatcher' })
   @ApiResponse({ status: 200, description: 'Call assigned successfully' })
-  async assignCall(@Request() req, @Param('callId') callId: string) {
+  async assignCall(@Request() req: any, @Param('callId') callId: string) {
     return this.dispatcherService.assignCall(callId, req.user.id);
   }
 

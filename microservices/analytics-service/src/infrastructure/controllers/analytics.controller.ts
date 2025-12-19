@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Param, Query, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalyticsService } from '../../application/services/analytics.service';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('analytics')
 @Controller()
@@ -27,21 +27,21 @@ export class AnalyticsController {
   @Post('reports')
   @ApiOperation({ summary: 'Generate report' })
   @ApiResponse({ status: 201, description: 'Report generation started' })
-  async generateReport(@Request() req, @Body() body: any) {
+  async generateReport(@Request() req: any, @Body() body: any) {
     return this.analyticsService.generateReport(req.user.id, body);
   }
 
   @Post('reports/comparative')
   @ApiOperation({ summary: 'Generate comparative report' })
   @ApiResponse({ status: 201, description: 'Comparative report generation started' })
-  async generateComparativeReport(@Request() req, @Body() body: any) {
+  async generateComparativeReport(@Request() req: any, @Body() body: any) {
     return this.analyticsService.generateComparativeReport(req.user.id, body);
   }
 
   @Post('reports/schedule')
   @ApiOperation({ summary: 'Schedule report generation' })
   @ApiResponse({ status: 201, description: 'Report scheduled successfully' })
-  async scheduleReport(@Request() req, @Body() body: any) {
+  async scheduleReport(@Request() req: any, @Body() body: any) {
     return this.analyticsService.scheduleReport(req.user.id, body);
   }
 
@@ -49,7 +49,7 @@ export class AnalyticsController {
   @ApiOperation({ summary: 'Get user reports' })
   @ApiResponse({ status: 200, description: 'Reports retrieved successfully' })
   async getUserReports(
-    @Request() req,
+    @Request() req: any,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
   ) {

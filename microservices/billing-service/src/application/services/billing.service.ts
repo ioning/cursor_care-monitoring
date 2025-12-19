@@ -3,7 +3,7 @@ import { SubscriptionRepository } from '../../infrastructure/repositories/subscr
 import { PaymentRepository } from '../../infrastructure/repositories/payment.repository';
 import { InvoiceRepository } from '../../infrastructure/repositories/invoice.repository';
 import { YooKassaAdapter } from '../../infrastructure/payment-providers/yookassa/yookassa.adapter';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -141,60 +141,3 @@ export class BillingService {
     return endDate;
   }
 }
-
-
-    };
-  }
-
-  async getPaymentStatus(paymentId: string) {
-    try {
-      const status = await this.yooKassaAdapter.getPaymentStatus(paymentId);
-      return {
-        success: true,
-        data: status,
-      };
-    } catch (error: any) {
-      this.logger.error('Failed to get payment status', {
-        paymentId,
-        error: error.message,
-      });
-      throw error;
-    }
-  }
-
-  private calculateEndDate(planId: string): Date {
-    const endDate = new Date();
-    // Default to 1 month
-    endDate.setMonth(endDate.getMonth() + 1);
-    return endDate;
-  }
-}
-
-
-    };
-  }
-
-  async getPaymentStatus(paymentId: string) {
-    try {
-      const status = await this.yooKassaAdapter.getPaymentStatus(paymentId);
-      return {
-        success: true,
-        data: status,
-      };
-    } catch (error: any) {
-      this.logger.error('Failed to get payment status', {
-        paymentId,
-        error: error.message,
-      });
-      throw error;
-    }
-  }
-
-  private calculateEndDate(planId: string): Date {
-    const endDate = new Date();
-    // Default to 1 month
-    endDate.setMonth(endDate.getMonth() + 1);
-    return endDate;
-  }
-}
-

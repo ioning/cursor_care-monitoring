@@ -5,7 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -19,7 +19,7 @@ export class UserController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
-  async getMe(@Request() req) {
+  async getMe(@Request() req: any) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${userServiceUrl}/users/me`, {
@@ -31,7 +31,7 @@ export class UserController {
 
   @Put('me')
   @ApiOperation({ summary: 'Update current user profile' })
-  async updateMe(@Request() req, @Body() updateDto: any) {
+  async updateMe(@Request() req: any, @Body() updateDto: any) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${userServiceUrl}/users/me`, updateDto, {
@@ -43,7 +43,7 @@ export class UserController {
 
   @Get('wards')
   @ApiOperation({ summary: 'Get all wards for current guardian' })
-  async getWards(@Request() req) {
+  async getWards(@Request() req: any) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${userServiceUrl}/users/wards`, {
@@ -55,7 +55,7 @@ export class UserController {
 
   @Post('wards')
   @ApiOperation({ summary: 'Create new ward' })
-  async createWard(@Request() req, @Body() createWardDto: any) {
+  async createWard(@Request() req: any, @Body() createWardDto: any) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${userServiceUrl}/users/wards`, createWardDto, {
@@ -67,7 +67,7 @@ export class UserController {
 
   @Get('wards/:wardId')
   @ApiOperation({ summary: 'Get ward by ID' })
-  async getWard(@Request() req, @Param('wardId') wardId: string) {
+  async getWard(@Request() req: any, @Param('wardId') wardId: string) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${userServiceUrl}/users/wards/${wardId}`, {
@@ -79,7 +79,7 @@ export class UserController {
 
   @Put('wards/:wardId')
   @ApiOperation({ summary: 'Update ward' })
-  async updateWard(@Request() req, @Param('wardId') wardId: string, @Body() updateDto: any) {
+  async updateWard(@Request() req: any, @Param('wardId') wardId: string, @Body() updateDto: any) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${userServiceUrl}/users/wards/${wardId}`, updateDto, {
@@ -91,7 +91,7 @@ export class UserController {
 
   @Delete('wards/:wardId')
   @ApiOperation({ summary: 'Delete ward' })
-  async deleteWard(@Request() req, @Param('wardId') wardId: string) {
+  async deleteWard(@Request() req: any, @Param('wardId') wardId: string) {
     const userServiceUrl = this.gatewayConfig.getUserServiceUrl();
     const response = await firstValueFrom(
       this.httpService.delete(`${userServiceUrl}/users/wards/${wardId}`, {
@@ -106,7 +106,7 @@ export class UserController {
   @ApiOperation({ summary: 'Upload ward avatar' })
   @ApiConsumes('multipart/form-data')
   async uploadAvatar(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {

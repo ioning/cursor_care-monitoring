@@ -4,7 +4,7 @@ import { LocationService as ApiLocationService } from './ApiLocationService';
 import { store } from '../store';
 import { setLocation, setError } from '../store/slices/locationSlice';
 
-class LocationService {
+class LocationServiceClass {
   private watchId: number | null = null;
   private isInitialized = false;
 
@@ -110,5 +110,5 @@ class LocationService {
   }
 }
 
-export const LocationService = new LocationService();
+export const LocationService = new LocationServiceClass();
 

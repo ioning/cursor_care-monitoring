@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Headers } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FamilyAccessService } from '../../application/services/family-access.service';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 
 @ApiTags('internal')
 @Controller('internal')

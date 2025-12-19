@@ -7,8 +7,7 @@ apply plugin: "org.jetbrains.kotlin.android"
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    /* Autolinking */
-    autolinkLibrariesWithApp()
+    /* Autolinking is enabled by default */
 }
 
 /**
@@ -26,6 +25,10 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.caremonitoring.ward"
+    
+    buildFeatures {
+        buildConfig true
+    }
     defaultConfig {
         applicationId "com.caremonitoring.ward"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -63,12 +66,27 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation("com.facebook.react:flipper-integration")
+    // implementation("com.facebook.react:flipper-integration")  // Закомментировано - не требуется
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -76,6 +94,9 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// Ensure RN CLI autolinking runs and generates PackageList / adds native module projects.
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 
 
 

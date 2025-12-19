@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Location {
   id: string;
@@ -131,7 +131,7 @@ export class LocationRepository {
     );
 
     return [
-      dataResult.rows.map((row) => this.mapRowToLocation(row)),
+      dataResult.rows.map((row: any) => this.mapRowToLocation(row)),
       parseInt(countResult.rows[0].total),
     ];
   }
@@ -150,30 +150,3 @@ export class LocationRepository {
     };
   }
 }
-
-
-      wardId: row.ward_id,
-      latitude: parseFloat(row.latitude),
-      longitude: parseFloat(row.longitude),
-      accuracy: row.accuracy ? parseFloat(row.accuracy) : undefined,
-      source: row.source,
-      timestamp: row.timestamp,
-      organizationId: row.organization_id,
-      createdAt: row.created_at,
-    };
-  }
-}
-
-
-      wardId: row.ward_id,
-      latitude: parseFloat(row.latitude),
-      longitude: parseFloat(row.longitude),
-      accuracy: row.accuracy ? parseFloat(row.accuracy) : undefined,
-      source: row.source,
-      timestamp: row.timestamp,
-      organizationId: row.organization_id,
-      createdAt: row.created_at,
-    };
-  }
-}
-

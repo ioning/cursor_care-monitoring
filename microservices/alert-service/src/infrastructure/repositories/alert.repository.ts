@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
-import { AlertStatus, AlertSeverity } from '../../../../shared/types/common.types';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
+import { AlertStatus, AlertSeverity } from '../../../../../shared/types/common.types';
 
 export interface Alert {
   id: string;

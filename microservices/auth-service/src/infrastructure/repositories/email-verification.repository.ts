@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createDatabaseConnection, getDatabaseConnection } from '../../../../shared/libs/database';
+import { createDatabaseConnection, getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface EmailVerificationCode {
   id: string;
@@ -22,12 +22,28 @@ export class EmailVerificationRepository {
       password: process.env.DB_PASSWORD || 'cms_password',
     });
 
-    // Table is created by migration, but ensure indexes exist
+    // In local/dev we may run without migrations; ensure table + indexes exist.
     await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_email_verification_email ON email_verification_codes(email);
-      CREATE INDEX IF NOT EXISTS idx_email_verification_code ON email_verification_codes(email, code);
-      CREATE INDEX IF NOT EXISTS idx_email_verification_expires ON email_verification_codes(expires_at);
+      CREATE TABLE IF NOT EXISTS email_verification_codes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        email VARCHAR(255) NOT NULL,
+        code VARCHAR(20) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        consumed BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        user_id UUID
+      )
     `);
+
+    await db.query(
+      'CREATE INDEX IF NOT EXISTS idx_email_verification_email ON email_verification_codes(email)'
+    );
+    await db.query(
+      'CREATE INDEX IF NOT EXISTS idx_email_verification_code ON email_verification_codes(email, code)'
+    );
+    await db.query(
+      'CREATE INDEX IF NOT EXISTS idx_email_verification_expires ON email_verification_codes(expires_at)'
+    );
   }
 
   async createCode(email: string, code: string, expiresAt: Date, userId?: string): Promise<EmailVerificationCode> {

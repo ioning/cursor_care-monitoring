@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
-import { CallPriority, CallStatus } from '../../../../shared/types/common.types';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
+import { CallPriority, CallStatus } from '../../../../../shared/types/common.types';
 
 export interface EmergencyCall {
   id: string;
@@ -205,86 +205,6 @@ export class CallRepository {
       updates.push(`assigned_at = NOW()`);
       values.push(dispatcherId);
     }
-
-    if (notes) {
-      updates.push(`notes = $${paramIndex++}`);
-      values.push(notes);
-    }
-
-    if (status === 'resolved') {
-      updates.push(`resolved_at = NOW()`);
-    }
-
-    values.push(id);
-
-    await db.query(
-      `UPDATE emergency_calls SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
-      values,
-    );
-  }
-
-  private mapRowToCall(row: any): EmergencyCall {
-    return {
-      id: row.id,
-      wardId: row.ward_id,
-      callType: row.call_type,
-      priority: row.priority,
-      status: row.status,
-      dispatcherId: row.dispatcher_id,
-      source: row.source,
-      healthSnapshot: row.health_snapshot,
-      locationSnapshot: row.location_snapshot,
-      aiAnalysis: row.ai_analysis,
-      notes: row.notes,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      assignedAt: row.assigned_at,
-      resolvedAt: row.resolved_at,
-    };
-  }
-}
-
-
-
-    if (notes) {
-      updates.push(`notes = $${paramIndex++}`);
-      values.push(notes);
-    }
-
-    if (status === 'resolved') {
-      updates.push(`resolved_at = NOW()`);
-    }
-
-    values.push(id);
-
-    await db.query(
-      `UPDATE emergency_calls SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
-      values,
-    );
-  }
-
-  private mapRowToCall(row: any): EmergencyCall {
-    return {
-      id: row.id,
-      wardId: row.ward_id,
-      callType: row.call_type,
-      priority: row.priority,
-      status: row.status,
-      dispatcherId: row.dispatcher_id,
-      source: row.source,
-      healthSnapshot: row.health_snapshot,
-      locationSnapshot: row.location_snapshot,
-      aiAnalysis: row.ai_analysis,
-      notes: row.notes,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      assignedAt: row.assigned_at,
-      resolvedAt: row.resolved_at,
-    };
-  }
-}
-
-
 
     if (notes) {
       updates.push(`notes = $${paramIndex++}`);

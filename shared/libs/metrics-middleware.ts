@@ -6,8 +6,9 @@ export function metricsMiddleware(req: Request, res: Response, next: NextFunctio
   const startTime = performance.now();
 
   // Override res.end to capture response status and duration
-  const originalEnd = res.end;
-  res.end = function (chunk?: any, encoding?: any) {
+  const originalEnd = res.end.bind(res);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  res.end = ((chunk?: any, encoding?: any) => {
     const duration = (performance.now() - startTime) / 1000; // Convert to seconds
     const method = req.method;
     const route = req.route?.path || req.path || 'unknown';
@@ -16,8 +17,9 @@ export function metricsMiddleware(req: Request, res: Response, next: NextFunctio
     recordHttpRequest(method, route, status, duration);
 
     // Call original end
-    originalEnd.call(this, chunk, encoding);
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (originalEnd as any)(chunk, encoding);
+  }) as any;
 
   next();
 }

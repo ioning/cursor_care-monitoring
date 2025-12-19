@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createLogger } from '../logger';
 

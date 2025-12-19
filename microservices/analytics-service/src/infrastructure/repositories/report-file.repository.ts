@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface ReportFile {
   id: string;
@@ -78,7 +78,7 @@ export class ReportFileRepository {
        ORDER BY generated_at DESC`,
       [reportId],
     );
-    return result.rows.map(row => this.mapRowToFile(row));
+    return result.rows.map((row: any) => this.mapRowToFile(row));
   }
 
   async findByReportIdAndFormat(reportId: string, format: string): Promise<ReportFile | null> {

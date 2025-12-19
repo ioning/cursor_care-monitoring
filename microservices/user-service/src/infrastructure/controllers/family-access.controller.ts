@@ -12,7 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FamilyAccessService, AddFamilyMemberDto, UpdateDutyScheduleDto } from '../../application/services/family-access.service';
 import { CreateFamilyChatMessageDto } from '../../infrastructure/repositories/family-chat.repository';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('family-access')
 @Controller('family')
@@ -25,7 +25,7 @@ export class FamilyAccessController {
   @ApiOperation({ summary: 'Add family member as guardian' })
   @ApiResponse({ status: 201, description: 'Family member added successfully' })
   async addFamilyMember(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() addMemberDto: AddFamilyMemberDto,
   ) {
@@ -35,7 +35,7 @@ export class FamilyAccessController {
   @Get('wards/:wardId/members')
   @ApiOperation({ summary: 'Get all guardians for ward' })
   @ApiResponse({ status: 200, description: 'Family members retrieved successfully' })
-  async getFamilyMembers(@Request() req, @Param('wardId') wardId: string) {
+  async getFamilyMembers(@Request() req: any, @Param('wardId') wardId: string) {
     return this.familyAccessService.getFamilyMembers(wardId, req.user.id);
   }
 
@@ -43,7 +43,7 @@ export class FamilyAccessController {
   @ApiOperation({ summary: 'Update duty schedule for guardian' })
   @ApiResponse({ status: 200, description: 'Duty schedule updated successfully' })
   async updateDutySchedule(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Param('guardianId') guardianId: string,
     @Body() updateDto: UpdateDutyScheduleDto,
@@ -58,7 +58,7 @@ export class FamilyAccessController {
   @ApiOperation({ summary: 'Temporarily transfer primary guardian rights' })
   @ApiResponse({ status: 200, description: 'Primary guardian transferred successfully' })
   async transferPrimaryGuardian(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() body: { newPrimaryId: string; startDate: string; endDate: string },
   ) {
@@ -75,7 +75,7 @@ export class FamilyAccessController {
   @ApiOperation({ summary: 'Create message in family chat' })
   @ApiResponse({ status: 201, description: 'Message created successfully' })
   async createChatMessage(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() messageDto: CreateFamilyChatMessageDto,
   ) {
@@ -86,7 +86,7 @@ export class FamilyAccessController {
   @ApiOperation({ summary: 'Get family chat messages' })
   @ApiResponse({ status: 200, description: 'Messages retrieved successfully' })
   async getChatMessages(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
@@ -102,14 +102,14 @@ export class FamilyAccessController {
   @Put('chat/:messageId/read')
   @ApiOperation({ summary: 'Mark message as read' })
   @ApiResponse({ status: 200, description: 'Message marked as read' })
-  async markMessageAsRead(@Request() req, @Param('messageId') messageId: string) {
+  async markMessageAsRead(@Request() req: any, @Param('messageId') messageId: string) {
     return this.familyAccessService.markMessageAsRead(messageId, req.user.id);
   }
 
   @Get('wards/:wardId/chat/unread-count')
   @ApiOperation({ summary: 'Get unread messages count' })
   @ApiResponse({ status: 200, description: 'Unread count retrieved successfully' })
-  async getUnreadCount(@Request() req, @Param('wardId') wardId: string) {
+  async getUnreadCount(@Request() req: any, @Param('wardId') wardId: string) {
     return this.familyAccessService.getUnreadCount(wardId, req.user.id);
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Subscription {
   id: string;
@@ -118,66 +118,3 @@ export class SubscriptionRepository {
     };
   }
 }
-
-
-    const result = await db.query('SELECT * FROM subscriptions WHERE user_id = $1', [userId]);
-    if (result.rows.length === 0) {
-      return null;
-    }
-    return this.mapRowToSubscription(result.rows[0]);
-  }
-
-  async updateStatus(userId: string, status: string): Promise<void> {
-    const db = getDatabaseConnection();
-    await db.query(
-      'UPDATE subscriptions SET status = $1, updated_at = NOW() WHERE user_id = $2',
-      [status, userId],
-    );
-  }
-
-  private mapRowToSubscription(row: any): Subscription {
-    return {
-      id: row.id,
-      userId: row.user_id,
-      organizationId: row.organization_id,
-      planId: row.plan_id,
-      status: row.status,
-      startDate: row.start_date,
-      endDate: row.end_date,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-}
-
-
-    const result = await db.query('SELECT * FROM subscriptions WHERE user_id = $1', [userId]);
-    if (result.rows.length === 0) {
-      return null;
-    }
-    return this.mapRowToSubscription(result.rows[0]);
-  }
-
-  async updateStatus(userId: string, status: string): Promise<void> {
-    const db = getDatabaseConnection();
-    await db.query(
-      'UPDATE subscriptions SET status = $1, updated_at = NOW() WHERE user_id = $2',
-      [status, userId],
-    );
-  }
-
-  private mapRowToSubscription(row: any): Subscription {
-    return {
-      id: row.id,
-      userId: row.user_id,
-      organizationId: row.organization_id,
-      planId: row.plan_id,
-      status: row.status,
-      startDate: row.start_date,
-      endDate: row.end_date,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-}
-

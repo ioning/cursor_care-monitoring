@@ -9,7 +9,7 @@ interface PushToken {
   platform: 'ios' | 'android';
 }
 
-class NotificationService {
+class NotificationServiceClass {
   private isInitialized = false;
   private pushToken: string | null = null;
 
@@ -217,4 +217,4 @@ class NotificationService {
   }
 }
 
-export const NotificationService = new NotificationService();
+export const NotificationService = new NotificationServiceClass();

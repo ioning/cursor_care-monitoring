@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '../../../../shared/types/common.types';
+import { UserRole } from '../../../../../shared/types/common.types';
 
 export interface Tokens {
   accessToken: string;

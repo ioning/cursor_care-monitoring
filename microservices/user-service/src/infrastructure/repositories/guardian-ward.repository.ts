@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface GuardianWard {
   id: string;
@@ -125,15 +125,15 @@ export class GuardianWardRepository {
     const values: any[] = [];
     let paramIndex = 1;
 
-    Object.keys(updates).forEach(key => {
+    (Object.keys(updates) as (keyof GuardianWard)[]).forEach((key) => {
       if (key !== 'id' && updates[key] !== undefined) {
         const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
         if (key === 'notificationPreferences' || key === 'dutySchedule') {
           fields.push(`${dbKey} = $${paramIndex}::jsonb`);
-          values.push(JSON.stringify(updates[key]));
+          values.push(JSON.stringify(updates[key] as any));
         } else {
           fields.push(`${dbKey} = $${paramIndex}`);
-          values.push(updates[key]);
+          values.push(updates[key] as any);
         }
         paramIndex++;
       }

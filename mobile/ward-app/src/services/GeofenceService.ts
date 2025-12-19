@@ -29,7 +29,7 @@ export interface GeofenceViolation {
   timestamp: string;
 }
 
-class GeofenceService {
+class GeofenceServiceClass {
   private monitoredGeofences: Map<string, Geofence> = new Map();
   private lastLocations: Map<string, { latitude: number; longitude: number }> = new Map();
   private checkInterval: NodeJS.Timeout | null = null;
@@ -294,5 +294,5 @@ class GeofenceService {
   }
 }
 
-export const GeofenceService = new GeofenceService();
+export const GeofenceService = new GeofenceServiceClass();
 

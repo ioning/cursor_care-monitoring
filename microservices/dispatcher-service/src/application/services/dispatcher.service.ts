@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CallRepository } from '../../infrastructure/repositories/call.repository';
 import { DispatcherRepository } from '../../infrastructure/repositories/dispatcher.repository';
-import { RiskAlertEvent } from '../../../../shared/types/event.types';
-import { createLogger } from '../../../../shared/libs/logger';
+import { RiskAlertEvent } from '../../../../../shared/types/event.types';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
-import { publishEvent } from '../../../../shared/libs/rabbitmq';
+import { publishEvent } from '../../../../../shared/libs/rabbitmq';
+import { CallPriority, CallStatus } from '../../../../../shared/types/common.types';
 
 @Injectable()
 export class DispatcherService {
@@ -24,7 +25,7 @@ export class DispatcherService {
       wardId: event.wardId || 'unknown',
       callType: 'emergency',
       priority: this.determinePriority(event.data.severity, event.data.priority),
-      status: 'created',
+      status: CallStatus.CREATED,
       source: 'ai_prediction',
       healthSnapshot: {
         riskScore: event.data.riskScore,
@@ -123,7 +124,7 @@ export class DispatcherService {
       throw new Error('Call not found');
     }
 
-    await this.callRepository.updateStatus(callId, 'assigned', dispatcherId);
+    await this.callRepository.updateStatus(callId, CallStatus.ASSIGNED, dispatcherId);
     await this.dispatcherRepository.updateAvailability(dispatcherId, false);
 
     this.logger.info(`Call assigned: ${callId} to dispatcher ${dispatcherId}`);
@@ -135,7 +136,8 @@ export class DispatcherService {
   }
 
   async updateCallStatus(callId: string, status: string, notes?: string) {
-    await this.callRepository.updateStatus(callId, status, undefined, notes);
+    const nextStatus = this.parseCallStatus(status);
+    await this.callRepository.updateStatus(callId, nextStatus, undefined, notes);
 
     const call = await this.callRepository.findById(callId);
     if (call?.dispatcherId) {
@@ -148,11 +150,20 @@ export class DispatcherService {
     };
   }
 
-  private determinePriority(severity: string, aiPriority?: number): string {
-    if (aiPriority && aiPriority >= 9) return 'critical';
-    if (severity === 'critical') return 'critical';
-    if (severity === 'high') return 'high';
-    return 'medium';
+  private determinePriority(severity: string, aiPriority?: number): CallPriority {
+    if (aiPriority && aiPriority >= 9) return CallPriority.CRITICAL;
+    if (severity === 'critical') return CallPriority.CRITICAL;
+    if (severity === 'high') return CallPriority.HIGH;
+    if (severity === 'medium') return CallPriority.MEDIUM;
+    return CallPriority.MEDIUM;
+  }
+
+  private parseCallStatus(status: string): CallStatus {
+    const normalized = (status || '').trim();
+    if ((Object.values(CallStatus) as string[]).includes(normalized)) {
+      return normalized as CallStatus;
+    }
+    throw new Error(`Invalid call status: ${status}`);
   }
 
   private async assignDispatcher(callId: string): Promise<any> {

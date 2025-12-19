@@ -4,7 +4,7 @@ import { GuardianWardRepository } from '../../infrastructure/repositories/guardi
 import { CreateWardDto } from '../../infrastructure/dto/create-ward.dto';
 import { UpdateWardDto } from '../../infrastructure/dto/update-ward.dto';
 import { LinkWardDto } from '../../infrastructure/dto/link-ward.dto';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -72,7 +72,10 @@ export class WardService {
       throw new ForbiddenException('Access denied to this ward');
     }
 
-    const ward = await this.wardRepository.update(wardId, updateWardDto);
+    const ward = await this.wardRepository.update(wardId, {
+      ...updateWardDto,
+      dateOfBirth: updateWardDto.dateOfBirth ? new Date(updateWardDto.dateOfBirth) : undefined,
+    });
 
     this.logger.info(`Ward updated: ${wardId} by guardian ${guardianId}`, { wardId, guardianId });
 

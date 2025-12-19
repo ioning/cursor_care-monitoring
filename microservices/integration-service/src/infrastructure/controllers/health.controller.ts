@@ -3,7 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { createLogger } from '../../../../../shared/libs/logger';
 import { getDatabaseConnection } from '../../../../../shared/libs/database';
 import { getRedisClient } from '../../../../../shared/libs/redis';
-import { getRabbitMQChannel } from '../../../../../shared/libs/rabbitmq';
+import { getChannel } from '../../../../../shared/libs/rabbitmq';
 
 const logger = createLogger({ serviceName: 'health-check' });
 
@@ -59,7 +59,7 @@ export class HealthController {
     }
 
     try {
-      const channel = getRabbitMQChannel();
+      const channel = getChannel();
       if (channel) {
         health.checks.rabbitmq = 'up';
       } else {

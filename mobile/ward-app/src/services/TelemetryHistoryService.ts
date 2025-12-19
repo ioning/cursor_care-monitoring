@@ -28,7 +28,7 @@ export interface TelemetryChartData {
   }>;
 }
 
-class TelemetryHistoryService {
+class TelemetryHistoryServiceClass {
   private readonly CACHE_PREFIX = '@telemetry_history:';
   private readonly CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
 
@@ -265,5 +265,5 @@ class TelemetryHistoryService {
   }
 }
 
-export const TelemetryHistoryService = new TelemetryHistoryService();
+export const TelemetryHistoryService = new TelemetryHistoryServiceClass();
 

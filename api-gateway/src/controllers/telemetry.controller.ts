@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('telemetry')
 @Controller('telemetry')
@@ -18,7 +18,7 @@ export class TelemetryController {
 
   @Post()
   @ApiOperation({ summary: 'Send telemetry data' })
-  async create(@Request() req, @Body() createDto: any) {
+  async create(@Request() req: any, @Body() createDto: any) {
     const telemetryServiceUrl = this.gatewayConfig.getTelemetryServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${telemetryServiceUrl}/telemetry`, createDto, {
@@ -31,7 +31,7 @@ export class TelemetryController {
   @Get('wards/:wardId')
   @ApiOperation({ summary: 'Get telemetry data for ward' })
   async getWardTelemetry(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Query() query: any,
   ) {
@@ -47,7 +47,7 @@ export class TelemetryController {
 
   @Get('wards/:wardId/latest')
   @ApiOperation({ summary: 'Get latest telemetry data for ward' })
-  async getLatest(@Request() req, @Param('wardId') wardId: string) {
+  async getLatest(@Request() req: any, @Param('wardId') wardId: string) {
     const telemetryServiceUrl = this.gatewayConfig.getTelemetryServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${telemetryServiceUrl}/telemetry/wards/${wardId}/latest`, {

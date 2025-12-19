@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Get, HttpStatus, HttpException, Inject, Optional } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { createLogger } from '../libs/logger';
 import { getDatabaseConnection } from '../libs/database';
@@ -23,8 +23,8 @@ interface HealthStatus {
 export class HealthController {
   private readonly serviceName: string;
 
-  constructor(serviceName: string = 'service') {
-    this.serviceName = serviceName;
+  constructor(@Optional() @Inject('SERVICE_NAME') serviceName?: string) {
+    this.serviceName = serviceName || 'service';
   }
 
   @Get('health')

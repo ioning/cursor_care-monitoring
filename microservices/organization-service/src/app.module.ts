@@ -1,9 +1,11 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { OrganizationController } from './infrastructure/controllers/organization.controller';
+import { HealthController } from './infrastructure/controllers/health.controller';
+import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { OrganizationService } from './application/services/organization.service';
 import { OrganizationRepository } from './infrastructure/repositories/organization.repository';
-import { createLogger } from '../../shared/libs/logger';
+import { createLogger } from '../../../shared/libs/logger';
 
 @Module({
   imports: [
@@ -12,7 +14,8 @@ import { createLogger } from '../../shared/libs/logger';
       envFilePath: ['.env', '.env.local'],
     }),
   ],
-  controllers: [OrganizationController, HealthController, MetricsController],
+  // Order matters: static routes like /health and /metrics must be registered before /:id
+  controllers: [HealthController, MetricsController, OrganizationController],
   providers: [OrganizationService, OrganizationRepository],
   exports: [OrganizationService, OrganizationRepository],
 })

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { publishEvent } from '../../../../shared/libs/rabbitmq';
+import { publishEvent } from '../../../../../shared/libs/rabbitmq';
 import { randomUUID } from 'crypto';
 
 export interface GeofenceViolationEvent {

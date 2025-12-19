@@ -10,7 +10,7 @@ export interface RetryOptions {
 
 const defaultRetryableErrors = (error: any): boolean => {
   // Retry on network errors, timeouts, and 5xx errors
-  if (!error.response) {
+  if (!error?.response) {
     return true; // Network error
   }
   const status = error.response?.status;
@@ -41,7 +41,7 @@ export async function retryWithBackoff<T>(
 
       // Check if error is retryable
       if (!retryableErrors(error)) {
-        logger?.debug('Error is not retryable', { error: error.message, attempt });
+        logger?.debug('Error is not retryable', { error: error?.message, attempt });
         throw error;
       }
 
@@ -49,24 +49,20 @@ export async function retryWithBackoff<T>(
       if (attempt === maxAttempts) {
         logger?.warn('Max retry attempts reached', {
           attempts: maxAttempts,
-          error: error.message,
+          error: error?.message,
         });
         throw error;
       }
 
-      // Log retry attempt
       logger?.info('Retrying after error', {
         attempt,
         maxAttempts,
         delay,
-        error: error.message,
+        error: error?.message,
       });
 
-      // Wait before retry
       await sleep(delay);
-
-      // Calculate next delay with exponential backoff
-      delay = Math.min(delay * backoffMultiplier, maxDelay);
+      delay = Math.min(Math.floor(delay * backoffMultiplier), maxDelay);
     }
   }
 
@@ -76,10 +72,5 @@ export async function retryWithBackoff<T>(
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-
-
-
-
 
 

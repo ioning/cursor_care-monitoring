@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Request } f
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ReportTemplateService } from '../../application/services/report-template.service';
 import { CreateReportTemplateDto } from '../../infrastructure/repositories/report-template.repository';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('report-templates')
 @Controller('report-templates')
@@ -14,14 +14,14 @@ export class ReportTemplateController {
   @Post()
   @ApiOperation({ summary: 'Create report template' })
   @ApiResponse({ status: 201, description: 'Template created successfully' })
-  async createTemplate(@Request() req, @Body() createDto: CreateReportTemplateDto) {
+  async createTemplate(@Request() req: any, @Body() createDto: CreateReportTemplateDto) {
     return this.templateService.createTemplate(req.user.id, createDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get user templates' })
   @ApiResponse({ status: 200, description: 'Templates retrieved successfully' })
-  async getUserTemplates(@Request() req) {
+  async getUserTemplates(@Request() req: any) {
     return this.templateService.getUserTemplates(req.user.id);
   }
 
@@ -49,7 +49,7 @@ export class ReportTemplateController {
   @Get(':templateId')
   @ApiOperation({ summary: 'Get template by ID' })
   @ApiResponse({ status: 200, description: 'Template retrieved successfully' })
-  async getTemplateById(@Request() req, @Param('templateId') templateId: string) {
+  async getTemplateById(@Request() req: any, @Param('templateId') templateId: string) {
     return this.templateService.getTemplateById(templateId, req.user.id);
   }
 
@@ -57,7 +57,7 @@ export class ReportTemplateController {
   @ApiOperation({ summary: 'Update template' })
   @ApiResponse({ status: 200, description: 'Template updated successfully' })
   async updateTemplate(
-    @Request() req,
+    @Request() req: any,
     @Param('templateId') templateId: string,
     @Body() updates: Partial<CreateReportTemplateDto>,
   ) {
@@ -67,7 +67,7 @@ export class ReportTemplateController {
   @Delete(':templateId')
   @ApiOperation({ summary: 'Delete template' })
   @ApiResponse({ status: 200, description: 'Template deleted successfully' })
-  async deleteTemplate(@Request() req, @Param('templateId') templateId: string) {
+  async deleteTemplate(@Request() req: any, @Param('templateId') templateId: string) {
     return this.templateService.deleteTemplate(templateId, req.user.id);
   }
 }

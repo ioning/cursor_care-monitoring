@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Payment {
   id: string;
@@ -85,6 +85,12 @@ export class PaymentRepository {
       `UPDATE payments SET ${updates.join(', ')} WHERE id = $${values.length}`,
       values,
     );
+  }
+
+  async findById(id: string): Promise<Payment | null> {
+    const db = getDatabaseConnection();
+    const result = await db.query('SELECT * FROM payments WHERE id = $1', [id]);
+    return result.rows[0] ? this.mapRowToPayment(result.rows[0]) : null;
   }
 
   private mapRowToPayment(row: any): Payment {

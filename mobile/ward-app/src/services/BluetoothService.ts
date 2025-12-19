@@ -3,7 +3,7 @@ import { store } from '../store';
 import { addTelemetryData } from '../store/slices/telemetrySlice';
 import { TelemetryService } from './TelemetryService';
 
-class BluetoothService {
+class BluetoothServiceClass {
   private manager: BleManager;
   private connectedDevice: Device | null = null;
   private isInitialized = false;
@@ -272,5 +272,5 @@ class BluetoothService {
   }
 }
 
-export const BluetoothService = new BluetoothService();
+export const BluetoothService = new BluetoothServiceClass();
 

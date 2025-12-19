@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Invoice {
   id: string;
@@ -76,9 +76,15 @@ export class InvoiceRepository {
     );
 
     return [
-      dataResult.rows.map((row) => this.mapRowToInvoice(row)),
+      dataResult.rows.map((row: any) => this.mapRowToInvoice(row)),
       parseInt(countResult.rows[0].total),
     ];
+  }
+
+  async findByPaymentId(paymentId: string): Promise<Invoice | null> {
+    const db = getDatabaseConnection();
+    const result = await db.query('SELECT * FROM invoices WHERE payment_id = $1 LIMIT 1', [paymentId]);
+    return result.rows[0] ? this.mapRowToInvoice(result.rows[0]) : null;
   }
 
   private mapRowToInvoice(row: any): Invoice {

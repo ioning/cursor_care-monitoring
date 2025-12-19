@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('devices')
 @Controller('devices')
@@ -18,7 +18,7 @@ export class DeviceController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register new device' })
-  async register(@Request() req, @Body() registerDto: any) {
+  async register(@Request() req: any, @Body() registerDto: any) {
     const deviceServiceUrl = this.gatewayConfig.getDeviceServiceUrl();
     const response = await firstValueFrom(
       this.httpService.post(`${deviceServiceUrl}/devices/register`, registerDto, {
@@ -30,7 +30,7 @@ export class DeviceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all devices for current user' })
-  async getDevices(@Request() req, @Query('wardId') wardId?: string) {
+  async getDevices(@Request() req: any, @Query('wardId') wardId?: string) {
     const deviceServiceUrl = this.gatewayConfig.getDeviceServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${deviceServiceUrl}/devices`, {
@@ -43,7 +43,7 @@ export class DeviceController {
 
   @Get(':deviceId')
   @ApiOperation({ summary: 'Get device by ID' })
-  async getDevice(@Request() req, @Param('deviceId') deviceId: string) {
+  async getDevice(@Request() req: any, @Param('deviceId') deviceId: string) {
     const deviceServiceUrl = this.gatewayConfig.getDeviceServiceUrl();
     const response = await firstValueFrom(
       this.httpService.get(`${deviceServiceUrl}/devices/${deviceId}`, {
@@ -55,7 +55,7 @@ export class DeviceController {
 
   @Put(':deviceId')
   @ApiOperation({ summary: 'Update device' })
-  async updateDevice(@Request() req, @Param('deviceId') deviceId: string, @Body() updateDto: any) {
+  async updateDevice(@Request() req: any, @Param('deviceId') deviceId: string, @Body() updateDto: any) {
     const deviceServiceUrl = this.gatewayConfig.getDeviceServiceUrl();
     const response = await firstValueFrom(
       this.httpService.put(`${deviceServiceUrl}/devices/${deviceId}`, updateDto, {
@@ -67,7 +67,7 @@ export class DeviceController {
 
   @Delete(':deviceId')
   @ApiOperation({ summary: 'Delete device' })
-  async deleteDevice(@Request() req, @Param('deviceId') deviceId: string) {
+  async deleteDevice(@Request() req: any, @Param('deviceId') deviceId: string) {
     const deviceServiceUrl = this.gatewayConfig.getDeviceServiceUrl();
     const response = await firstValueFrom(
       this.httpService.delete(`${deviceServiceUrl}/devices/${deviceId}`, {

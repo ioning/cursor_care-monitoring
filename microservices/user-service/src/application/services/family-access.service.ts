@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { GuardianWardRepository } from '../../infrastructure/repositories/guardian-ward.repository';
 import { FamilyChatRepository, CreateFamilyChatMessageDto } from '../../infrastructure/repositories/family-chat.repository';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 
 export interface AddFamilyMemberDto {
   userId: string;

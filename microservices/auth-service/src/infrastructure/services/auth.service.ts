@@ -9,8 +9,8 @@ import { EmailService } from './email.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { VerifyEmailDto, ResendVerificationCodeDto } from '../dto/verify-email.dto';
-import { createLogger } from '../../../../shared/libs/logger';
-import { createAuditLogger } from '../../../../shared/libs/audit-logger';
+import { createLogger } from '../../../../../shared/libs/logger';
+import { createAuditLogger } from '../../../../../shared/libs/audit-logger';
 
 @Injectable()
 export class AuthService {

@@ -1,31 +1,38 @@
-import amqp, { Connection, Channel } from 'amqplib';
+// NOTE: amqplib TypeScript typings frequently differ across versions (callback vs promise API).
+// For runtime stability in services, we use a minimal `any`-typed wrapper around the promise API.
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-explicit-any
+const amqp: any = require('amqplib');
 import { randomUUID } from 'crypto';
 
-let connection: Connection | null = null;
-let channel: Channel | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let connection: any | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let channel: any | null = null;
 
 export interface RabbitMQConfig {
   url: string;
   exchange?: string;
 }
 
-export async function createRabbitMQConnection(config: RabbitMQConfig): Promise<{ connection: Connection; channel: Channel }> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function createRabbitMQConnection(config: RabbitMQConfig): Promise<{ connection: any; channel: any }> {
   if (connection && channel) {
     return { connection, channel };
   }
 
   const conn = await amqp.connect(config.url);
+  const ch = await conn.createChannel();
   connection = conn;
-  channel = await connection.createChannel();
+  channel = ch;
 
   // Declare exchange if provided
   if (config.exchange) {
-    await channel.assertExchange(config.exchange, 'topic', {
+    await ch.assertExchange(config.exchange, 'topic', {
       durable: true,
     });
   }
 
-  connection.on('error', (err) => {
+  connection.on('error', (err: any) => {
     console.error('RabbitMQ Connection Error:', err);
   });
 
@@ -35,13 +42,19 @@ export async function createRabbitMQConnection(config: RabbitMQConfig): Promise<
     channel = null;
   });
 
-  return { connection, channel };
+  return { connection: conn, channel: ch };
 }
 
-export function getChannel(): Channel {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getChannel(): any {
   if (!channel) {
     throw new Error('RabbitMQ channel not initialized. Call createRabbitMQConnection first.');
   }
+  return channel;
+}
+
+// Optional accessor used by health-check endpoints (returns null if not initialized)
+export function getRabbitMQChannel() {
   return channel;
 }
 
@@ -92,7 +105,7 @@ export async function consumeEvent(
     durable: true,
   });
 
-  await ch.consume(queue, async (msg) => {
+  await ch.consume(queue, async (msg: any) => {
     if (!msg) {
       return;
     }

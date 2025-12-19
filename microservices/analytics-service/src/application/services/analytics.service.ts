@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ReportRepository } from '../../infrastructure/repositories/report.repository';
 import { ReportTemplateRepository } from '../../infrastructure/repositories/report-template.repository';
 import { ReportFileRepository } from '../../infrastructure/repositories/report-file.repository';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 
 export interface GenerateReportDto {
   wardId?: string;

@@ -3,7 +3,7 @@ import { DeviceRepository } from '../../infrastructure/repositories/device.repos
 import { RegisterDeviceDto } from '../../infrastructure/dto/register-device.dto';
 import { UpdateDeviceDto } from '../../infrastructure/dto/update-device.dto';
 import { LinkDeviceDto } from '../../infrastructure/dto/link-device.dto';
-import { createLogger } from '../../../../shared/libs/logger';
+import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
 @Injectable()

@@ -16,14 +16,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { UserService } from '../application/services/user.service';
-import { WardService } from '../application/services/ward.service';
-import { WardAccessPermissionService } from '../application/services/ward-access-permission.service';
+import { UserService } from '../../application/services/user.service';
+import { WardService } from '../../application/services/ward.service';
+import { WardAccessPermissionService } from '../../application/services/ward-access-permission.service';
 import { CreateWardDto } from '../dto/create-ward.dto';
 import { UpdateWardDto } from '../dto/update-ward.dto';
 import { LinkWardDto } from '../dto/link-ward.dto';
 import { GrantAccessDto } from '../dto/grant-access.dto';
-import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller()
@@ -39,35 +39,35 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
-  async getMe(@Request() req) {
+  async getMe(@Request() req: any) {
     return this.userService.getProfile(req.user.id);
   }
 
   @Put('me')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'User profile updated successfully' })
-  async updateMe(@Request() req, @Body() updateDto: any) {
+  async updateMe(@Request() req: any, @Body() updateDto: any) {
     return this.userService.updateProfile(req.user.id, updateDto);
   }
 
   @Get('wards')
   @ApiOperation({ summary: 'Get all wards for current guardian' })
   @ApiResponse({ status: 200, description: 'Wards retrieved successfully' })
-  async getWards(@Request() req) {
+  async getWards(@Request() req: any) {
     return this.wardService.getWardsByGuardianId(req.user.id);
   }
 
   @Post('wards')
   @ApiOperation({ summary: 'Create new ward' })
   @ApiResponse({ status: 201, description: 'Ward created successfully' })
-  async createWard(@Request() req, @Body() createWardDto: CreateWardDto) {
+  async createWard(@Request() req: any, @Body() createWardDto: CreateWardDto) {
     return this.wardService.create(req.user.id, createWardDto);
   }
 
   @Get('wards/:wardId')
   @ApiOperation({ summary: 'Get ward by ID' })
   @ApiResponse({ status: 200, description: 'Ward retrieved successfully' })
-  async getWard(@Request() req, @Param('wardId') wardId: string) {
+  async getWard(@Request() req: any, @Param('wardId') wardId: string) {
     return this.wardService.getById(req.user.id, wardId);
   }
 
@@ -75,7 +75,7 @@ export class UserController {
   @ApiOperation({ summary: 'Update ward' })
   @ApiResponse({ status: 200, description: 'Ward updated successfully' })
   async updateWard(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() updateWardDto: UpdateWardDto,
   ) {
@@ -85,14 +85,14 @@ export class UserController {
   @Delete('wards/:wardId')
   @ApiOperation({ summary: 'Delete ward' })
   @ApiResponse({ status: 200, description: 'Ward deleted successfully' })
-  async deleteWard(@Request() req, @Param('wardId') wardId: string) {
+  async deleteWard(@Request() req: any, @Param('wardId') wardId: string) {
     return this.wardService.delete(req.user.id, wardId);
   }
 
   @Post('wards/link')
   @ApiOperation({ summary: 'Link existing ward to guardian' })
   @ApiResponse({ status: 200, description: 'Ward linked successfully' })
-  async linkWard(@Request() req, @Body() linkWardDto: LinkWardDto) {
+  async linkWard(@Request() req: any, @Body() linkWardDto: LinkWardDto) {
     return this.wardService.linkWard(req.user.id, linkWardDto);
   }
 
@@ -122,7 +122,7 @@ export class UserController {
   @ApiOperation({ summary: 'Upload ward avatar' })
   @ApiResponse({ status: 200, description: 'Avatar uploaded successfully' })
   async uploadAvatar(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
@@ -140,7 +140,7 @@ export class UserController {
   @ApiOperation({ summary: 'Grant access to ward for user' })
   @ApiResponse({ status: 201, description: 'Access granted successfully' })
   async grantAccess(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Body() grantAccessDto: GrantAccessDto,
   ) {
@@ -155,7 +155,7 @@ export class UserController {
   @Get('wards/:wardId/access')
   @ApiOperation({ summary: 'Get list of users with access to ward' })
   @ApiResponse({ status: 200, description: 'Access list retrieved successfully' })
-  async getAccessList(@Request() req, @Param('wardId') wardId: string) {
+  async getAccessList(@Request() req: any, @Param('wardId') wardId: string) {
     return this.accessPermissionService.getWardAccessList(wardId, req.user.id);
   }
 
@@ -163,10 +163,10 @@ export class UserController {
   @ApiOperation({ summary: 'Update access permissions' })
   @ApiResponse({ status: 200, description: 'Permissions updated successfully' })
   async updatePermission(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Param('permissionId') permissionId: string,
-    @Body() updates: Partial<GrantAccessDto['permissions']>,
+    @Body() updates: Partial<NonNullable<GrantAccessDto['permissions']>>,
   ) {
     return this.accessPermissionService.updatePermission(req.user.id, permissionId, updates);
   }
@@ -175,7 +175,7 @@ export class UserController {
   @ApiOperation({ summary: 'Revoke access to ward' })
   @ApiResponse({ status: 200, description: 'Access revoked successfully' })
   async revokeAccess(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Param('permissionId') permissionId: string,
   ) {
@@ -186,7 +186,7 @@ export class UserController {
   @ApiOperation({ summary: 'Get access history (audit log)' })
   @ApiResponse({ status: 200, description: 'Access history retrieved successfully' })
   async getAccessHistory(
-    @Request() req,
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Query('userId') userId?: string,
     @Query('actionType') actionType?: string,

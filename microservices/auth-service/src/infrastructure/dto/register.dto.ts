@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../../../../shared/types/common.types';
+import { UserRole } from '../../../../../shared/types/common.types';
 
 export class RegisterDto {
   @ApiProperty({ example: 'guardian@example.com' })

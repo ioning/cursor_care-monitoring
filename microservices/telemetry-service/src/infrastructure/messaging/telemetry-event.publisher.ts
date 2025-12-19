@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { publishEvent } from '../../../../shared/libs/rabbitmq';
-import { TelemetryReceivedEvent } from '../../../../shared/types/event.types';
+import { publishEvent } from '../../../../../shared/libs/rabbitmq';
+import { TelemetryReceivedEvent } from '../../../../../shared/types/event.types';
 
 @Injectable()
 export class TelemetryEventPublisher {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getDatabaseConnection } from '../../../../shared/libs/database';
+import { getDatabaseConnection } from '../../../../../shared/libs/database';
 
 export interface Geofence {
   id: string;
@@ -74,7 +74,7 @@ export class GeofenceRepository {
       'SELECT * FROM geofences WHERE ward_id = $1 AND enabled = TRUE',
       [wardId],
     );
-    return result.rows.map((row) => this.mapRowToGeofence(row));
+    return result.rows.map((row: any) => this.mapRowToGeofence(row));
   }
 
   private mapRowToGeofence(row: any): Geofence {

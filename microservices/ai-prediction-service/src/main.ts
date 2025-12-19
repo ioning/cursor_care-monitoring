@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { createLogger } from '../../../shared/libs/logger';
 import { createDatabaseConnection } from '../../../shared/libs/database';
 import { createRabbitMQConnection, consumeEvent } from '../../../shared/libs/rabbitmq';
-import { TelemetryReceivedEvent, RiskAlertEvent } from '../../../shared/types/event.types';
+import { TelemetryReceivedEvent } from '../../../shared/types/event.types';
 import { AIPredictionService } from './application/services/ai-prediction.service';
 
 async function bootstrap() {
