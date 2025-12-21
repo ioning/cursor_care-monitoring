@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { WsAdapter } from '@nestjs/platform-ws';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { createLogger } from '../../shared/libs/logger';
@@ -11,6 +12,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
+
+  // WebSocket adapter
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   // Security Headers (Helmet)
   app.use(

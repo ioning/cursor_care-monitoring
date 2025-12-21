@@ -86,9 +86,14 @@ class BluetoothServiceClass {
     }
   }
 
-  async scanForDevices(): Promise<Device[]> {
+  /**
+   * Scan for Bluetooth devices
+   * @param serialNumber Optional serial number to filter devices
+   */
+  async scanForDevices(serialNumber?: string): Promise<Device[]> {
     return new Promise((resolve, reject) => {
       const devices: Device[] = [];
+      const seenDevices = new Set<string>(); // Для избежания дубликатов
 
       this.manager.startDeviceScan(null, null, (error, device) => {
         if (error) {
@@ -97,8 +102,40 @@ class BluetoothServiceClass {
           return;
         }
 
-        if (device && device.name?.includes('CareMonitor')) {
-          devices.push(device);
+        if (device && !seenDevices.has(device.id)) {
+          seenDevices.add(device.id);
+          
+          // Если указан серийный номер, проверяем его в различных полях
+          if (serialNumber) {
+            const deviceName = device.name || '';
+            const deviceId = device.id || '';
+            const manufacturerData = device.manufacturerData || '';
+            const serviceData = device.serviceData || {};
+            
+            // Нормализуем серийный номер для сравнения (убираем пробелы, дефисы)
+            const normalizedSerial = serialNumber.replace(/[\s-]/g, '').toUpperCase();
+            
+            // Проверяем в различных местах:
+            // 1. В имени устройства (например, "CareMonitor-SN123456")
+            // 2. В ID устройства (может содержать серийный номер)
+            // 3. В manufacturer data (если устройство передает его)
+            // 4. В service data (если устройство передает его)
+            const nameMatch = deviceName.replace(/[\s-]/g, '').toUpperCase().includes(normalizedSerial);
+            const idMatch = deviceId.replace(/[\s-]/g, '').toUpperCase().includes(normalizedSerial);
+            const manufacturerMatch = manufacturerData.toString().replace(/[\s-]/g, '').toUpperCase().includes(normalizedSerial);
+            const serviceDataMatch = Object.values(serviceData).some((data: any) => 
+              data.toString().replace(/[\s-]/g, '').toUpperCase().includes(normalizedSerial)
+            );
+            
+            if (nameMatch || idMatch || manufacturerMatch || serviceDataMatch) {
+              devices.push(device);
+            }
+          } else {
+            // Если серийный номер не указан, ищем устройства с именем CareMonitor
+            if (device.name?.includes('CareMonitor')) {
+              devices.push(device);
+            }
+          }
         }
       });
 
@@ -108,6 +145,15 @@ class BluetoothServiceClass {
         resolve(devices);
       }, 10000);
     });
+  }
+
+  /**
+   * Scan and find device by serial number
+   * @param serialNumber Serial number to search for
+   */
+  async findDeviceBySerialNumber(serialNumber: string): Promise<Device | null> {
+    const devices = await this.scanForDevices(serialNumber);
+    return devices.length > 0 ? devices[0] : null;
   }
 
   async connectToDevice(deviceId: string, options?: { timeout?: number }): Promise<void> {

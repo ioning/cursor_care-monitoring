@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PassportModule } from '@nestjs/passport';
 import { HealthController } from './controllers/health.controller';
 import { MetricsController } from './controllers/metrics.controller';
 import { AuthController } from './controllers/auth.controller';
@@ -15,6 +16,8 @@ import { DispatcherController } from './controllers/dispatcher.controller';
 import { AnalyticsController } from './controllers/analytics.controller';
 import { OrganizationController } from './controllers/organization.controller';
 import { GatewayConfig } from './config/gateway.config';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { RealtimeGateway } from './gateways/realtime.gateway';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { GatewayConfig } from './config/gateway.config';
       envFilePath: ['.env', '.env.local'],
     }),
     HttpModule,
+    PassportModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -44,7 +48,7 @@ import { GatewayConfig } from './config/gateway.config';
     AnalyticsController,
     OrganizationController,
   ],
-  providers: [GatewayConfig],
+  providers: [GatewayConfig, JwtStrategy, RealtimeGateway],
 })
 export class AppModule {}
 

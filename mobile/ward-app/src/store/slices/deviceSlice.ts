@@ -6,6 +6,8 @@ interface Device {
   name: string;
   deviceType: string;
   status: string;
+  serialNumber?: string;
+  macAddress?: string;
   lastSeenAt?: string;
 }
 
@@ -38,11 +40,22 @@ export const fetchDevices = createAsyncThunk(
 
 export const connectDevice = createAsyncThunk(
   'device/connectDevice',
-  async (deviceId: string, { rejectWithValue }) => {
+  async (device: Device, { rejectWithValue }) => {
     try {
-      return await DeviceService.connectDevice(deviceId);
+      return await DeviceService.connectDevice(device);
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to connect device');
+    }
+  }
+);
+
+export const autoConnectDevices = createAsyncThunk(
+  'device/autoConnectDevices',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await DeviceService.autoConnectDevices();
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to auto-connect devices');
     }
   }
 );
@@ -79,6 +92,14 @@ const deviceSlice = createSlice({
         state.connectedDevice = action.payload;
       })
       .addCase(connectDevice.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(autoConnectDevices.fulfilled, (state, action) => {
+        if (action.payload.length > 0) {
+          state.connectedDevice = action.payload[0]; // Подключаемся к первому устройству
+        }
+      })
+      .addCase(autoConnectDevices.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

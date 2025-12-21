@@ -116,6 +116,18 @@ export class DeviceRepository {
     return result.rows.map((row) => this.mapRowToDevice(row));
   }
 
+  /**
+   * Find devices by ward ID (for ward users to see their devices)
+   */
+  async findByWardId(wardId: string): Promise<Device[]> {
+    const db = getDatabaseConnection();
+    const result = await db.query(
+      'SELECT * FROM devices WHERE ward_id = $1 ORDER BY created_at DESC',
+      [wardId]
+    );
+    return result.rows.map((row) => this.mapRowToDevice(row));
+  }
+
   async update(id: string, data: Partial<Device>): Promise<Device> {
     const db = getDatabaseConnection();
     const updates: string[] = [];

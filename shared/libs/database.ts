@@ -22,19 +22,20 @@ export function createDatabaseConnection(config: DatabaseConfig): Pool {
     return pool;
   }
 
-  // Оптимизированные настройки connection pool
+  // Connection pool defaults tuned for local dev:
+  // Many microservices run concurrently on one Postgres instance, so keep pool sizes small by default.
   const poolConfig: PoolConfig = {
     host: config.host,
     port: config.port,
     database: config.database,
     user: config.user,
     password: config.password,
-    // Увеличено количество соединений для высокой нагрузки
-    max: config.max || 50,
-    // Минимальное количество соединений для быстрого отклика
-    min: config.min || 5,
-    // Увеличено время простоя перед закрытием соединения
-    idleTimeoutMillis: config.idleTimeoutMillis || 60000,
+    // Limit connections by default to avoid exhausting Postgres max_connections in dev
+    max: config.max ?? 5,
+    // Keep 0 idle connections by default (faster startup, fewer reserved slots)
+    min: config.min ?? 0,
+    // Close idle connections reasonably fast in dev
+    idleTimeoutMillis: config.idleTimeoutMillis ?? 30000,
     // Увеличено время ожидания соединения
     connectionTimeoutMillis: config.connectionTimeoutMillis || 5000,
     // Таймаут для выполнения запросов (30 секунд)

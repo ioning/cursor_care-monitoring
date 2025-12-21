@@ -19,12 +19,32 @@ export interface LoginResponse {
 export const authApi = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post('/auth/login', credentials);
-    return response.data;
+    // API Gateway возвращает { success: true, data: { user, tokens } }
+    // Преобразуем в ожидаемую структуру
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return {
+        accessToken: data.data.tokens.accessToken,
+        refreshToken: data.data.tokens.refreshToken,
+        user: data.data.user,
+      };
+    }
+    // Если структура уже правильная (для обратной совместимости)
+    return data;
   },
 
   async refreshToken(refreshToken: string): Promise<LoginResponse> {
     const response = await apiClient.post('/auth/refresh', { refreshToken });
-    return response.data;
+    // API Gateway возвращает { success: true, data: { user, tokens } }
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return {
+        accessToken: data.data.tokens.accessToken,
+        refreshToken: data.data.tokens.refreshToken,
+        user: data.data.user,
+      };
+    }
+    return data;
   },
 };
 

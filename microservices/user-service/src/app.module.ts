@@ -18,6 +18,8 @@ import { WardAccessPermissionRepository } from './infrastructure/repositories/wa
 import { WardAccessAuditRepository } from './infrastructure/repositories/ward-access-audit.repository';
 import { FamilyChatRepository } from './infrastructure/repositories/family-chat.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { AuthServiceClient } from './infrastructure/clients/auth-service.client';
+import { IntegrationServiceClient } from './infrastructure/clients/integration-service.client';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     WardAccessAuditRepository,
     FamilyChatRepository,
     JwtStrategy,
+    AuthServiceClient,
+    IntegrationServiceClient,
   ],
 })
 export class AppModule implements OnModuleInit {

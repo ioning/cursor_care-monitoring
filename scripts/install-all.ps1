@@ -7,7 +7,8 @@ $ErrorActionPreference = "Stop"
 Write-Host "Installing all dependencies..."
 Write-Host ""
 
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Root = Split-Path -Parent $ScriptPath
 Set-Location $Root
 
 function Install-PackageJson {

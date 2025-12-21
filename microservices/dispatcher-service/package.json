@@ -6,8 +6,8 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:prod": "node dist/main",
+    "start:dev": "npm run build && node dist/microservices/dispatcher-service/src/main.js",
+    "start:prod": "node dist/microservices/dispatcher-service/src/main.js",
     "test": "jest"
   },
   "dependencies": {

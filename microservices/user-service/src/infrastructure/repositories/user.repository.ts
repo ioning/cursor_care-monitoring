@@ -19,6 +19,7 @@ export class UserRepository {
   async initialize() {
     const db = getDatabaseConnection();
 
+    // Create table (new installs)
     await db.query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY,
@@ -30,22 +31,31 @@ export class UserRepository {
         status VARCHAR(20) DEFAULT 'active',
         email_verified BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(email, organization_id)
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
 
+    // Backward-compatible schema upgrades (older migrations may have created users without organization_id)
+    await db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS organization_id UUID`);
+
+    // Ensure uniqueness semantics for both legacy (no org) and multi-tenancy
+    // - Legacy users: unique email when organization_id IS NULL
+    // - Tenant users: unique (email, organization_id) when organization_id IS NOT NULL
+    await db.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key`);
+    await db.query(`DROP INDEX IF EXISTS idx_users_email_organization`);
     await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_null_org
+      ON users(email)
+      WHERE organization_id IS NULL
+    `);
+    await db.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_organization
+      ON users(email, organization_id)
+      WHERE organization_id IS NOT NULL
     `);
 
-    await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_organization_id ON users(organization_id)
-    `);
-
-    await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_email_organization ON users(email, organization_id)
-    `);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_users_organization_id ON users(organization_id)`);
   }
 
   async findById(id: string, organizationId?: string): Promise<User | null> {

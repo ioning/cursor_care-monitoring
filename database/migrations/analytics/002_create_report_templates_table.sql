@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS report_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   description TEXT,
-  created_by UUID NOT NULL REFERENCES users(id),
-  ward_id UUID REFERENCES wards(id) ON DELETE CASCADE, -- NULL для глобальных шаблонов
+  created_by UUID NOT NULL, -- Reference to user (users table is in different DB)
+  ward_id UUID, -- Reference to ward (wards table is in different DB), NULL для глобальных шаблонов
   is_global BOOLEAN DEFAULT FALSE, -- Глобальный шаблон доступен всем
   is_public BOOLEAN DEFAULT FALSE, -- Публичный шаблон может использоваться другими
   

@@ -1,4 +1,5 @@
--- UP Migration: Add organization_id to users table for multi-tenancy
+-- UP
+-- Add organization_id to users table for multi-tenancy
 ALTER TABLE users ADD COLUMN IF NOT EXISTS organization_id UUID;
 
 -- Drop old unique constraint on email

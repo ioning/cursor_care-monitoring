@@ -42,14 +42,36 @@ export const telemetryApi = {
     },
   ): Promise<TelemetryResponse> => {
     const response = await apiClient.get(`/telemetry/wards/${wardId}`, { params });
-    return response.data;
+    // API Gateway может возвращать { success: true, data: [...] } или напрямую массив
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return {
+        success: true,
+        data: data.data,
+        meta: data.meta,
+      };
+    }
+    // Если структура уже правильная
+    return data;
   },
 
   getLatestTelemetry: async (
     wardId: string,
   ): Promise<{ success: boolean; data: TelemetryData }> => {
     const response = await apiClient.get(`/telemetry/wards/${wardId}/latest`);
-    return response.data;
+    // API Gateway может возвращать { success: true, data: {...} } или напрямую объект
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return {
+        success: true,
+        data: data.data,
+      };
+    }
+    // Если структура уже правильная
+    return {
+      success: true,
+      data: data,
+    };
   },
 };
 

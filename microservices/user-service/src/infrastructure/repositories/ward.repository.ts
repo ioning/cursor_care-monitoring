@@ -36,6 +36,9 @@ export class WardRepository {
       )
     `);
 
+    // Backward-compatible schema upgrades (older migrations created wards without organization_id)
+    await db.query(`ALTER TABLE wards ADD COLUMN IF NOT EXISTS organization_id UUID`);
+
     await db.query(`
       CREATE INDEX IF NOT EXISTS idx_wards_status ON wards(status)
     `);

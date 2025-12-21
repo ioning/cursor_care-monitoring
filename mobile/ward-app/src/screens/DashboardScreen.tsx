@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { RootState } from '../store';
-import { fetchDevices } from '../store/slices/deviceSlice';
+import { fetchDevices, autoConnectDevices } from '../store/slices/deviceSlice';
 import { colors, spacing, typography, radii, shadows, getStatusColor } from '../theme/designSystem';
 
 type MetricConfig = {
@@ -88,7 +88,13 @@ const DashboardScreen: React.FC = () => {
   const { currentLocation } = useSelector((state: RootState) => state.location);
 
   useEffect(() => {
-    dispatch(fetchDevices());
+    // Загружаем устройства и автоматически подключаемся
+    const loadAndConnect = async () => {
+      await dispatch(fetchDevices());
+      // Автоматически подключаемся к устройствам с серийными номерами
+      await dispatch(autoConnectDevices());
+    };
+    loadAndConnect();
   }, [dispatch]);
 
   const metrics = useMemo(() => {

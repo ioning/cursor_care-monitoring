@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { WardRepository } from '../../infrastructure/repositories/ward.repository';
 import { GuardianWardRepository } from '../../infrastructure/repositories/guardian-ward.repository';
+import { UserRepository } from '../../infrastructure/repositories/user.repository';
 import { CreateWardDto } from '../../infrastructure/dto/create-ward.dto';
 import { UpdateWardDto } from '../../infrastructure/dto/update-ward.dto';
 import { LinkWardDto } from '../../infrastructure/dto/link-ward.dto';
+import { AuthServiceClient } from '../../infrastructure/clients/auth-service.client';
+import { IntegrationServiceClient } from '../../infrastructure/clients/integration-service.client';
 import { createLogger } from '../../../../../shared/libs/logger';
-import { randomUUID } from 'crypto';
+import { randomUUID, randomBytes } from 'crypto';
 
 @Injectable()
 export class WardService {
@@ -14,6 +17,9 @@ export class WardService {
   constructor(
     private readonly wardRepository: WardRepository,
     private readonly guardianWardRepository: GuardianWardRepository,
+    private readonly userRepository: UserRepository,
+    private readonly authServiceClient: AuthServiceClient,
+    private readonly integrationServiceClient: IntegrationServiceClient,
   ) {}
 
   async getWardsByGuardianId(guardianId: string) {
@@ -26,9 +32,18 @@ export class WardService {
 
   async create(guardianId: string, createWardDto: CreateWardDto) {
     const wardId = randomUUID();
+    
+    // Получаем информацию об опекуне для organizationId
+    const guardian = await this.userRepository.findById(guardianId);
+    if (!guardian) {
+      throw new NotFoundException('Guardian not found');
+    }
+
+    // Создаем запись в wards
     const ward = await this.wardRepository.create({
       id: wardId,
       ...createWardDto,
+      organizationId: guardian.organizationId,
     });
 
     // Link ward to guardian
@@ -38,13 +53,98 @@ export class WardService {
       relationship: createWardDto.relationship || 'ward',
     });
 
-    this.logger.info(`Ward created: ${wardId} by guardian ${guardianId}`, { wardId, guardianId });
+    // Если указан телефон, создаем аккаунт и отправляем SMS
+    let accountCreated = false;
+    let temporaryPassword: string | null = null;
+
+    if (createWardDto.phone) {
+      try {
+        // Генерируем временный пароль
+        temporaryPassword = this.generateTemporaryPassword();
+
+        // Создаем пользователя в Auth Service
+        await this.authServiceClient.createWardUser({
+          id: wardId, // Используем тот же UUID что и для ward
+          fullName: createWardDto.fullName,
+          phone: createWardDto.phone,
+          password: temporaryPassword,
+          organizationId: guardian.organizationId,
+        });
+
+        accountCreated = true;
+
+        // Отправляем SMS с учетными данными
+        const smsMessage = this.createSmsMessage(createWardDto.fullName, temporaryPassword);
+        await this.integrationServiceClient.sendSms({
+          to: createWardDto.phone,
+          message: smsMessage,
+        });
+
+        this.logger.info(`Ward account created and SMS sent: ${wardId}`, {
+          wardId,
+          guardianId,
+          phone: createWardDto.phone,
+        });
+      } catch (error: any) {
+        this.logger.error('Failed to create ward account or send SMS', {
+          wardId,
+          guardianId,
+          error: error.message,
+        });
+        // Не прерываем создание подопечного, но логируем ошибку
+        // Опекун может создать аккаунт позже
+      }
+    }
+
+    this.logger.info(`Ward created: ${wardId} by guardian ${guardianId}`, {
+      wardId,
+      guardianId,
+      accountCreated,
+    });
 
     return {
       success: true,
       data: ward,
       message: 'Ward created successfully',
+      accountCreated,
+      // В development режиме возвращаем пароль для тестирования
+      ...(process.env.NODE_ENV === 'development' && temporaryPassword
+        ? { temporaryPassword }
+        : {}),
     };
+  }
+
+  /**
+   * Generate temporary password for ward
+   */
+  private generateTemporaryPassword(): string {
+    // Генерируем пароль: 8 символов (буквы + цифры)
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    const passwordLength = 8;
+    let password = '';
+
+    // Гарантируем хотя бы одну цифру и одну букву
+    password += chars[Math.floor(Math.random() * 10) + 52]; // Цифра
+    password += chars[Math.floor(Math.random() * 26)]; // Заглавная буква
+    password += chars[Math.floor(Math.random() * 26) + 26]; // Строчная буква
+
+    // Заполняем остальные символы
+    for (let i = password.length; i < passwordLength; i++) {
+      password += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    // Перемешиваем символы
+    return password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
+  }
+
+  /**
+   * Create SMS message with credentials
+   */
+  private createSmsMessage(wardName: string, password: string): string {
+    return `Care Monitoring: Для ${wardName} создан аккаунт. Пароль: ${password}. Скачайте приложение: https://care-monitoring.ru/app`;
   }
 
   async getById(guardianId: string, wardId: string) {

@@ -152,35 +152,78 @@ useRealtimeChannel('alerts.created', (payload) => {
 .dashboard-view {
   max-width: 1400px;
   margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .dashboard-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 2rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  box-shadow: var(--shadow);
+  gap: 1.25rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--primary);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-card.danger {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.stat-card.danger::before {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .stat-icon {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .stat-content {
@@ -188,50 +231,74 @@ useRealtimeChannel('alerts.created', (payload) => {
 }
 
 .stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--gray-900);
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card.danger .stat-value {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stat-label {
-  font-size: 0.875rem;
-  color: var(--gray-600);
-  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .alerts-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .alert-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 1.25rem;
+  padding: 1.25rem;
   border-radius: var(--radius);
   border-left: 4px solid;
-  background: var(--gray-50);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-left-width: 4px;
+  transition: all 0.3s;
+}
+
+.alert-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
 }
 
 .alert-item.severity-critical {
   border-left-color: var(--danger);
-  background: #fee2e2;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, var(--bg-tertiary) 100%);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
 
 .alert-item.severity-high {
   border-left-color: var(--warning);
-  background: #fef3c7;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, var(--bg-tertiary) 100%);
 }
 
 .alert-item.severity-medium {
   border-left-color: var(--info);
-  background: #dbeafe;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, var(--bg-tertiary) 100%);
 }
 
 .alert-icon {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .alert-content {
@@ -239,82 +306,112 @@ useRealtimeChannel('alerts.created', (payload) => {
 }
 
 .alert-title {
-  font-weight: 500;
-  color: var(--gray-900);
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
 }
 
 .alert-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--gray-600);
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
 }
 
 .alert-time {
   margin-left: auto;
+  color: var(--text-muted);
 }
 
 .wards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
 .ward-card {
-  background: var(--gray-50);
-  border-radius: var(--radius);
-  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.ward-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.ward-card:hover::before {
+  left: 100%;
 }
 
 .ward-card:hover {
-  background: var(--gray-100);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--primary);
 }
 
 .ward-avatar {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: var(--gradient-primary);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .ward-name {
-  font-weight: 500;
-  color: var(--gray-900);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 .ward-meta {
-  font-size: 0.75rem;
-  color: var(--gray-600);
-  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
 }
 
 .loading,
 .empty-state {
   text-align: center;
-  padding: 3rem;
-  color: var(--gray-600);
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
 }
 
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+}
+
+.empty-state p {
+  font-size: 1.125rem;
+  color: var(--text-tertiary);
 }
 </style>
 

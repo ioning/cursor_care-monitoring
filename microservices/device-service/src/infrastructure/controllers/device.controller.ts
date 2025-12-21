@@ -35,7 +35,7 @@ export class DeviceController {
   @ApiOperation({ summary: 'Get all devices for current user' })
   @ApiResponse({ status: 200, description: 'Devices retrieved successfully' })
   async getDevices(@Request() req: any, @Query('wardId') wardId?: string) {
-    return this.deviceService.getDevices(req.user.id, wardId);
+    return this.deviceService.getDevices(req.user.id, req.user.role, wardId);
   }
 
   // NOTE: Keep this path from colliding with /devices/health (":deviceId" would match "health")
@@ -43,7 +43,7 @@ export class DeviceController {
   @ApiOperation({ summary: 'Get device by ID' })
   @ApiResponse({ status: 200, description: 'Device retrieved successfully' })
   async getDevice(@Request() req: any, @Param('deviceId') deviceId: string) {
-    return this.deviceService.getDevice(req.user.id, deviceId);
+    return this.deviceService.getDevice(req.user.id, req.user.role, deviceId);
   }
 
   @Put('id/:deviceId')

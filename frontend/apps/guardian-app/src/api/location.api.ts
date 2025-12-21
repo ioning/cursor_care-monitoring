@@ -40,11 +40,21 @@ export const locationApi = {
   async getLatestLocation(wardId: string): Promise<Location | null> {
     try {
       const response = await apiClient.get(`/locations/wards/${wardId}/latest`);
-      return response.data.data || null;
+      // API Gateway может возвращать { success: true, data: {...} } или напрямую объект
+      const data = response.data;
+      if (data?.success && data?.data) {
+        return data.data;
+      } else if (data?.data) {
+        return data.data;
+      } else if (data && typeof data === 'object' && 'wardId' in data) {
+        return data as Location;
+      }
+      return null;
     } catch (error: any) {
       if (error.response?.status === 404) {
         return null;
       }
+      console.error('Error in getLatestLocation:', error);
       throw error;
     }
   },
@@ -61,7 +71,16 @@ export const locationApi = {
     const response = await apiClient.get(`/locations/wards/${wardId}/history`, {
       params: filters,
     });
-    return response.data;
+    // API Gateway может возвращать { success: true, data: [...] } или напрямую объект
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return {
+        success: true,
+        data: data.data,
+        meta: data.meta,
+      };
+    }
+    return data;
   },
 
   async getGeofences(wardId: string): Promise<Geofence[]> {

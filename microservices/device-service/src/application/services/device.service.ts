@@ -39,8 +39,17 @@ export class DeviceService {
     };
   }
 
-  async getDevices(userId: string, wardId?: string) {
-    const devices = await this.deviceRepository.findByUserId(userId, wardId);
+  async getDevices(userId: string, userRole: string, wardId?: string) {
+    let devices: Device[];
+    
+    if (userRole === 'ward') {
+      // Для подопечного: ищем устройства, привязанные к нему через wardId
+      devices = await this.deviceRepository.findByWardId(userId);
+    } else {
+      // Для опекуна: ищем устройства, которые он зарегистрировал
+      devices = await this.deviceRepository.findByUserId(userId, wardId);
+    }
+    
     return {
       success: true,
       data: devices.map((d) => ({
@@ -50,15 +59,23 @@ export class DeviceService {
     };
   }
 
-  async getDevice(userId: string, deviceId: string) {
+  async getDevice(userId: string, userRole: string, deviceId: string) {
     const device = await this.deviceRepository.findById(deviceId);
     if (!device) {
       throw new NotFoundException('Device not found');
     }
 
     // Verify user has access
-    if (device.userId !== userId) {
-      throw new ForbiddenException('Access denied to this device');
+    if (userRole === 'ward') {
+      // Для подопечного: проверяем, что устройство привязано к нему
+      if (device.wardId !== userId) {
+        throw new ForbiddenException('Access denied to this device');
+      }
+    } else {
+      // Для опекуна: проверяем, что он владелец устройства
+      if (device.userId !== userId) {
+        throw new ForbiddenException('Access denied to this device');
+      }
     }
 
     return {

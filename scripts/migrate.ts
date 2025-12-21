@@ -1,5 +1,4 @@
 import { MigrationRunner } from '../shared/libs/migrations/migration-runner';
-import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 

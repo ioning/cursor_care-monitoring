@@ -1,3 +1,4 @@
+-- UP
 -- Migration: Create email_verification_codes table
 -- Description: Stores 4-digit verification codes for email confirmation
 
@@ -27,3 +28,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- DOWN
+DROP FUNCTION IF EXISTS cleanup_expired_verification_codes();
+DROP INDEX IF EXISTS idx_email_verification_expires;
+DROP INDEX IF EXISTS idx_email_verification_code;
+DROP INDEX IF EXISTS idx_email_verification_email;
+DROP TABLE IF EXISTS email_verification_codes;

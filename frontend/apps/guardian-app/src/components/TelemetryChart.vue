@@ -168,7 +168,14 @@ const loadData = async () => {
 
     updateChartDataset(true);
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Ошибка загрузки данных';
+    console.error('Error loading telemetry data:', err);
+    if (err.response) {
+      console.error('Response status:', err.response.status);
+      console.error('Response data:', err.response.data);
+      error.value = err.response?.data?.message || `Ошибка загрузки данных (${err.response.status})`;
+    } else {
+      error.value = err.message || 'Ошибка загрузки данных';
+    }
   } finally {
     isLoading.value = false;
   }

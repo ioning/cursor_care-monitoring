@@ -23,7 +23,7 @@ export class ServicePriceRepository {
     await db.query(`
       CREATE TABLE IF NOT EXISTS service_prices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        service_type VARCHAR(100) NOT NULL,
+        service_type VARCHAR(100) NOT NULL UNIQUE,
         service_name VARCHAR(255) NOT NULL,
         base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
         currency VARCHAR(3) DEFAULT 'RUB',
@@ -32,10 +32,12 @@ export class ServicePriceRepository {
         is_active BOOLEAN DEFAULT TRUE,
         organization_id UUID,
         created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(service_type, organization_id)
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+
+    // Backward-compatible schema upgrades (older migrations created service_prices without organization_id)
+    await db.query(`ALTER TABLE service_prices ADD COLUMN IF NOT EXISTS organization_id UUID`);
 
     await db.query(`CREATE INDEX IF NOT EXISTS idx_service_prices_active ON service_prices(is_active)`);
     await db.query(`CREATE INDEX IF NOT EXISTS idx_service_prices_type ON service_prices(service_type)`);
@@ -195,7 +197,7 @@ export class ServicePriceRepository {
       await db.query(
         `INSERT INTO service_prices (service_type, service_name, base_price, currency, unit, description, is_active, organization_id)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-         ON CONFLICT (service_type, organization_id) DO NOTHING`,
+         ON CONFLICT (service_type) DO NOTHING`,
         [
           p.serviceType,
           p.serviceName,

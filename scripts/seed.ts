@@ -28,24 +28,95 @@ async function seedAuthService() {
     // Create default admin user
     await seedDefaultAdmin(db);
 
-    // Create test user (password: Test1234!)
-    const testUserResult = await db.query('SELECT id FROM users WHERE email = $1', ['test@example.com']);
-    if (testUserResult.rows.length > 0) {
-      logger.info('Test user already exists');
-    } else {
-      const passwordHash = '$2b$10$rQZ8vJ8vJ8vJ8vJ8vJ8vJ.8vJ8vJ8vJ8vJ8vJ8vJ8vJ8vJ8vJ8vJ';
-      await db.query(
-        `INSERT INTO users (id, email, password_hash, full_name, role, status, email_verified, organization_id)
-         VALUES (gen_random_uuid(), 'test@example.com', $1, 'Test User', 'guardian', 'active', TRUE, NULL)
-         ON CONFLICT (email, organization_id) DO NOTHING`,
-        [passwordHash],
-      );
-      logger.info('Test user created: test@example.com / Test1234!');
-    }
+    // Create default users for all roles
+    await seedDefaultUser(db, {
+      email: 'test@example.com',
+      password: 'Test1234!',
+      fullName: 'Test User',
+      role: 'guardian',
+    });
+
+    await seedDefaultUser(db, {
+      email: 'guardian@care-monitoring.ru',
+      password: 'guardian123',
+      fullName: 'Тестовый Опекун',
+      role: 'guardian',
+    });
+
+    await seedDefaultUser(db, {
+      email: 'ward@care-monitoring.ru',
+      password: 'ward123',
+      fullName: 'Тестовый Подопечный',
+      role: 'ward',
+    });
+
+    await seedDefaultUser(db, {
+      email: 'dispatcher@care-monitoring.ru',
+      password: 'dispatcher123',
+      fullName: 'Тестовый Диспетчер',
+      role: 'dispatcher',
+    });
+
+    await seedDefaultUser(db, {
+      email: 'org-admin@care-monitoring.ru',
+      password: 'orgadmin123',
+      fullName: 'Администратор Организации',
+      role: 'organization_admin',
+    });
   } catch (error) {
     logger.error('Error seeding auth service:', error);
   } finally {
     await db.end();
+  }
+}
+
+interface DefaultUser {
+  email: string;
+  password: string;
+  fullName: string;
+  role: 'guardian' | 'ward' | 'dispatcher' | 'admin' | 'organization_admin';
+  organizationId?: string | null;
+}
+
+async function seedDefaultUser(db: Pool, user: DefaultUser) {
+  try {
+    const orgId = user.organizationId || null;
+    
+    // Check if user already exists
+    const checkQuery = orgId 
+      ? 'SELECT id FROM users WHERE email = $1 AND organization_id = $2'
+      : 'SELECT id FROM users WHERE email = $1 AND organization_id IS NULL';
+    
+    const checkParams = orgId ? [user.email, orgId] : [user.email];
+    const result = await db.query(checkQuery, checkParams);
+
+    if (result.rows.length > 0) {
+      logger.info(`User already exists: ${user.email} (${user.role})`);
+      return;
+    }
+
+    // Hash password
+    const passwordHash = await hash(user.password, 10);
+
+    // Create user (without ON CONFLICT since we already checked)
+    await db.query(
+      `INSERT INTO users (email, password_hash, full_name, role, status, email_verified, organization_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        user.email,
+        passwordHash,
+        user.fullName,
+        user.role,
+        'active',
+        true,
+        orgId,
+      ]
+    );
+
+    logger.info(`Default user created: ${user.email} / ${user.password} (${user.role})`);
+  } catch (error: any) {
+    logger.error(`Error creating user ${user.email}:`, error);
+    throw error;
   }
 }
 
@@ -54,42 +125,13 @@ async function seedDefaultAdmin(db: Pool) {
   const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || '14081979';
   const adminFullName = process.env.DEFAULT_ADMIN_FULL_NAME || 'Администратор системы';
 
-  try {
-    // Check if admin already exists
-    const result = await db.query(
-      'SELECT id FROM users WHERE email = $1 AND role = $2 AND organization_id IS NULL',
-      [adminEmail, 'admin']
-    );
-
-    if (result.rows.length > 0) {
-      logger.info(`Default admin user already exists: ${adminEmail}`);
-      return;
-    }
-
-    // Hash password
-    const passwordHash = await hash(adminPassword, 10);
-
-    // Create default admin
-    await db.query(
-      `INSERT INTO users (email, password_hash, full_name, role, status, email_verified, organization_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       ON CONFLICT (email, organization_id) DO NOTHING`,
-      [
-        adminEmail,
-        passwordHash,
-        adminFullName,
-        'admin',
-        'active',
-        true,
-        null, // Глобальный админ, не привязан к организации
-      ]
-    );
-
-    logger.info(`Default admin user created: ${adminEmail} / ${adminPassword}`);
-  } catch (error: any) {
-    logger.error('Error creating default admin user:', error);
-    throw error;
-  }
+  await seedDefaultUser(db, {
+    email: adminEmail,
+    password: adminPassword,
+    fullName: adminFullName,
+    role: 'admin',
+    organizationId: null, // Глобальный админ, не привязан к организации
+  });
 }
 
 async function seedAll() {

@@ -1,10 +1,19 @@
-import { IsString, IsDateString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsEnum, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateWardDto {
   @ApiProperty({ example: 'Иванов Петр Иванович' })
   @IsString()
   fullName: string;
+
+  @ApiProperty({ 
+    example: '+79001234567', 
+    required: false,
+    description: 'Номер телефона подопечного для отправки SMS с учетными данными. Формат: +7XXXXXXXXXX'
+  })
+  @Matches(/^\+7\d{10}$/, { message: 'Номер телефона должен быть в формате +7XXXXXXXXXX' })
+  @IsOptional()
+  phone?: string;
 
   @ApiProperty({ example: '1990-01-15', required: false })
   @IsDateString()

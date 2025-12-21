@@ -1,7 +1,7 @@
 -- UP
 CREATE TABLE IF NOT EXISTS reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
+  user_id UUID NOT NULL, -- Reference to user, but no FK constraint (users table is in different DB)
   report_type VARCHAR(50) NOT NULL,
   filters JSONB,
   status VARCHAR(20) NOT NULL CHECK (status IN ('generating', 'completed', 'failed')),

@@ -18,35 +18,53 @@ export class SubscriptionRepository {
   async initialize() {
     const db = getDatabaseConnection();
 
+    // Create table for new installs
     await db.query(`
       CREATE TABLE IF NOT EXISTS subscriptions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID,
-        organization_id UUID, -- For organization-level subscriptions
+        organization_id UUID,
         plan_id VARCHAR(50) NOT NULL,
         status VARCHAR(20) NOT NULL CHECK (status IN ('active', 'cancelled', 'expired', 'suspended')),
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
-        CONSTRAINT check_subscription_owner CHECK (
-          (user_id IS NOT NULL AND organization_id IS NULL) OR
-          (user_id IS NULL AND organization_id IS NOT NULL)
-        )
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
 
+    // Backward-compatible schema upgrades (older migrations created user_id NOT NULL UNIQUE and no organization_id)
+    await db.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS organization_id UUID`);
+    await db.query(`ALTER TABLE subscriptions ALTER COLUMN user_id DROP NOT NULL`);
+
+    // Drop legacy unique constraint on user_id if present (name varies by migration)
+    await db.query(`ALTER TABLE subscriptions DROP CONSTRAINT IF EXISTS subscriptions_user_id_key`);
+
+    // Enforce exactly one owner (user OR organization)
+    await db.query(`ALTER TABLE subscriptions DROP CONSTRAINT IF EXISTS check_subscription_owner`);
     await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)
+      ALTER TABLE subscriptions
+      ADD CONSTRAINT check_subscription_owner CHECK (
+        (user_id IS NOT NULL AND organization_id IS NULL) OR
+        (user_id IS NULL AND organization_id IS NOT NULL)
+      )
     `);
 
+    // Uniqueness per owner
     await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_subscriptions_organization_id ON subscriptions(organization_id)
+      CREATE UNIQUE INDEX IF NOT EXISTS ux_subscriptions_user_id
+      ON subscriptions(user_id)
+      WHERE user_id IS NOT NULL
+    `);
+    await db.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS ux_subscriptions_organization_id
+      ON subscriptions(organization_id)
+      WHERE organization_id IS NOT NULL
     `);
 
-    await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)
-    `);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)`);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_organization_id ON subscriptions(organization_id)`);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)`);
   }
 
   async create(data: {

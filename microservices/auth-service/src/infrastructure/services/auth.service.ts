@@ -46,6 +46,7 @@ export class AuthService {
       fullName: registerDto.fullName,
       phone: registerDto.phone,
       role: registerDto.role,
+      emailVerified: false,
     });
 
     // Генерируем 4-значный код
@@ -89,6 +90,64 @@ export class AuthService {
       },
       message: 'Registration successful. Please check your email for verification code.',
       requiresEmailVerification: true,
+    };
+  }
+
+  /**
+   * Internal method for creating ward user account
+   * Skips email verification and uses provided ID
+   */
+  async registerInternal(data: {
+    id: string;
+    email: string;
+    password: string;
+    fullName: string;
+    phone?: string;
+    role: string;
+    organizationId?: string;
+    skipEmailVerification?: boolean;
+  }) {
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Проверяем, не существует ли пользователь с таким ID
+    const existingUserById = await this.userRepository.findById(data.id);
+    if (existingUserById) {
+      throw new ConflictException('User with this ID already exists');
+    }
+
+    const passwordHash = await this.passwordService.hash(data.password);
+    const user = await this.userRepository.create({
+      id: data.id, // Используем переданный ID
+      email: data.email,
+      passwordHash,
+      fullName: data.fullName,
+      phone: data.phone,
+      role: data.role,
+      organizationId: data.organizationId,
+      emailVerified: data.skipEmailVerification ? true : false, // Пропускаем верификацию если нужно
+    });
+
+    this.logger.info(`Ward user created internally: ${user.id}`, {
+      userId: user.id,
+      email: user.email,
+      phone: user.phone,
+    });
+
+    return {
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+        },
+      },
+      message: 'Ward user created successfully',
     };
   }
 

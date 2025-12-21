@@ -13,9 +13,21 @@ export const useWardsStore = defineStore('wards', () => {
     error.value = null;
     try {
       const response = await wardsApi.getWards();
-      wards.value = response.data;
+      // API Gateway может возвращать { success: true, data: [...] } или напрямую массив
+      if (response?.success && response?.data) {
+        wards.value = response.data;
+      } else if (Array.isArray(response?.data)) {
+        wards.value = response.data;
+      } else if (Array.isArray(response)) {
+        wards.value = response;
+      } else {
+        console.warn('Unexpected response format:', response);
+        wards.value = [];
+      }
     } catch (err: any) {
+      console.error('Error fetching wards:', err);
       error.value = err.response?.data?.message || 'Ошибка загрузки подопечных';
+      wards.value = [];
     } finally {
       isLoading.value = false;
     }
@@ -26,10 +38,21 @@ export const useWardsStore = defineStore('wards', () => {
     error.value = null;
     try {
       const response = await wardsApi.getWard(wardId);
-      currentWard.value = response.data;
-      return response.data;
+      // API Gateway может возвращать { success: true, data: {...} } или напрямую объект
+      if (response?.success && response?.data) {
+        currentWard.value = response.data;
+        return response.data;
+      } else if (response?.data) {
+        currentWard.value = response.data;
+        return response.data;
+      } else {
+        currentWard.value = response as any;
+        return response as any;
+      }
     } catch (err: any) {
+      console.error('Error fetching ward:', err);
       error.value = err.response?.data?.message || 'Ошибка загрузки подопечного';
+      currentWard.value = null;
       throw err;
     } finally {
       isLoading.value = false;

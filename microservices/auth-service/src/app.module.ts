@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './infrastructure/controllers/auth.controller';
+import { InternalController } from './infrastructure/controllers/internal.controller';
 import { HealthController } from './infrastructure/controllers/health.controller';
 import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { AuthService } from './infrastructure/services/auth.service';
@@ -37,7 +38,7 @@ import { EmailService } from './infrastructure/services/email.service';
       },
     }),
   ],
-  controllers: [AuthController, HealthController, MetricsController],
+  controllers: [AuthController, InternalController, HealthController, MetricsController],
   providers: [
     AuthService,
     UserRepository,

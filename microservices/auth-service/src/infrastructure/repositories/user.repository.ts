@@ -62,28 +62,52 @@ export class UserRepository {
   }
 
   async create(data: {
+    id?: string; // Опциональный ID (для внутреннего создания)
     email: string;
     passwordHash: string;
     fullName: string;
     phone?: string;
     role: UserRole;
     organizationId?: string;
+    emailVerified?: boolean;
   }): Promise<User> {
     const db = getDatabaseConnection();
-    const result = await db.query(
-      `INSERT INTO users (email, password_hash, full_name, phone, role, organization_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [
-        data.email,
-        data.passwordHash,
-        data.fullName,
-        data.phone || null,
-        data.role,
-        data.organizationId || null,
-      ],
-    );
-    return this.mapRowToUser(result.rows[0]);
+    
+    // Если ID указан, используем его, иначе генерируем автоматически
+    if (data.id) {
+      const result = await db.query(
+        `INSERT INTO users (id, email, password_hash, full_name, phone, role, organization_id, email_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING *`,
+        [
+          data.id,
+          data.email,
+          data.passwordHash,
+          data.fullName,
+          data.phone || null,
+          data.role,
+          data.organizationId || null,
+          data.emailVerified !== undefined ? data.emailVerified : false,
+        ],
+      );
+      return this.mapRowToUser(result.rows[0]);
+    } else {
+      const result = await db.query(
+        `INSERT INTO users (email, password_hash, full_name, phone, role, organization_id, email_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING *`,
+        [
+          data.email,
+          data.passwordHash,
+          data.fullName,
+          data.phone || null,
+          data.role,
+          data.organizationId || null,
+          data.emailVerified !== undefined ? data.emailVerified : false,
+        ],
+      );
+      return this.mapRowToUser(result.rows[0]);
+    }
   }
 
   async findByEmail(email: string, organizationId?: string): Promise<User | null> {

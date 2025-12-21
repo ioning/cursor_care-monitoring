@@ -48,6 +48,10 @@ export class PredictionRepository {
       )
     `);
 
+    // Backward-compatible schema upgrades (older migrations created a minimal predictions table)
+    await db.query(`ALTER TABLE predictions ADD COLUMN IF NOT EXISTS risk_score DECIMAL(5,3)`);
+    await db.query(`ALTER TABLE predictions ADD COLUMN IF NOT EXISTS severity VARCHAR(20)`);
+
     // Create indexes for better query performance
     await db.query(`
       CREATE INDEX IF NOT EXISTS idx_predictions_ward_type 

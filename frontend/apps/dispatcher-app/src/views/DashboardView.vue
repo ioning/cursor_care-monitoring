@@ -111,17 +111,17 @@
     </div>
 
     <!-- Контрактные СМП и стоимость услуг -->
-    <SMPCostSummary />
+    <!-- <SMPCostSummary /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useCallsStore } from '../stores/calls';
-import SMPCostSummary from '../components/SMPCostSummary.vue';
+// import SMPCostSummary from '../components/SMPCostSummary.vue';
 
 const router = useRouter();
 const callsStore = useCallsStore();
@@ -163,15 +163,21 @@ async function refreshData() {
   ]);
 }
 
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
 onMounted(() => {
   refreshData();
   
   // Auto-refresh every 5 seconds
-  const interval = setInterval(() => {
+  refreshInterval = setInterval(() => {
     refreshData();
   }, 5000);
+});
 
-  return () => clearInterval(interval);
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
 });
 </script>
 
@@ -179,147 +185,244 @@ onMounted(() => {
 .dashboard {
   max-width: 1400px;
   margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .stat-card {
   background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: var(--shadow);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
   text-align: center;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card.priority-critical {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.stat-card.priority-critical::before {
+  background: var(--gradient-emergency);
 }
 
 .stat-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  font-size: 3rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.stat-card.priority-critical .stat-value {
+  background: var(--gradient-emergency);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stat-label {
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stat-trend {
-  margin-top: 0.75rem;
-  font-size: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  color: var(--text-secondary);
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--text-tertiary);
 }
 
 .trend-up {
-  color: var(--success, #10b981);
+  color: var(--success-color);
+  font-weight: 600;
 }
 
 .trend-critical {
-  color: var(--error, #ef4444);
+  color: var(--danger-color);
+  font-weight: 600;
+  animation: pulse 2s infinite;
 }
 
 .trend-success {
-  color: var(--success, #10b981);
+  color: var(--success-color);
+  font-weight: 600;
 }
 
 .trend-value {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .section h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .calls-list {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .call-card {
   background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: var(--shadow);
+  padding: 1.75rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.call-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .call-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+}
+
+.call-card:hover::before {
+  opacity: 1;
+}
+
+.call-card.priority-critical {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, var(--card-bg) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+  }
 }
 
 .call-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .call-body h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
 }
 
 .call-body p {
   color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
 }
 
 .call-time {
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  margin-top: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
 }
 
 .call-actions {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .loading,
 .empty {
   text-align: center;
-  padding: 2rem;
+  padding: 4rem 2rem;
   color: var(--text-secondary);
+  font-size: 1.125rem;
 }
 </style>
-
-
-  margin-bottom: 2rem;
-}
-
-.section h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.calls-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.call-card {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: var(--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

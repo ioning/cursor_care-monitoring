@@ -41,9 +41,9 @@
       </div>
 
       <!-- Current Metrics -->
-      <div v-if="latestTelemetry" class="card">
+      <div class="card">
         <h3 class="card-title">Текущие показатели</h3>
-        <div class="metrics-grid">
+        <div v-if="latestTelemetry && latestTelemetry.metrics" class="metrics-grid">
           <div
             v-for="(metric, key) in latestTelemetry.metrics"
             :key="key"
@@ -57,6 +57,10 @@
               Качество: {{ (metric.qualityScore * 100).toFixed(0) }}%
             </div>
           </div>
+        </div>
+        <div v-else class="empty-state">
+          <p>Нет данных о показателях</p>
+          <p class="empty-hint">Данные появятся после подключения устройства или мобильного приложения</p>
         </div>
       </div>
 
@@ -200,9 +204,20 @@ const handleAcknowledge = async (alertId: string) => {
 const loadLatestTelemetry = async () => {
   try {
     const response = await telemetryApi.getLatestTelemetry(wardId);
-    latestTelemetry.value = response.data;
-  } catch (error) {
+    if (response && response.data) {
+      latestTelemetry.value = response.data;
+    } else {
+      console.warn('No telemetry data received', response);
+      latestTelemetry.value = null;
+    }
+  } catch (error: any) {
     console.error('Error loading telemetry:', error);
+    // Показываем более детальную информацию об ошибке
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    latestTelemetry.value = null;
   }
 };
 

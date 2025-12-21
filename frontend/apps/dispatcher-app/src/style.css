@@ -5,28 +5,64 @@
 }
 
 :root {
-  --primary-color: #dc2626;
-  --primary-dark: #991b1b;
-  --primary-light: #fca5a5;
+  /* Premium Dark Theme Colors - Emergency/Dispatcher Theme */
+  --primary-color: #ef4444;
+  --primary-dark: #dc2626;
+  --primary-light: #f87171;
   --secondary-color: #1f2937;
+  --accent: #f59e0b;
+  
+  /* Status Colors */
   --success-color: #10b981;
+  --success-dark: #059669;
   --warning-color: #f59e0b;
+  --warning-dark: #d97706;
   --danger-color: #ef4444;
+  --danger-dark: #dc2626;
   --info-color: #3b82f6;
-  --bg-color: #f9fafb;
-  --card-bg: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --border-color: #e5e7eb;
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --info-dark: #2563eb;
+  
+  /* Dark Theme Backgrounds */
+  --bg-color: #0a0e1a;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #252b3d;
+  --card-bg: #1a1f2e;
+  --card-bg-hover: #252b3d;
+  --bg-overlay: rgba(10, 14, 26, 0.9);
+  
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* Borders */
+  --border-color: #334155;
+  --border-hover: #475569;
+  
+  /* Shadows - Premium with glow effects */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(239, 68, 68, 0.3);
+  --shadow-glow-primary: 0 0 30px rgba(239, 68, 68, 0.5);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #dc2626 100%);
+  --gradient-card: linear-gradient(135deg, #1a1f2e 0%, #252b3d 100%);
+  --gradient-emergency: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-color);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(239, 68, 68, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 50%);
   color: var(--text-primary);
   line-height: 1.6;
+  min-height: 100vh;
 }
 
 #app {
@@ -36,101 +72,199 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
 }
 
+/* Premium Buttons */
 .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background: var(--gradient-primary);
   color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
 }
 
 .btn-secondary {
-  background-color: var(--secondary-color);
-  color: white;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
 }
 
 .btn-success {
-  background-color: var(--success-color);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
 
 .btn-warning {
-  background-color: var(--warning-color);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
 .btn-danger {
-  background-color: var(--danger-color);
+  background: var(--gradient-emergency);
   color: white;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
 }
 
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+/* Premium Cards */
 .card {
   background: var(--card-bg);
-  border-radius: 0.5rem;
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--primary-color);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+/* Premium Badges */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.375rem 0.875rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .badge-critical {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background: var(--gradient-emergency);
+  color: white;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+  }
 }
 
 .badge-high {
-  background-color: #fef3c7;
-  color: #92400e;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
 }
 
 .badge-medium {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
 }
 
 .badge-low {
-  background-color: #e5e7eb;
-  color: #374151;
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
 }
 
 .status-created {
   color: var(--info-color);
+  font-weight: 600;
 }
 
 .status-assigned {
   color: var(--warning-color);
+  font-weight: 600;
 }
 
 .status-in_progress {
   color: var(--primary-color);
+  font-weight: 600;
 }
 
 .status-resolved {
   color: var(--success-color);
+  font-weight: 600;
 }
 
 .status-canceled {
@@ -139,6 +273,7 @@ body {
 
 .priority-critical {
   border-left: 4px solid var(--danger-color);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .priority-high {
@@ -153,3 +288,79 @@ body {
   border-left: 4px solid var(--text-secondary);
 }
 
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Premium Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Loading States */
+.loading,
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.loading::after {
+  content: '...';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
