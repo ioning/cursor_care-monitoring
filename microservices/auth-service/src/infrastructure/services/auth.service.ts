@@ -9,8 +9,9 @@ import { EmailService } from './email.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { VerifyEmailDto, ResendVerificationCodeDto } from '../dto/verify-email.dto';
-import { createLogger } from '../../../../../shared/libs/logger';
-import { createAuditLogger } from '../../../../../shared/libs/audit-logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
+import { createAuditLogger } from '@care-monitoring/shared/libs/audit-logger';
+import { UserRole } from '@care-monitoring/shared/types/common.types';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +40,32 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
+    // Определяем организацию по серийному номеру устройства (для guardian и ward)
+    let organizationId = registerDto.organizationId;
+    if (!organizationId && registerDto.deviceSerialNumber && (registerDto.role === 'guardian' || registerDto.role === 'ward')) {
+      try {
+        organizationId = await this.getOrganizationByDeviceSerialNumber(registerDto.deviceSerialNumber);
+        this.logger.info(`User assigned to organization by device serial number`, {
+          email: registerDto.email,
+          role: registerDto.role,
+          serialNumber: registerDto.deviceSerialNumber,
+          organizationId,
+        });
+      } catch (error: any) {
+        this.logger.warn(`Failed to determine organization for user registration`, {
+          email: registerDto.email,
+          serialNumber: registerDto.deviceSerialNumber,
+          error: error.message,
+        });
+        // Продолжаем регистрацию без организации (будет использована primary)
+      }
+    }
+
+    // Если организация не определена, используем primary
+    if (!organizationId) {
+      organizationId = await this.getPrimaryOrganizationId();
+    }
+
     const passwordHash = await this.passwordService.hash(registerDto.password);
     const user = await this.userRepository.create({
       email: registerDto.email,
@@ -46,6 +73,7 @@ export class AuthService {
       fullName: registerDto.fullName,
       phone: registerDto.phone,
       role: registerDto.role,
+      organizationId,
       emailVerified: false,
     });
 
@@ -107,6 +135,7 @@ export class AuthService {
     organizationId?: string;
     skipEmailVerification?: boolean;
   }) {
+    const role = this.parseUserRole(data.role);
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -125,7 +154,7 @@ export class AuthService {
       passwordHash,
       fullName: data.fullName,
       phone: data.phone,
-      role: data.role,
+      role,
       organizationId: data.organizationId,
       emailVerified: data.skipEmailVerification ? true : false, // Пропускаем верификацию если нужно
     });
@@ -197,6 +226,14 @@ export class AuthService {
       },
       message: 'Email verified successfully',
     };
+  }
+
+  private parseUserRole(role: string): UserRole {
+    const allowed = new Set<string>(Object.values(UserRole));
+    if (!allowed.has(role)) {
+      throw new BadRequestException('Invalid role');
+    }
+    return role as UserRole;
   }
 
   async resendVerificationCode(resendDto: ResendVerificationCodeDto) {
@@ -355,8 +392,76 @@ export class AuthService {
         role: user.role,
         emailVerified: user.emailVerified,
         createdAt: user.createdAt,
+        organizationId: user.organizationId,
       },
     };
+  }
+
+  /**
+   * Get organization ID by device serial number
+   * Returns primary organization ID if not found
+   */
+  private async getOrganizationByDeviceSerialNumber(serialNumber: string): Promise<string> {
+    try {
+      const organizationServiceUrl = process.env.ORGANIZATION_SERVICE_URL || 'http://localhost:3012';
+      const response = await fetch(
+        `${organizationServiceUrl}/organizations/serial-number/${encodeURIComponent(serialNumber)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.id) {
+          return data.data.id;
+        }
+      }
+
+      // Fallback to primary organization
+      return this.getPrimaryOrganizationId();
+    } catch (error: any) {
+      this.logger.warn(`Failed to get organization by serial number: ${serialNumber}`, {
+        error: error.message,
+      });
+      return this.getPrimaryOrganizationId();
+    }
+  }
+
+  /**
+   * Get primary organization ID (default for unassigned users)
+   */
+  private async getPrimaryOrganizationId(): Promise<string> {
+    try {
+      const organizationServiceUrl = process.env.ORGANIZATION_SERVICE_URL || 'http://localhost:3012';
+      const response = await fetch(`${organizationServiceUrl}/organizations/slug/primary`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.id) {
+          return data.data.id;
+        }
+      }
+
+      // Fallback to default UUID from migration
+      return '00000000-0000-0000-0000-000000000000';
+    } catch (error: any) {
+      this.logger.warn('Failed to get primary organization, using default UUID', {
+        error: error.message,
+      });
+      // Return default UUID from migration
+      return '00000000-0000-0000-0000-000000000000';
+    }
   }
 
   async validateUser(email: string, password: string): Promise<any> {

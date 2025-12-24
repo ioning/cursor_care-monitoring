@@ -8,6 +8,8 @@
       <button class="ghost" @click="refresh">Принудительный health-check</button>
     </header>
 
+    <ServicesHealthBoard />
+
     <RealtimeMetrics />
 
     <div class="grid">
@@ -23,6 +25,7 @@ import { onMounted } from 'vue';
 import DatabaseInsights from '@/components/monitoring/DatabaseInsights.vue';
 import IntegrationStatus from '@/components/monitoring/IntegrationStatus.vue';
 import RealtimeMetrics from '@/components/monitoring/RealtimeMetrics.vue';
+import ServicesHealthBoard from '@/components/monitoring/ServicesHealthBoard.vue';
 import { useSystemStore } from '@/stores/system';
 
 const store = useSystemStore();

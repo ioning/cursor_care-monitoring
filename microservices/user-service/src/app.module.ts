@@ -30,9 +30,10 @@ import { IntegrationServiceClient } from './infrastructure/clients/integration-s
     PassportModule,
     JwtModule.registerAsync({
       useFactory: () => {
-        const jwtSecret = process.env.JWT_SECRET;
-        if (!jwtSecret) {
-          throw new Error('JWT_SECRET environment variable is required');
+        const jwtSecret = process.env.JWT_SECRET || 'please-change-me';
+        if (!process.env.JWT_SECRET) {
+          // eslint-disable-next-line no-console
+          console.warn('[user-service] JWT_SECRET is not set; using default from env.example. Set JWT_SECRET for real auth.');
         }
         return {
           secret: jwtSecret,

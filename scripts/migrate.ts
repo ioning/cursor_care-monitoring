@@ -22,11 +22,23 @@ async function runMigrations() {
   const command = process.argv[2] || 'up';
   const serviceName = process.argv[3];
 
+  // On Windows it's common to have global DB_* environment variables set (e.g. DB_USER=postgres),
+  // which breaks local docker-compose defaults (cms_user/cms_password). Prefer POSTGRES_* when present,
+  // and ignore DB_USER=postgres style globals.
+  const safeDbUser =
+    process.env.POSTGRES_USER ||
+    (process.env.DB_USER && process.env.DB_USER !== 'postgres' ? process.env.DB_USER : undefined) ||
+    'cms_user';
+  const safeDbPassword =
+    process.env.POSTGRES_PASSWORD ||
+    (process.env.DB_PASSWORD && process.env.DB_USER !== 'postgres' ? process.env.DB_PASSWORD : undefined) ||
+    'cms_password';
+
   const config = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
-    user: process.env.DB_USER || 'cms_user',
-    password: process.env.DB_PASSWORD || 'cms_password',
+    user: safeDbUser,
+    password: safeDbPassword,
   };
 
   if (serviceName) {

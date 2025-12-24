@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, WebSocket } from 'ws';
 import { Logger } from '@nestjs/common';
-import { createLogger } from '../../../shared/libs/logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
 
 type ChannelPayload = unknown;
 

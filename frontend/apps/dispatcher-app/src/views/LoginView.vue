@@ -1,7 +1,10 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1>🚨 Dispatcher</h1>
+      <div class="login-logo">
+        <img src="/logo.jpg" alt="Care Monitoring" class="logo-image" />
+        <h1>Dispatcher</h1>
+      </div>
       <h2>Вход в систему</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
@@ -130,11 +133,25 @@ async function handleLogin() {
   border-radius: 20px 20px 0 0;
 }
 
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.logo-image {
+  height: 2.5rem;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-card h1 {
   text-align: center;
   font-size: 2.5rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin: 0;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
-import { createLogger } from '../../../../../shared/libs/logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
 
 export interface CreateWardUserDto {
   id: string; // Ward ID (будет использован как User ID)

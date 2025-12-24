@@ -27,6 +27,7 @@
     "dev:admin": "cd frontend/apps/admin-app && npm run dev",
     "dev:landing": "cd frontend/apps/landing-app && npm run dev",
     "dev:all": "concurrently \"npm run dev:gateway\" \"npm run dev:services\" \"npm run dev:frontend\"",
+    "dev:all:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-all-clean.ps1",
     "db:migrate": "node scripts/migrate.js",
     "db:migrate:up": "node scripts/migrate.js up",
     "db:migrate:down": "node scripts/migrate.js down",

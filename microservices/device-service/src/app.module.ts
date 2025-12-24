@@ -1,5 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DeviceController } from './infrastructure/controllers/device.controller';
@@ -9,6 +10,7 @@ import { MetricsController } from './infrastructure/controllers/metrics.controll
 import { DeviceService } from './application/services/device.service';
 import { DeviceRepository } from './infrastructure/repositories/device.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { OrganizationServiceClient } from './infrastructure/clients/organization-service.client';
 
 @Module({
   imports: [
@@ -16,12 +18,14 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       isGlobal: true,
       envFilePath: ['.env', '.env.local'],
     }),
+    HttpModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: () => {
-        const jwtSecret = process.env.JWT_SECRET;
-        if (!jwtSecret) {
-          throw new Error('JWT_SECRET environment variable is required');
+        const jwtSecret = process.env.JWT_SECRET || 'please-change-me';
+        if (!process.env.JWT_SECRET) {
+          // eslint-disable-next-line no-console
+          console.warn('[device-service] JWT_SECRET is not set; using default from env.example. Set JWT_SECRET for real auth.');
         }
         return {
           secret: jwtSecret,
@@ -30,7 +34,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     }),
   ],
   controllers: [DeviceController, InternalController, HealthController, MetricsController],
-  providers: [DeviceService, DeviceRepository, JwtStrategy],
+  providers: [DeviceService, DeviceRepository, JwtStrategy, OrganizationServiceClient],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly deviceRepository: DeviceRepository) {}

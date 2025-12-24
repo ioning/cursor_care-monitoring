@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @ApiTags('devices')
 @Controller('devices')

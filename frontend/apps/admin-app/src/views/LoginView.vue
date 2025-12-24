@@ -2,12 +2,17 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h1>⚙️ Admin Panel</h1>
+        <div class="login-logo">
+          <img src="/logo.jpg" alt="Care Monitoring" class="logo-image" />
+          <h1>Admin Panel</h1>
+        </div>
         <h2>Вход в систему</h2>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
-        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
 
         <div class="form-group">
           <label for="email">Email</label>
@@ -68,10 +73,36 @@ onMounted(async () => {
 
 async function handleLogin() {
   try {
-    await authStore.login(email.value, password.value);
-    router.push('/');
-  } catch (err) {
-    // Ошибка уже обработана в store
+    // Вызываем login - ошибки обрабатываются в store
+    const result = await authStore.login(email.value, password.value);
+    
+    console.log('handleLogin - result:', result);
+    console.log('handleLogin - authStore.user:', authStore.user);
+    console.log('handleLogin - isAuthenticated:', authStore.isAuthenticated);
+    console.log('handleLogin - token:', localStorage.getItem('accessToken') ? 'present' : 'missing');
+    
+    // Проверяем что login вернул успешный результат
+    if (result && authStore.user) {
+      console.log('handleLogin - attempting redirect to /');
+      // Даем Vue Router немного времени на обновление store
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Редирект только при успешном входе
+      try {
+        await router.push('/');
+        console.log('handleLogin - redirect successful');
+      } catch (redirectError) {
+        console.error('handleLogin - redirect error:', redirectError);
+        // Попробуем альтернативный способ редиректа
+        window.location.href = '/';
+      }
+    } else {
+      console.error('Login failed: no user returned', { result, user: authStore.user });
+    }
+  } catch (err: any) {
+    // Ошибка уже обработана в store и отображается через computed error
+    console.error('Login error caught in handleLogin:', err);
+    // Не делаем редирект при ошибке - остаемся на странице входа
   }
 }
 </script>
@@ -102,9 +133,23 @@ async function handleLogin() {
   margin-bottom: 2rem;
 }
 
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.logo-image {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-header h1 {
   font-size: 2rem;
-  margin-bottom: 0.5rem;
+  margin: 0;
   color: #fff;
 }
 

@@ -1,7 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { register } from '../../../shared/libs/metrics';
+import { register } from '@care-monitoring/shared/libs/metrics';
 
 @ApiTags('metrics')
 @Controller()

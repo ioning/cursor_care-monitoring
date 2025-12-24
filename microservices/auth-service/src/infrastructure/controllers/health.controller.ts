@@ -1,9 +1,9 @@
 import { Controller, Get, HttpStatus, HttpException, Inject } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { createLogger } from '../../../../../shared/libs/logger';
-import { getDatabaseConnection } from '../../../../../shared/libs/database';
-import { getRedisClient } from '../../../../../shared/libs/redis';
-import { getChannel } from '../../../../../shared/libs/rabbitmq';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
+import { getDatabaseConnection } from '@care-monitoring/shared/libs/database';
+import { getRedisClient } from '@care-monitoring/shared/libs/redis';
+import { getChannel } from '@care-monitoring/shared/libs/rabbitmq';
 
 const logger = createLogger({ serviceName: 'health-check' });
 

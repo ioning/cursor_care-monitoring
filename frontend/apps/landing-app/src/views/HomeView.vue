@@ -4,7 +4,7 @@
       <div class="container">
         <div class="nav-content">
           <div class="logo">
-            <span class="logo-icon">🏥</span>
+            <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
             <span class="logo-text">Care Monitoring</span>
           </div>
           <div class="nav-links">
@@ -780,7 +780,7 @@
         <div class="footer-content">
           <div class="footer-section">
             <div class="footer-logo">
-              <span class="logo-icon">🏥</span>
+              <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
               <span class="logo-text">Care Monitoring</span>
             </div>
             <p class="footer-description">
@@ -1110,7 +1110,9 @@ onMounted(() => {
 }
 
 .logo-icon {
-  font-size: 2rem;
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -2219,7 +2221,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 

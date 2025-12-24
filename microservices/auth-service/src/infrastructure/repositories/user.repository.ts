@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { createDatabaseConnection, getDatabaseConnection } from '../../../../../shared/libs/database';
-import { UserRole } from '../../../../../shared/types/common.types';
+import { createDatabaseConnection, getDatabaseConnection } from '@care-monitoring/shared/libs/database';
+import { UserRole } from '@care-monitoring/shared/types/common.types';
 
 export interface User {
   id: string;
@@ -20,12 +20,17 @@ export interface User {
 @Injectable()
 export class UserRepository {
   async initialize() {
+    // IMPORTANT:
+    // On Windows it's common to have global DB_* environment variables set (e.g. DB_USER=postgres),
+    // which breaks local docker-compose defaults (cms_user/cms_password). For auth-service we prefer
+    // service-scoped variables first, then safe defaults.
     const db = createDatabaseConnection({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      database: process.env.DB_NAME || 'auth_db',
-      user: process.env.DB_USER || 'cms_user',
-      password: process.env.DB_PASSWORD || 'cms_password',
+      host: process.env.AUTH_DB_HOST || process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.AUTH_DB_PORT || process.env.DB_PORT || '5432'),
+      database: process.env.AUTH_DB_NAME || process.env.DB_NAME || 'auth_db',
+      user: process.env.AUTH_DB_USER || 'cms_user',
+      password: process.env.AUTH_DB_PASSWORD || 'cms_password',
+      application_name: 'auth-service',
     });
 
     // Create users table if not exists

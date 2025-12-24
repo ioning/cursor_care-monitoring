@@ -2,7 +2,8 @@
   <div class="layout">
     <nav class="navbar">
       <div class="navbar-brand">
-        <h1>🚨 Dispatcher</h1>
+        <img src="/logo.jpg" alt="Care Monitoring" class="navbar-logo" />
+        <h1>Dispatcher</h1>
       </div>
       <div class="navbar-nav">
         <router-link to="/dashboard" class="nav-link">Панель</router-link>
@@ -63,11 +64,24 @@ function handleLogout() {
   z-index: -1;
 }
 
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
 .navbar-brand h1 {
   font-size: 1.75rem;
   font-weight: 800;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   letter-spacing: -0.5px;
+  margin: 0;
 }
 
 .navbar-nav {

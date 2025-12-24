@@ -3,8 +3,8 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagg
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { GatewayConfig } from '../config/gateway.config';
-import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
-import { TenantGuard } from '../../../shared/guards/tenant.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { TenantGuard } from '../guards/tenant.guard';
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -40,6 +40,15 @@ export class OrganizationController {
   @ApiResponse({ status: 200, description: 'Organization retrieved successfully' })
   async getOrganizationBySlug(@Param('slug') slug: string) {
     const url = `${this.gatewayConfig.getOrganizationServiceUrl()}/organizations/slug/${slug}`;
+    const response = await firstValueFrom(this.httpService.get(url));
+    return response.data;
+  }
+
+  @Get('serial-number/:serialNumber')
+  @ApiOperation({ summary: 'Get organization by device serial number (internal)' })
+  @ApiResponse({ status: 200, description: 'Organization retrieved successfully' })
+  async getOrganizationBySerialNumber(@Param('serialNumber') serialNumber: string) {
+    const url = `${this.gatewayConfig.getOrganizationServiceUrl()}/organizations/serial-number/${encodeURIComponent(serialNumber)}`;
     const response = await firstValueFrom(this.httpService.get(url));
     return response.data;
   }

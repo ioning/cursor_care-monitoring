@@ -4,7 +4,7 @@
       <div class="container">
         <div class="nav-content">
           <div class="logo">
-            <span class="logo-icon">🏥</span>
+            <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
             <span class="logo-text">Care Monitoring</span>
           </div>
           <div class="nav-links">
@@ -578,7 +578,7 @@
         <div class="footer-content">
           <div class="footer-section">
             <div class="footer-logo">
-              <span class="logo-icon">🏥</span>
+              <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
               <span class="logo-text">Care Monitoring</span>
             </div>
             <p class="footer-description">
@@ -672,7 +672,9 @@ const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http:/
 }
 
 .logo-icon {
-  font-size: 2rem;
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-links {

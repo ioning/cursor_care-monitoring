@@ -38,6 +38,7 @@ export class OrganizationController {
       billingEmail?: string;
       contactEmail?: string;
       contactPhone?: string;
+      deviceSerialNumbers?: string[];
       trialDays?: number;
     },
   ) {
@@ -71,6 +72,18 @@ export class OrganizationController {
   @ApiResponse({ status: 200, description: 'Organization retrieved successfully' })
   async getOrganizationBySlug(@Param('slug') slug: string) {
     const organization = await this.organizationService.getOrganizationBySlug(slug);
+
+    return {
+      success: true,
+      data: organization,
+    };
+  }
+
+  @Get('serial-number/:serialNumber')
+  @ApiOperation({ summary: 'Get organization by device serial number' })
+  @ApiResponse({ status: 200, description: 'Organization retrieved successfully' })
+  async getOrganizationBySerialNumber(@Param('serialNumber') serialNumber: string) {
+    const organization = await this.organizationService.getOrganizationBySerialNumber(serialNumber);
 
     return {
       success: true,

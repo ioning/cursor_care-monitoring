@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { createLogger } from '../../shared/libs/logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
 
 async function bootstrap() {
   const logger = createLogger({ serviceName: 'api-gateway' });

@@ -3,7 +3,10 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1>Care Monitoring</h1>
+          <div class="login-logo">
+            <img src="/logo.jpg" alt="Care Monitoring" class="logo-image" />
+            <h1>Care Monitoring</h1>
+          </div>
           <p>Войдите в систему</p>
         </div>
         <form @submit.prevent="handleLogin" class="login-form">
@@ -95,6 +98,20 @@ const handleLogin = async () => {
   margin-bottom: 2rem;
 }
 
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.logo-image {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-header h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -102,7 +119,7 @@ const handleLogin = async () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .login-header p {

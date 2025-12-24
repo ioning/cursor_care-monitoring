@@ -362,16 +362,3 @@ onMounted(async () => {
   font-size: 0.75rem;
 }
 </style>
-
-
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-}
-</style>
-
-
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-}
-</style>
-

@@ -4,7 +4,7 @@
       <div class="auth-card">
         <div class="auth-header">
           <RouterLink to="/" class="logo">
-            <span class="logo-icon">🏥</span>
+            <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
             <span class="logo-text">Care Monitoring</span>
           </RouterLink>
           <h1 class="auth-title">Регистрация</h1>
@@ -266,7 +266,9 @@ const startResendCooldown = () => {
 }
 
 .logo-icon {
-  font-size: 2rem;
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .auth-title {

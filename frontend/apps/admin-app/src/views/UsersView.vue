@@ -27,9 +27,15 @@ import RoleMatrixDrawer from '@/components/users/RoleMatrixDrawer.vue';
 import UserFilters from '@/components/users/UserFilters.vue';
 import UserTable from '@/components/users/UserTable.vue';
 import { useUsersStore } from '@/stores/users';
+import { useRealtimeChannel } from '@/composables/useRealtimeChannel';
 
 const store = useUsersStore();
 const drawerOpen = ref(false);
+
+// Подключаем realtime обновления для пользователей
+useRealtimeChannel('admin.users', () => {
+  void store.load();
+});
 
 onMounted(() => {
   if (!store.items.length) {

@@ -1,8 +1,8 @@
 <template>
   <aside class="sidebar" :class="{ collapsed }">
     <div class="logo">
-      <span v-if="!collapsed">Care Admin</span>
-      <span v-else>CA</span>
+      <img src="/logo.jpg" alt="Care Monitoring" class="logo-image" :class="{ collapsed }" />
+      <span v-if="!collapsed" class="logo-text">Care Admin</span>
     </div>
 
     <nav class="menu">
@@ -40,6 +40,7 @@ defineEmits<{ (e: 'toggle'): void }>();
 const menuItems = [
   { label: 'Дашборд', path: '/', icon: '📊' },
   { label: 'Пользователи', path: '/users', icon: '👥' },
+  { label: 'Организации', path: '/organizations', icon: '🏢' },
   { label: 'Мониторинг', path: '/monitoring', icon: '🛰️' },
   { label: 'Аналитика', path: '/analytics', icon: '📈' },
   { label: 'AI модели', path: '/ai-models', icon: '🤖' },
@@ -67,11 +68,27 @@ const menuItems = [
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.logo-image {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-image.collapsed {
+  height: 1.5rem;
+}
+
+.logo-text {
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 2rem;
 }
 
 .menu {

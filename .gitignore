@@ -47,6 +47,9 @@ tmp/
 temp/
 *.tmp
 
+# Service management
+.service-jobs/
+
 # Database
 *.sqlite
 *.db

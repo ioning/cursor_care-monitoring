@@ -20,6 +20,7 @@ export class OrganizationService {
     billingEmail?: string;
     contactEmail?: string;
     contactPhone?: string;
+    deviceSerialNumbers?: string[];
     trialDays?: number;
   }): Promise<Organization> {
     // Проверка уникальности slug
@@ -32,6 +33,7 @@ export class OrganizationService {
       ...data,
       features: this.getDefaultFeatures(data.subscriptionTier),
       settings: this.getDefaultSettings(),
+      deviceSerialNumbers: data.deviceSerialNumbers || [],
     });
 
     this.logger.info(`Organization created: ${organization.id}`, {
@@ -57,6 +59,41 @@ export class OrganizationService {
       throw new NotFoundException(`Organization with slug "${slug}" not found`);
     }
     return organization;
+  }
+
+  async getOrganizationBySerialNumber(serialNumber: string): Promise<Organization> {
+    // Ищем организацию по серийному номеру
+    let organization = await this.organizationRepository.findBySerialNumber(serialNumber);
+    
+    // Если не найдена, возвращаем primary организацию
+    if (!organization) {
+      organization = await this.organizationRepository.getPrimaryOrganization();
+      if (!organization) {
+        throw new NotFoundException('Primary organization not found');
+      }
+    }
+    
+    return organization;
+  }
+
+  async addSerialNumbers(organizationId: string, serialNumbers: string[]): Promise<Organization> {
+    const organization = await this.getOrganization(organizationId);
+    const existingNumbers = organization.deviceSerialNumbers || [];
+    const newNumbers = [...new Set([...existingNumbers, ...serialNumbers])]; // Удаляем дубликаты
+    
+    return this.organizationRepository.update(organizationId, {
+      deviceSerialNumbers: newNumbers,
+    });
+  }
+
+  async removeSerialNumbers(organizationId: string, serialNumbers: string[]): Promise<Organization> {
+    const organization = await this.getOrganization(organizationId);
+    const existingNumbers = organization.deviceSerialNumbers || [];
+    const newNumbers = existingNumbers.filter((sn) => !serialNumbers.includes(sn));
+    
+    return this.organizationRepository.update(organizationId, {
+      deviceSerialNumbers: newNumbers,
+    });
   }
 
   async updateOrganization(

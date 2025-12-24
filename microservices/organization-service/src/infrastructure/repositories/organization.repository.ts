@@ -19,6 +19,7 @@ export interface Organization {
   contactEmail?: string;
   contactPhone?: string;
   address?: Record<string, any>; // JSONB
+  deviceSerialNumbers?: string[]; // Массив серийных номеров устройств
   trialEndsAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -47,10 +48,22 @@ export class OrganizationRepository {
         contact_email VARCHAR(255),
         contact_phone VARCHAR(20),
         address JSONB,
+        device_serial_numbers JSONB DEFAULT '[]'::jsonb,
         trial_ends_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
+    `);
+
+    // Add device_serial_numbers column if it doesn't exist (for existing installations)
+    await db.query(`
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS device_serial_numbers JSONB DEFAULT '[]'::jsonb
+    `);
+
+    // Create GIN index for efficient searching
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS idx_organizations_device_serial_numbers 
+      ON organizations USING GIN (device_serial_numbers)
     `);
 
     await db.query(`
@@ -80,6 +93,7 @@ export class OrganizationRepository {
     contactEmail?: string;
     contactPhone?: string;
     address?: Record<string, any>;
+    deviceSerialNumbers?: string[];
     trialDays?: number;
   }): Promise<Organization> {
     const db = getDatabaseConnection();
@@ -91,9 +105,9 @@ export class OrganizationRepository {
       `INSERT INTO organizations (
         name, slug, description, subscription_tier, max_wards, max_dispatchers,
         max_guardians, features, settings, billing_email, contact_email,
-        contact_phone, address, trial_ends_at, status
+        contact_phone, address, device_serial_numbers, trial_ends_at, status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *`,
       [
         data.name,
@@ -109,6 +123,7 @@ export class OrganizationRepository {
         data.contactEmail || null,
         data.contactPhone || null,
         data.address ? JSON.stringify(data.address) : null,
+        JSON.stringify(data.deviceSerialNumbers || []),
         trialEndsAt,
         trialEndsAt ? 'trial' : 'active',
       ],
@@ -132,6 +147,25 @@ export class OrganizationRepository {
       return null;
     }
     return this.mapRowToOrganization(result.rows[0]);
+  }
+
+  async findBySerialNumber(serialNumber: string): Promise<Organization | null> {
+    const db = getDatabaseConnection();
+    // Используем JSONB оператор для поиска в массиве
+    const result = await db.query(
+      `SELECT * FROM organizations 
+       WHERE device_serial_numbers @> $1::jsonb 
+       LIMIT 1`,
+      [JSON.stringify([serialNumber])],
+    );
+    if (result.rows.length === 0) {
+      return null;
+    }
+    return this.mapRowToOrganization(result.rows[0]);
+  }
+
+  async getPrimaryOrganization(): Promise<Organization | null> {
+    return this.findBySlug('primary');
   }
 
   async update(id: string, data: Partial<Organization>): Promise<Organization> {
@@ -258,6 +292,10 @@ export class OrganizationRepository {
       contactEmail: row.contact_email,
       contactPhone: row.contact_phone,
       address: typeof row.address === 'string' ? JSON.parse(row.address) : row.address,
+      deviceSerialNumbers:
+        typeof row.device_serial_numbers === 'string'
+          ? JSON.parse(row.device_serial_numbers)
+          : row.device_serial_numbers || [],
       trialEndsAt: row.trial_ends_at,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

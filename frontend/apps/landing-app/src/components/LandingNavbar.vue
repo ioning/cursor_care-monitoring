@@ -3,7 +3,7 @@
     <div class="container">
       <div class="nav-content">
         <RouterLink to="/" class="logo" @click="closeMobileMenu">
-          <span class="logo-icon">🏥</span>
+          <img src="/logo.jpg" alt="Care Monitoring" class="logo-icon" />
           <span class="logo-text">Care Monitoring</span>
         </RouterLink>
 
@@ -99,7 +99,9 @@ watch(
 }
 
 .logo-icon {
-  font-size: 2rem;
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-links {

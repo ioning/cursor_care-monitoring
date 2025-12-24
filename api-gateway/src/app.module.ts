@@ -15,6 +15,7 @@ import { BillingController } from './controllers/billing.controller';
 import { DispatcherController } from './controllers/dispatcher.controller';
 import { AnalyticsController } from './controllers/analytics.controller';
 import { OrganizationController } from './controllers/organization.controller';
+import { ServicesController } from './controllers/services.controller';
 import { GatewayConfig } from './config/gateway.config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RealtimeGateway } from './gateways/realtime.gateway';
@@ -47,6 +48,7 @@ import { RealtimeGateway } from './gateways/realtime.gateway';
     DispatcherController,
     AnalyticsController,
     OrganizationController,
+    ServicesController,
   ],
   providers: [GatewayConfig, JwtStrategy, RealtimeGateway],
 })

@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { DeviceRepository } from '../../infrastructure/repositories/device.repository';
+import { DeviceRepository, type Device } from '../../infrastructure/repositories/device.repository';
 import { RegisterDeviceDto } from '../../infrastructure/dto/register-device.dto';
 import { UpdateDeviceDto } from '../../infrastructure/dto/update-device.dto';
 import { LinkDeviceDto } from '../../infrastructure/dto/link-device.dto';
+import { OrganizationServiceClient } from '../../infrastructure/clients/organization-service.client';
 import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
@@ -10,11 +11,37 @@ import { randomUUID } from 'crypto';
 export class DeviceService {
   private readonly logger = createLogger({ serviceName: 'device-service' });
 
-  constructor(private readonly deviceRepository: DeviceRepository) {}
+  constructor(
+    private readonly deviceRepository: DeviceRepository,
+    private readonly organizationServiceClient: OrganizationServiceClient,
+  ) {}
 
   async register(userId: string, registerDeviceDto: RegisterDeviceDto) {
     const deviceId = randomUUID();
     const apiKey = this.generateApiKey();
+
+    // Определяем организацию по серийному номеру устройства
+    let organizationId: string | undefined;
+    if (registerDeviceDto.serialNumber) {
+      try {
+        const organization = await this.organizationServiceClient.getOrganizationBySerialNumber(
+          registerDeviceDto.serialNumber,
+        );
+        organizationId = organization.id;
+        this.logger.info(`Device assigned to organization: ${organization.name}`, {
+          deviceId,
+          serialNumber: registerDeviceDto.serialNumber,
+          organizationId: organization.id,
+        });
+      } catch (error: any) {
+        this.logger.warn(`Failed to determine organization for device`, {
+          deviceId,
+          serialNumber: registerDeviceDto.serialNumber,
+          error: error.message,
+        });
+        // Продолжаем регистрацию без организации (будет использована primary)
+      }
+    }
 
     const device = await this.deviceRepository.create({
       id: deviceId,
@@ -27,6 +54,8 @@ export class DeviceService {
       deviceId,
       userId,
       deviceType: registerDeviceDto.deviceType,
+      serialNumber: registerDeviceDto.serialNumber,
+      organizationId,
     });
 
     return {
@@ -34,6 +63,7 @@ export class DeviceService {
       data: {
         ...device,
         apiKey, // Return API key only once during registration
+        organizationId, // Return organization ID for user assignment
       },
       message: 'Device registered successfully',
     };

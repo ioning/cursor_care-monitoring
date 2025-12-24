@@ -9,13 +9,23 @@ import { createRabbitMQConnection } from '../../../shared/libs/rabbitmq';
 async function bootstrap() {
   const logger = createLogger({ serviceName: 'telemetry-service' });
 
+  // Avoid global DB_* (often DB_USER=postgres on Windows). Prefer docker-compose POSTGRES_* defaults.
+  const safeDbUser =
+    process.env.POSTGRES_USER ||
+    (process.env.DB_USER && process.env.DB_USER !== 'postgres' ? process.env.DB_USER : undefined) ||
+    'cms_user';
+  const safeDbPassword =
+    process.env.POSTGRES_PASSWORD ||
+    (process.env.DB_PASSWORD && process.env.DB_USER !== 'postgres' ? process.env.DB_PASSWORD : undefined) ||
+    'cms_password';
+
   // Initialize database
   createDatabaseConnection({
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
     database: process.env.DB_NAME || 'telemetry_db',
-    user: process.env.DB_USER || 'cms_user',
-    password: process.env.DB_PASSWORD || 'cms_password',
+    user: safeDbUser,
+    password: safeDbPassword,
   });
 
   // Initialize RabbitMQ

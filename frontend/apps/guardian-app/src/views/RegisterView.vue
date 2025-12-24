@@ -3,7 +3,10 @@
     <div class="register-container">
       <div class="register-card">
         <div class="register-header">
-          <h1>Care Monitoring</h1>
+          <div class="register-logo">
+            <img src="/logo.jpg" alt="Care Monitoring" class="logo-image" />
+            <h1>Care Monitoring</h1>
+          </div>
           <p>Создайте аккаунт</p>
         </div>
         <form @submit.prevent="handleRegister" class="register-form">
@@ -118,6 +121,20 @@ const handleRegister = async () => {
   margin-bottom: 2rem;
 }
 
+.register-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.logo-image {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+}
+
 .register-header h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -125,7 +142,7 @@ const handleRegister = async () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .register-header p {

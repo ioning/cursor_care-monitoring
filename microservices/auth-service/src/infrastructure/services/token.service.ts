@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '../../../../../shared/types/common.types';
+import { UserRole } from '@care-monitoring/shared/types/common.types';
 
 export interface Tokens {
   accessToken: string;
@@ -28,7 +28,7 @@ export class TokenService {
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
+      secret: process.env.JWT_REFRESH_SECRET || 'please-change-refresh',
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     });
 

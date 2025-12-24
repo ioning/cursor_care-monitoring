@@ -2,6 +2,7 @@
   <div class="main-layout">
     <aside class="sidebar">
       <div class="sidebar-header">
+        <img src="/logo.jpg" alt="Care Monitoring" class="sidebar-logo" />
         <h2>Care Monitoring</h2>
       </div>
       <nav class="sidebar-nav">
@@ -123,6 +124,17 @@ onMounted(() => {
   padding: 2rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar-logo {
+  height: 1.75rem;
+  width: auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar-header h2 {
@@ -135,6 +147,7 @@ onMounted(() => {
   letter-spacing: -0.5px;
   position: relative;
   z-index: 1;
+  margin: 0;
 }
 
 .sidebar-nav {

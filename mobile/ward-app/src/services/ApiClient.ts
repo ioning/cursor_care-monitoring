@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getApiBaseUrl } from '../utils/apiBaseUrl';
 
-const API_BASE_URL = __DEV__
-  ? 'http://localhost:3000/api/v1'
-  : 'https://api.caremonitoring.com/api/v1';
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
   private client: AxiosInstance;
@@ -48,12 +47,30 @@ class ApiClient {
               const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
                 refreshToken,
               });
-              const newToken = response.data.accessToken;
-              await AsyncStorage.setItem('token', newToken);
-              // Retry original request
-              if (error.config) {
-                error.config.headers.Authorization = `Bearer ${newToken}`;
-                return this.client.request(error.config);
+              
+              // Обрабатываем новый формат ответа { success: true, data: { accessToken, refreshToken } }
+              let newToken: string;
+              let newRefreshToken: string | null = null;
+              
+              if (response.data.success && response.data.data) {
+                newToken = response.data.data.accessToken;
+                newRefreshToken = response.data.data.refreshToken;
+              } else {
+                // Fallback для старого формата
+                newToken = response.data.accessToken || response.data.data?.accessToken;
+                newRefreshToken = response.data.refreshToken || response.data.data?.refreshToken;
+              }
+              
+              if (newToken) {
+                await AsyncStorage.setItem('token', newToken);
+                if (newRefreshToken) {
+                  await AsyncStorage.setItem('refreshToken', newRefreshToken);
+                }
+                // Retry original request
+                if (error.config) {
+                  error.config.headers.Authorization = `Bearer ${newToken}`;
+                  return this.client.request(error.config);
+                }
               }
             } catch (refreshError) {
               // Refresh failed, logout

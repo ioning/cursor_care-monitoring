@@ -8,6 +8,7 @@ import AiModelsView from '@/views/AiModelsView.vue';
 import IncidentsView from '@/views/IncidentsView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import BillingView from '@/views/BillingView.vue';
+import OrganizationsView from '@/views/OrganizationsView.vue';
 import LoginView from '@/views/LoginView.vue';
 
 const routes: RouteRecordRaw[] = [
@@ -70,6 +71,12 @@ const routes: RouteRecordRaw[] = [
         component: BillingView,
         meta: { title: 'Биллинг и тарифы', requiresAuth: true },
       },
+      {
+        path: 'organizations',
+        name: 'organizations',
+        component: OrganizationsView,
+        meta: { title: 'Организации', requiresAuth: true },
+      },
     ],
   },
 ];
@@ -85,8 +92,17 @@ router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth !== false;
 
+  console.log('Router guard:', { to: to.path, requiresAuth, user: authStore.user });
+
   // Если маршрут не требует авторизации (например, /login)
   if (!requiresAuth) {
+    next();
+    return;
+  }
+
+  // Если пользователь уже загружен в store, пропускаем checkAuth
+  if (authStore.user && authStore.user.role === 'admin') {
+    console.log('Router guard: user already in store, allowing navigation');
     next();
     return;
   }
@@ -94,17 +110,22 @@ router.beforeEach(async (to, _from, next) => {
   // Проверяем наличие токена
   const token = localStorage.getItem('accessToken');
   if (!token) {
+    console.log('Router guard: no token, redirecting to login');
     next({ name: 'login', query: { redirect: to.fullPath } });
     return;
   }
 
   // Проверяем валидность токена и роль пользователя
+  console.log('Router guard: calling checkAuth');
   const isAuthenticated = await authStore.checkAuth();
+  console.log('Router guard: checkAuth result:', isAuthenticated, 'user:', authStore.user);
   if (!isAuthenticated) {
+    console.log('Router guard: not authenticated, redirecting to login');
     next({ name: 'login', query: { redirect: to.fullPath } });
     return;
   }
 
+  console.log('Router guard: allowing navigation');
   next();
 });
 

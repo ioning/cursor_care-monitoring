@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createDatabaseConnection, getDatabaseConnection } from '../../../../../shared/libs/database';
+import { createDatabaseConnection, getDatabaseConnection } from '@care-monitoring/shared/libs/database';
 
 export interface EmailVerificationCode {
   id: string;
@@ -15,11 +15,12 @@ export interface EmailVerificationCode {
 export class EmailVerificationRepository {
   async initialize() {
     const db = createDatabaseConnection({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      database: process.env.DB_NAME || 'auth_db',
-      user: process.env.DB_USER || 'cms_user',
-      password: process.env.DB_PASSWORD || 'cms_password',
+      host: process.env.AUTH_DB_HOST || process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.AUTH_DB_PORT || process.env.DB_PORT || '5432'),
+      database: process.env.AUTH_DB_NAME || process.env.DB_NAME || 'auth_db',
+      user: process.env.AUTH_DB_USER || 'cms_user',
+      password: process.env.AUTH_DB_PASSWORD || 'cms_password',
+      application_name: 'auth-service',
     });
 
     // In local/dev we may run without migrations; ensure table + indexes exist.

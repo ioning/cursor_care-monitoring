@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { createLogger } from '../../../../../shared/libs/logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
 
 @Injectable()
 export class EmailService {

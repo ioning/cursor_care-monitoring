@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../../../../../shared/types/common.types';
+import { UserRole } from '@care-monitoring/shared/types/common.types';
 
 export class RegisterDto {
   @ApiProperty({ example: 'guardian@example.com' })
@@ -24,5 +24,15 @@ export class RegisterDto {
   @ApiProperty({ enum: UserRole, example: UserRole.GUARDIAN })
   @IsEnum(UserRole)
   role: UserRole;
+
+  @ApiProperty({ required: false, description: 'Organization ID (auto-assigned if device serial number provided)' })
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
+
+  @ApiProperty({ required: false, description: 'Device serial number for auto-assignment to organization' })
+  @IsString()
+  @IsOptional()
+  deviceSerialNumber?: string;
 }
 

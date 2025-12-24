@@ -13,11 +13,15 @@ async function bootstrap() {
 
   // Initialize database
   createDatabaseConnection({
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'user_db',
-    user: process.env.DB_USER || 'cms_user',
-    password: process.env.DB_PASSWORD || 'cms_password',
+    // IMPORTANT:
+    // On developer machines, generic DB_* env vars are often set globally (e.g. DB_USER=postgres),
+    // which breaks local docker-compose defaults (cms_user/cms_password).
+    // Prefer service-scoped vars, then docker-compose vars, then safe defaults.
+    host: process.env.USER_DB_HOST || process.env.POSTGRES_HOST || process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.USER_DB_PORT || process.env.POSTGRES_PORT || process.env.DB_PORT || '5432'),
+    database: process.env.USER_DB_NAME || process.env.POSTGRES_DB || process.env.DB_NAME || 'user_db',
+    user: process.env.USER_DB_USER || process.env.POSTGRES_USER || 'cms_user',
+    password: process.env.USER_DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'cms_password',
   });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {

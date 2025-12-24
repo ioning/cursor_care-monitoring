@@ -49,7 +49,8 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async () => {
   const token = await AsyncStorage.getItem('token');
   if (token) {
     try {
-      const user = await AuthService.getCurrentUser();
+      const userData = await AuthService.getCurrentUser();
+      const user = (userData as any)?.data || userData;
       return { user, token };
     } catch (error) {
       await AsyncStorage.removeItem('token');
@@ -94,7 +95,14 @@ const authSlice = createSlice({
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.token = action.payload.token;
-        state.user = action.payload.user;
+        // getCurrentUser возвращает { success: true, data: { id, email, ... } } или напрямую user объект
+        const userData = action.payload.user?.data || action.payload.user;
+        state.user = userData ? {
+          id: userData.id,
+          email: userData.email,
+          fullName: userData.fullName,
+          role: userData.role,
+        } : null;
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isAuthenticated = false;

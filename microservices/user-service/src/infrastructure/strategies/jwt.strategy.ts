@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { EnvValidator } from '@care-monitoring/shared';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    const jwtSecret = EnvValidator.getRequired('JWT_SECRET');
+    const jwtSecret = process.env.JWT_SECRET || 'please-change-me';
+    if (!process.env.JWT_SECRET) {
+      // eslint-disable-next-line no-console
+      console.warn('[user-service] JWT_SECRET is not set; using default from env.example. Set JWT_SECRET for real auth.');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

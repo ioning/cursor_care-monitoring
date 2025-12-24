@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { createLogger } from '../../../shared/libs/logger';
+import { createLogger } from '@care-monitoring/shared/libs/logger';
 
 async function bootstrap() {
   const logger = createLogger({ serviceName: 'auth-service' });
