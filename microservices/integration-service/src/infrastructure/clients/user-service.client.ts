@@ -90,5 +90,53 @@ export class UserServiceClient {
       return [];
     }
   }
+
+  /**
+   * Get ward push token from notification devices
+   * This is a simplified approach - tries to get token from notification_devices table
+   * If table doesn't exist, returns null (push will be skipped)
+   */
+  async getWardPushToken(wardId: string): Promise<string | null> {
+    try {
+      // Try to query notification_devices table if it exists
+      // The table should be created by integration-service when devices register
+      const { getDatabaseConnection } = require('../../../../../shared/libs/database');
+      const db = getDatabaseConnection();
+      
+      // Check if table exists first
+      const tableCheck = await db.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'notification_devices'
+        )`
+      );
+
+      if (!tableCheck.rows[0]?.exists) {
+        this.logger.warn('notification_devices table does not exist', { wardId });
+        return null;
+      }
+      
+      const result = await db.query(
+        `SELECT token FROM notification_devices 
+         WHERE user_id = $1 AND platform IN ('ios', 'android') 
+         ORDER BY updated_at DESC LIMIT 1`,
+        [wardId]
+      );
+
+      if (result.rows.length > 0) {
+        return result.rows[0].token;
+      }
+
+      return null;
+    } catch (error: any) {
+      // If table doesn't exist or query fails, just log and return null
+      // This is not critical - polling will handle incoming calls
+      this.logger.warn('Failed to fetch ward push token (non-critical)', {
+        wardId,
+        error: error.message,
+      });
+      return null;
+    }
+  }
 }
 

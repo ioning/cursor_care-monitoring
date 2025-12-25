@@ -56,14 +56,16 @@ export class ServicesController {
   @ApiOperation({ summary: 'Get health status of all services' })
   @ApiResponse({ status: 200, description: 'Services health status retrieved successfully' })
   async getAllServicesHealth(@Request() req: any): Promise<{ services: ServiceHealth[] }> {
-    const services = this.getServices();
+    const serviceInfos = this.getServices();
+    
     const healthChecks = await Promise.allSettled(
-      services.map(async (service) => {
+      serviceInfos.map(async (service) => {
         const startTime = Date.now();
         try {
           const response = await firstValueFrom(
             this.httpService.get(`${service.url}/health`, {
               timeout: 5000,
+              validateStatus: () => true, // Accept all status codes
             }),
           );
 
@@ -72,32 +74,60 @@ export class ServicesController {
 
           return {
             name: service.name,
-            status: healthData.status === 'healthy' ? 'healthy' : 'unhealthy',
+            status: healthData?.status === 'ok' || healthData?.status === 'healthy' ? 'healthy' : 'unhealthy',
             latency,
             timestamp: new Date().toISOString(),
-            checks: healthData.checks || {},
+            checks: healthData?.checks || {},
           } as ServiceHealth;
         } catch (error: any) {
+          // Handle AggregateError (multiple errors)
+          let errorMessage = 'Service unavailable';
+          if (error.name === 'AggregateError' && error.errors) {
+            errorMessage = error.errors.map((e: any) => e.message || e.code || 'Unknown error').join('; ');
+          } else if (error.code === 'ECONNREFUSED') {
+            errorMessage = 'Connection refused - service may be down';
+          } else if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+            errorMessage = 'Request timeout';
+          } else if (error.response) {
+            errorMessage = `HTTP ${error.response.status}: ${error.response.statusText}`;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
           return {
             name: service.name,
-            status: 'unhealthy',
+            status: 'unhealthy' as const,
             latency: Date.now() - startTime,
             timestamp: new Date().toISOString(),
-            error: error.message || 'Service unavailable',
+            error: errorMessage,
           } as ServiceHealth;
         }
       }),
     );
 
-    const services = healthChecks.map((result) => {
+    const services: ServiceHealth[] = healthChecks.map((result, index) => {
       if (result.status === 'fulfilled') {
         return result.value;
       }
+      
+      // Handle rejected promise
+      const service = serviceInfos[index];
+      let errorMessage = 'Failed to check service';
+      if (result.reason) {
+        if (result.reason.name === 'AggregateError' && result.reason.errors) {
+          errorMessage = result.reason.errors.map((e: any) => e.message || e.code || 'Unknown error').join('; ');
+        } else if (result.reason.code === 'ECONNREFUSED') {
+          errorMessage = 'Connection refused - service may be down';
+        } else if (result.reason.message) {
+          errorMessage = result.reason.message;
+        }
+      }
+
       return {
-        name: 'Unknown',
+        name: service?.name || 'Unknown',
         status: 'unknown' as const,
         timestamp: new Date().toISOString(),
-        error: result.reason?.message || 'Failed to check service',
+        error: errorMessage,
       } as ServiceHealth;
     });
 

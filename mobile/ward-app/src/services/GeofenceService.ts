@@ -6,15 +6,15 @@ export interface Geofence {
   id: string;
   wardId: string;
   name: string;
-  type: 'circle' | 'polygon';
-  center?: {
-    latitude: number;
-    longitude: number;
-    radius: number; // в метрах
-  };
-  polygon?: Array<{ latitude: number; longitude: number }>;
+  type: 'safe_zone' | 'restricted_zone';
+  shape: 'circle' | 'polygon';
+  centerLatitude?: number | null;
+  centerLongitude?: number | null;
+  radius?: number | null;
+  polygonPoints?: Array<{ latitude: number; longitude: number }> | null;
   enabled: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface GeofenceViolation {
@@ -45,10 +45,10 @@ class GeofenceServiceClass {
   /**
    * Загрузить геозоны для подопечного
    */
-  async loadGeofences(wardId: string): Promise<Geofence[]> {
+  async loadGeofences(wardId: string, options?: { enabled?: boolean }): Promise<Geofence[]> {
     try {
       const response = await apiClient.instance.get(`/locations/geofences`, {
-        params: { wardId, enabled: true },
+        params: { wardId, ...(options?.enabled !== undefined ? { enabled: options.enabled } : {}) },
       });
 
       const geofences = response.data.data || response.data || [];
@@ -68,7 +68,10 @@ class GeofenceServiceClass {
   /**
    * Создать геозону
    */
-  async createGeofence(wardId: string, geofenceData: Omit<Geofence, 'id' | 'createdAt'>): Promise<Geofence> {
+  async createGeofence(
+    wardId: string,
+    geofenceData: Omit<Geofence, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Geofence> {
     try {
       const response = await apiClient.instance.post('/locations/geofences', {
         ...geofenceData,
@@ -94,6 +97,33 @@ class GeofenceServiceClass {
       this.monitoredGeofences.delete(geofenceId);
     } catch (error) {
       console.error('Failed to delete geofence:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Обновить геозону (enabled, name, shape, coordinates)
+   */
+  async updateGeofence(
+    geofenceId: string,
+    patch: Partial<Pick<Geofence, 'enabled' | 'name'>> & {
+      type?: 'safe_zone' | 'restricted_zone';
+      shape?: 'circle' | 'polygon';
+      centerLatitude?: number;
+      centerLongitude?: number;
+      radius?: number;
+      polygonPoints?: Array<{ latitude: number; longitude: number }>;
+    }
+  ): Promise<Geofence | null> {
+    try {
+      const response = await apiClient.instance.patch(`/locations/geofences/${geofenceId}`, patch);
+      const updated = response.data?.data || response.data || null;
+      if (updated) {
+        this.monitoredGeofences.set(geofenceId, updated as Geofence);
+      }
+      return updated;
+    } catch (error) {
+      console.error('Failed to update geofence:', error);
       throw error;
     }
   }
@@ -170,10 +200,12 @@ class GeofenceServiceClass {
     point: { latitude: number; longitude: number },
     geofence: Geofence
   ): boolean {
-    if (geofence.type === 'circle' && geofence.center) {
-      return this.isPointInCircle(point, geofence.center);
-    } else if (geofence.type === 'polygon' && geofence.polygon) {
-      return this.isPointInPolygon(point, geofence.polygon);
+    if (geofence.shape === 'polygon' && geofence.polygonPoints) {
+      return this.isPointInPolygon(point, geofence.polygonPoints);
+    }
+
+    if (geofence.shape === 'circle' && geofence.centerLatitude != null && geofence.centerLongitude != null && geofence.radius != null) {
+      return this.isPointInCircle(point, { latitude: geofence.centerLatitude, longitude: geofence.centerLongitude, radius: geofence.radius });
     }
     return false;
   }

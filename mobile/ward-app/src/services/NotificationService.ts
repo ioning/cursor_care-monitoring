@@ -1,5 +1,6 @@
 import PushNotification from 'react-native-push-notification';
 import { Platform } from 'react-native';
+import { NavigationContainerRef } from '@react-navigation/native';
 import { store } from '../store';
 import { addAlert } from '../store/slices/alertSlice';
 import { apiClient } from './ApiClient';
@@ -12,9 +13,11 @@ interface PushToken {
 class NotificationServiceClass {
   private isInitialized = false;
   private pushToken: string | null = null;
+  private navigationRef: React.RefObject<NavigationContainerRef<any>> | null = null;
 
-  async initialize() {
+  async initialize(navRef?: React.RefObject<NavigationContainerRef<any>>) {
     if (this.isInitialized) return;
+    this.navigationRef = navRef || null;
 
     PushNotification.configure({
       onRegister: async (token) => {
@@ -40,14 +43,16 @@ class NotificationServiceClass {
           store.dispatch(addAlert(notification.data.alert));
         }
 
-        if (notification.data?.type === 'call') {
-          // Обрабатываем входящий звонок
-          // Navigation будет обработан в AppNavigator
+        if (notification.data?.type === 'call' && notification.data?.callId) {
+          // Обрабатываем входящий звонок - навигация к экрану звонка
+          this.navigateToIncomingCall(notification.data.callId);
         }
 
         if (notification.userInteraction) {
           // Пользователь нажал на уведомление
-          // Навигация будет обработана в зависимости от типа
+          if (notification.data?.type === 'call' && notification.data?.callId) {
+            this.navigateToIncomingCall(notification.data.callId);
+          }
         }
       },
       permissions: {
@@ -89,7 +94,7 @@ class NotificationServiceClass {
         (created) => console.log(`General channel created: ${created}`)
       );
 
-      // Канал для вызовов
+      // Канал для вызовов с максимальным приоритетом
       PushNotification.createChannel(
         {
           channelId: 'care-monitoring-calls',
@@ -97,8 +102,10 @@ class NotificationServiceClass {
           channelDescription: 'Уведомления о входящих экстренных вызовах',
           playSound: true,
           soundName: 'default',
-          importance: 5,
+          importance: 5, // Max importance - показывает поверх всех окон
           vibrate: true,
+          // Для Android 8.0+ - показывать поверх всех окон
+          channelShowBadge: true,
         },
         (created) => console.log(`Call channel created: ${created}`)
       );
@@ -173,15 +180,27 @@ class NotificationServiceClass {
   }
 
   /**
-   * Показать уведомление о входящем звонке
+   * Показать уведомление о входящем звонке с максимальным приоритетом
    */
-  showCallNotification(call: any) {
-    this.showLocalNotification(
-      'Входящий вызов',
-      `Новый экстренный вызов от ${call.source || 'системы'}`,
-      { type: 'call', callId: call.id },
-      'care-monitoring-calls'
-    );
+  showCallNotification(call: any, priorityOverlay: boolean = true) {
+    PushNotification.localNotification({
+      channelId: Platform.OS === 'android' ? 'care-monitoring-calls' : undefined,
+      title: 'Входящий вызов',
+      message: `Новый экстренный вызов от ${call.source || 'системы'}`,
+      data: { type: 'call', callId: call.id },
+      playSound: true,
+      soundName: 'default',
+      priority: 'max', // Максимальный приоритет
+      importance: 'high',
+      // Для Android - показывать поверх всех окон
+      ongoing: priorityOverlay, // Нельзя смахнуть
+      autoCancel: false, // Не удаляется автоматически
+      // Для показа поверх всех окон
+      ...(Platform.OS === 'android' && priorityOverlay && {
+        // Дополнительные настройки для Android
+        userInfo: { priority: 'max' },
+      }),
+    });
   }
 
   /**
@@ -214,6 +233,22 @@ class NotificationServiceClass {
    */
   setBadgeCount(count: number) {
     PushNotification.setApplicationIconBadgeNumber(count);
+  }
+
+  /**
+   * Навигация к экрану входящего звонка
+   */
+  private navigateToIncomingCall(callId: string) {
+    if (this.navigationRef?.current?.isReady()) {
+      this.navigationRef.current.navigate('IncomingCall' as never, { callId } as never);
+    } else {
+      // Если навигация еще не готова, ждем немного и пробуем снова
+      setTimeout(() => {
+        if (this.navigationRef?.current?.isReady()) {
+          this.navigationRef.current.navigate('IncomingCall' as never, { callId } as never);
+        }
+      }, 500);
+    }
   }
 }
 

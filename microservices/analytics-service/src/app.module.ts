@@ -11,6 +11,9 @@ import { ReportTemplateService } from './application/services/report-template.se
 import { ReportRepository } from './infrastructure/repositories/report.repository';
 import { ReportTemplateRepository } from './infrastructure/repositories/report-template.repository';
 import { ReportFileRepository } from './infrastructure/repositories/report-file.repository';
+import { TelemetryServiceClient } from './infrastructure/clients/telemetry-service.client';
+import { AlertServiceClient } from './infrastructure/clients/alert-service.client';
+import { UserServiceClient } from './infrastructure/clients/user-service.client';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 
 @Module({
@@ -40,6 +43,9 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     ReportRepository,
     ReportTemplateRepository,
     ReportFileRepository,
+    TelemetryServiceClient,
+    AlertServiceClient,
+    UserServiceClient,
     JwtStrategy,
   ],
 })

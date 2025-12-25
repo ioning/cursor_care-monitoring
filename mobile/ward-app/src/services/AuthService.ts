@@ -44,8 +44,30 @@ export class AuthService {
       throw new Error('Unexpected response format from login endpoint');
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      throw new Error(errorMessage);
+      
+      // Handle network errors (CORS, connection refused, etc.)
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error') || error.message?.includes('Failed to fetch')) {
+        throw new Error('Не удалось подключиться к серверу. Проверьте, что API Gateway запущен на порту 3000 и доступен с вашего устройства.');
+      }
+      
+      // Handle CORS errors
+      if (error.response?.status === 0 || error.message?.includes('CORS')) {
+        throw new Error('Ошибка CORS. Убедитесь, что API Gateway настроен для работы с мобильными приложениями.');
+      }
+      
+      // Handle HTTP errors
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      
+      // Handle validation errors
+      if (error.response?.data?.errors) {
+        const validationErrors = Object.values(error.response.data.errors).flat().join(', ');
+        throw new Error(validationErrors);
+      }
+      
+      // Generic error
+      throw new Error(error.message || 'Ошибка входа. Проверьте email и пароль.');
     }
   }
 

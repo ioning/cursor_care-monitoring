@@ -136,13 +136,15 @@ npm run android
 
 ## Конфигурация
 
-### Переменные окружения
+### API Endpoint
 
-Создайте файл `.env`:
+Базовый URL API определяется автоматически в `src/utils/apiBaseUrl.ts`:
+- **Android emulator**: `http://10.0.2.2:3000/api/v1`
+- **Physical device**: автоматически определяется IP адрес Metro bundler
+- **iOS simulator**: `http://localhost:3000/api/v1`
+- **Production**: `https://api.caremonitoring.com/api/v1`
 
-```
-API_BASE_URL=http://localhost:3000/api/v1
-```
+**Важно:** Убедитесь, что API Gateway запущен и слушает на всех интерфейсах (`0.0.0.0:3000`), а не только на localhost. CORS должен быть настроен для разрешения всех origin'ов в development режиме.
 
 ### Разрешения
 

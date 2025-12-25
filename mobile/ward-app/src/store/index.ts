@@ -5,6 +5,7 @@ import telemetryReducer from './slices/telemetrySlice';
 import locationReducer from './slices/locationSlice';
 import alertReducer from './slices/alertSlice';
 import wardReducer from './slices/wardSlice';
+import settingsReducer from './slices/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     location: locationReducer,
     alert: alertReducer,
     ward: wardReducer,
+    settings: settingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

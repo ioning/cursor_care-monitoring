@@ -107,6 +107,71 @@ export class DispatcherService {
     return stats;
   }
 
+  async createCall(data: {
+    wardId: string;
+    callType?: string;
+    priority?: CallPriority;
+    source?: string;
+    healthSnapshot?: Record<string, any>;
+    locationSnapshot?: Record<string, any>;
+    notes?: string;
+  }) {
+    const callId = randomUUID();
+
+    // Create emergency call
+    const call = await this.callRepository.create({
+      id: callId,
+      wardId: data.wardId,
+      callType: data.callType || 'assistance',
+      priority: data.priority || CallPriority.MEDIUM,
+      status: CallStatus.CREATED,
+      source: data.source || 'dispatcher_app',
+      healthSnapshot: data.healthSnapshot,
+      locationSnapshot: data.locationSnapshot,
+    });
+
+    // Assign to available dispatcher if not already assigned
+    const dispatcher = await this.assignDispatcher(callId);
+
+    // Publish call created event
+    await publishEvent(
+      'care-monitoring.events',
+      'dispatcher.call.created',
+      {
+        eventId: randomUUID(),
+        eventType: 'dispatcher.call.created',
+        timestamp: new Date().toISOString(),
+        version: '1.0',
+        correlationId: randomUUID(),
+        source: 'dispatcher-service',
+        wardId: data.wardId,
+        data: {
+          callId: call.id,
+          callType: call.callType,
+          priority: call.priority,
+          status: call.status,
+          healthSnapshot: call.healthSnapshot,
+          locationSnapshot: call.locationSnapshot,
+          createdAt: call.createdAt.toISOString(),
+        },
+      },
+      { persistent: true },
+    );
+
+    this.logger.info(`Emergency call created: ${callId}`, {
+      callId,
+      wardId: data.wardId,
+      priority: call.priority,
+      dispatcherId: dispatcher?.id,
+    });
+
+    return {
+      success: true,
+      data: call,
+      message: 'Call created successfully',
+    };
+  }
+
   async getCall(callId: string) {
     const call = await this.callRepository.findById(callId);
     if (!call) {

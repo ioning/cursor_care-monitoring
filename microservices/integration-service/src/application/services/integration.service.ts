@@ -182,5 +182,83 @@ export class IntegrationService {
       return [];
     }
   }
+
+  async handleCallCreated(event: any): Promise<void> {
+    const { callId, callType, priority, status } = event.data;
+    const wardId = event.wardId;
+
+    if (!wardId || !callId) {
+      this.logger.warn('CallCreatedEvent missing wardId or callId; skipping notifications', { callId, wardId });
+      return;
+    }
+
+    try {
+      // Get ward push token from notification devices
+      const pushToken = await this.userServiceClient.getWardPushToken(wardId);
+      
+      if (!pushToken) {
+        this.logger.warn('Ward has no push token for call notification', { wardId, callId });
+        return;
+      }
+
+      // Send push notification to ward
+      if (pushToken) {
+        const title = 'Входящий вызов';
+        const body = priority === 'critical' 
+          ? 'Срочный вызов от диспетчера' 
+          : 'Новый вызов от диспетчера';
+
+        try {
+          await this.pushService.send({
+            token: pushToken,
+            title,
+            body,
+            data: {
+              type: 'call',
+              callId,
+              wardId,
+              priority,
+            },
+          });
+
+          await this.notificationRepository.create({
+            id: randomUUID(),
+            userId: wardId,
+            type: 'push',
+            channel: 'push',
+            status: 'sent',
+            content: body,
+            metadata: { callId, wardId, priority },
+          });
+
+          this.logger.info(`Call notification sent to ward`, { callId, wardId });
+        } catch (error: any) {
+          this.logger.error('Failed to send call push notification', {
+            error: error.message,
+            wardId,
+            callId,
+          });
+
+          await this.notificationRepository.create({
+            id: randomUUID(),
+            userId: wardId,
+            type: 'push',
+            channel: 'push',
+            status: 'failed',
+            content: body,
+            metadata: { callId, wardId, error: error.message },
+          });
+        }
+      } else {
+        this.logger.warn('Ward has no push token', { wardId, callId });
+      }
+    } catch (error: any) {
+      this.logger.error('Failed to handle call created event', {
+        error: error.message,
+        wardId,
+        callId,
+      });
+    }
+  }
 }
 

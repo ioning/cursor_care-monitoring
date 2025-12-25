@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { DeviceController } from './infrastructure/controllers/device.controller';
+import { DeviceController, DeviceTelemetryController } from './infrastructure/controllers/device.controller';
 import { InternalController } from './infrastructure/controllers/internal.controller';
 import { HealthController } from './infrastructure/controllers/health.controller';
 import { MetricsController } from './infrastructure/controllers/metrics.controller';
@@ -11,6 +11,9 @@ import { DeviceService } from './application/services/device.service';
 import { DeviceRepository } from './infrastructure/repositories/device.repository';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { OrganizationServiceClient } from './infrastructure/clients/organization-service.client';
+import { TelemetryServiceClient } from './infrastructure/clients/telemetry-service.client';
+import { LocationServiceClient } from './infrastructure/clients/location-service.client';
+import { ApiKeyGuard } from './infrastructure/guards/api-key.guard';
 
 @Module({
   imports: [
@@ -33,8 +36,22 @@ import { OrganizationServiceClient } from './infrastructure/clients/organization
       },
     }),
   ],
-  controllers: [DeviceController, InternalController, HealthController, MetricsController],
-  providers: [DeviceService, DeviceRepository, JwtStrategy, OrganizationServiceClient],
+  controllers: [
+    DeviceController,
+    DeviceTelemetryController,
+    InternalController,
+    HealthController,
+    MetricsController,
+  ],
+  providers: [
+    DeviceService,
+    DeviceRepository,
+    JwtStrategy,
+    OrganizationServiceClient,
+    TelemetryServiceClient,
+    LocationServiceClient,
+    ApiKeyGuard,
+  ],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly deviceRepository: DeviceRepository) {}

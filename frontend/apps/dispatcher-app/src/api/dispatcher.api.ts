@@ -78,5 +78,27 @@ export const dispatcherApi = {
     const response = await apiClient.get('/dispatcher/stats');
     return response.data;
   },
+
+  // Voice call methods
+  async initiateVoiceCall(callId: string): Promise<{ offer: RTCSessionDescriptionInit }> {
+    const response = await apiClient.post(`/dispatcher/calls/${callId}/voice/initiate`);
+    return response.data;
+  },
+
+  async sendVoiceOffer(callId: string, offer: RTCSessionDescriptionInit): Promise<void> {
+    await apiClient.post(`/dispatcher/calls/${callId}/voice/offer`, { offer });
+  },
+
+  async sendVoiceAnswer(callId: string, answer: RTCSessionDescriptionInit): Promise<void> {
+    await apiClient.post(`/dispatcher/calls/${callId}/voice/answer`, { answer });
+  },
+
+  async sendIceCandidate(callId: string, candidate: RTCIceCandidateInit): Promise<void> {
+    await apiClient.post(`/dispatcher/calls/${callId}/voice/ice`, { candidate });
+  },
+
+  async endVoiceCall(callId: string): Promise<void> {
+    await apiClient.post(`/dispatcher/calls/${callId}/voice/end`);
+  },
 };
 

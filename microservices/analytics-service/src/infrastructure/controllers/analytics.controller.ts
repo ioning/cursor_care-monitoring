@@ -13,15 +13,21 @@ export class AnalyticsController {
   @Get('wards/:wardId/health-report')
   @ApiOperation({ summary: 'Get health report for ward' })
   @ApiResponse({ status: 200, description: 'Health report retrieved successfully' })
-  async getWardHealthReport(@Param('wardId') wardId: string, @Query('period') period: string) {
-    return this.analyticsService.getWardHealthReport(wardId, period || '7d');
+  async getWardHealthReport(
+    @Param('wardId') wardId: string,
+    @Query('period') period: string,
+    @Request() req: any,
+  ) {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    return this.analyticsService.getWardHealthReport(wardId, period || '7d', token);
   }
 
   @Get('system/stats')
   @ApiOperation({ summary: 'Get system statistics' })
   @ApiResponse({ status: 200, description: 'System stats retrieved successfully' })
-  async getSystemStats() {
-    return this.analyticsService.getSystemStats();
+  async getSystemStats(@Request() req: any) {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    return this.analyticsService.getSystemStats(token);
   }
 
   @Post('reports')

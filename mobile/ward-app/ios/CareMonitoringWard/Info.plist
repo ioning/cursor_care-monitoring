@@ -47,6 +47,8 @@
 	<string>Приложению требуется доступ к Bluetooth для подключения к медицинским устройствам</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Приложению требуется доступ к Bluetooth для подключения к медицинским устройствам</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Приложению необходим доступ к микрофону для звонков</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Приложению требуется доступ к камере для загрузки фото аватара подопечного</string>
 	<key>NSPhotoLibraryUsageDescription</key>

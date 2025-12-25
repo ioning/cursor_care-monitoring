@@ -388,36 +388,199 @@ async function seedTelemetryServiceData(params: { deviceId: string; wardId: stri
       `CREATE INDEX IF NOT EXISTS idx_raw_metrics_ward_type_timestamp ON raw_metrics(ward_id, metric_type, timestamp DESC)`,
     );
 
-    // Do not spam duplicates: if there are any records for this ward in the last hour, skip
+    // Проверяем, есть ли данные за последние 24 часа
     const recent = await db.query(
-      `SELECT 1 FROM raw_metrics WHERE ward_id = $1 AND timestamp > NOW() - INTERVAL '60 minutes' LIMIT 1`,
+      `SELECT 1 FROM raw_metrics WHERE ward_id = $1 AND timestamp > NOW() - INTERVAL '24 hours' LIMIT 1`,
       [params.wardId],
     );
     if (recent.rows.length > 0) {
-      logger.info(`Telemetry already exists for ward in last hour, skipping telemetry seed: ${params.wardId}`);
+      logger.info(`Telemetry already exists for ward in last 24 hours, skipping telemetry seed: ${params.wardId}`);
       return;
     }
 
     const now = new Date();
-    const metrics = [
-      { type: 'heart_rate', value: 72, unit: 'bpm', quality: 0.96 },
-      { type: 'spo2', value: 98, unit: '%', quality: 0.95 },
-      { type: 'steps', value: 1240, unit: 'count', quality: 0.9 },
-      { type: 'temperature', value: 36.6, unit: 'c', quality: 0.92 },
-      { type: 'battery', value: 87, unit: '%', quality: 1.0 },
-    ];
+    const records: Array<{
+      deviceId: string;
+      wardId: string;
+      type: string;
+      value: number;
+      unit: string;
+      quality: number;
+      timestamp: Date;
+    }> = [];
 
-    for (let i = 0; i < metrics.length; i++) {
-      const m = metrics[i];
-      const ts = new Date(now.getTime() - i * 5 * 60 * 1000); // каждые 5 минут
+    // Генерируем данные за последние 7 дней
+    // Каждый день: данные каждые 15 минут для основных метрик
+    const daysBack = 7;
+    const intervalMinutes = 15;
+
+    // Базовые значения для пожилого человека (67 лет, гипертония)
+    const baseHeartRate = 72;
+    const baseSpo2 = 98;
+    const baseTemperature = 36.6;
+    const baseSteps = 0; // Начнем с 0, будем накапливать
+
+    // Генерируем данные для каждого дня
+    for (let day = 0; day < daysBack; day++) {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - day);
+      dayStart.setHours(6, 0, 0, 0); // Начинаем с 6 утра
+
+      // Количество записей в день (с 6:00 до 22:00 = 16 часов = 64 интервала по 15 минут)
+      const intervalsPerDay = 64;
+
+      let dailySteps = 0;
+
+      for (let interval = 0; interval < intervalsPerDay; interval++) {
+        const timestamp = new Date(dayStart.getTime() + interval * intervalMinutes * 60 * 1000);
+        const hour = timestamp.getHours();
+        const isDaytime = hour >= 6 && hour < 22;
+
+        // Вариации значений в зависимости от времени суток и активности
+        const activityFactor = isDaytime ? 1.0 : 0.7; // Ночью метрики ниже
+        const randomVariation = () => (Math.random() - 0.5) * 0.1; // ±5% вариация
+
+        // Heart rate: 65-85 bpm днем, 60-75 ночью
+        const heartRate = isDaytime
+          ? baseHeartRate + (Math.random() - 0.5) * 20 + (interval % 10 === 0 ? 10 : 0) // Периодические всплески
+          : baseHeartRate - 5 + (Math.random() - 0.5) * 10;
+        records.push({
+          deviceId: params.deviceId,
+          wardId: params.wardId,
+          type: 'heart_rate',
+          value: Math.round(heartRate),
+          unit: 'bpm',
+          quality: 0.95 + Math.random() * 0.05,
+          timestamp: new Date(timestamp),
+        });
+
+        // SpO2: 96-99% (норма для пожилого)
+        const spo2 = baseSpo2 + (Math.random() - 0.5) * 3;
+        records.push({
+          deviceId: params.deviceId,
+          wardId: params.wardId,
+          type: 'spo2',
+          value: Math.round(spo2),
+          unit: '%',
+          quality: 0.96 + Math.random() * 0.04,
+          timestamp: new Date(timestamp),
+        });
+
+        // Temperature: 36.2-37.0°C
+        const temperature = baseTemperature + (Math.random() - 0.5) * 0.8;
+        records.push({
+          deviceId: params.deviceId,
+          wardId: params.wardId,
+          type: 'temperature',
+          value: Math.round(temperature * 10) / 10,
+          unit: 'c',
+          quality: 0.92 + Math.random() * 0.08,
+          timestamp: new Date(timestamp),
+        });
+
+        // Steps: накапливаем в течение дня (больше активности днем)
+        if (isDaytime && interval % 4 === 0) {
+          // Каждый час добавляем шаги
+          const stepsInInterval = Math.floor(Math.random() * 50 * activityFactor);
+          dailySteps += stepsInInterval;
+        }
+        records.push({
+          deviceId: params.deviceId,
+          wardId: params.wardId,
+          type: 'steps',
+          value: dailySteps,
+          unit: 'count',
+          quality: 0.9 + Math.random() * 0.1,
+          timestamp: new Date(timestamp),
+        });
+
+        // Battery: постепенно уменьшается, заряжается ночью
+        const batteryLevel = 100 - (day * 2) - (interval / intervalsPerDay) * 1.5 + (hour >= 22 || hour < 6 ? 0.1 : 0);
+        records.push({
+          deviceId: params.deviceId,
+          wardId: params.wardId,
+          type: 'battery',
+          value: Math.max(20, Math.min(100, Math.round(batteryLevel))),
+          unit: '%',
+          quality: 1.0,
+          timestamp: new Date(timestamp),
+        });
+
+        // Дополнительные метрики (реже)
+        if (interval % 4 === 0) {
+          // Blood pressure (систолическое) - каждые 4 интервала (каждый час)
+          const systolic = 130 + (Math.random() - 0.5) * 20; // 120-140 для гипертоника
+          records.push({
+            deviceId: params.deviceId,
+            wardId: params.wardId,
+            type: 'blood_pressure_systolic',
+            value: Math.round(systolic),
+            unit: 'mmHg',
+            quality: 0.88 + Math.random() * 0.12,
+            timestamp: new Date(timestamp),
+          });
+
+          const diastolic = 80 + (Math.random() - 0.5) * 10; // 75-85
+          records.push({
+            deviceId: params.deviceId,
+            wardId: params.wardId,
+            type: 'blood_pressure_diastolic',
+            value: Math.round(diastolic),
+            unit: 'mmHg',
+            quality: 0.88 + Math.random() * 0.12,
+            timestamp: new Date(timestamp),
+          });
+        }
+
+        // Fall detection (редко, но важно для тестирования)
+        if (Math.random() < 0.001 && isDaytime) {
+          // 0.1% вероятность падения
+          records.push({
+            deviceId: params.deviceId,
+            wardId: params.wardId,
+            type: 'fall_detected',
+            value: 1,
+            unit: 'count',
+            quality: 0.95,
+            timestamp: new Date(timestamp),
+          });
+        }
+      }
+    }
+
+    // Batch insert для оптимизации (вставляем по 100 записей за раз)
+    const batchSize = 100;
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      let paramIndex = 1;
+
+      for (const record of batch) {
+        placeholders.push(
+          `(gen_random_uuid(), $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`,
+        );
+        values.push(
+          record.deviceId,
+          record.wardId,
+          record.type,
+          record.value,
+          record.unit,
+          record.quality,
+          record.timestamp,
+        );
+      }
+
       await db.query(
         `INSERT INTO raw_metrics (id, device_id, ward_id, metric_type, value, unit, quality_score, timestamp)
-         VALUES (gen_random_uuid(), $1,$2,$3,$4,$5,$6,$7)`,
-        [params.deviceId, params.wardId, m.type, m.value, m.unit, m.quality, ts],
+         VALUES ${placeholders.join(', ')}`,
+        values,
       );
     }
 
-    logger.info(`Telemetry seeded in telemetry_db for ward=${params.wardId}, device=${params.deviceId}`);
+    logger.info(
+      `Telemetry seeded in telemetry_db: ${records.length} records for ward=${params.wardId}, device=${params.deviceId} (last ${daysBack} days)`,
+    );
   } finally {
     await db.end();
   }

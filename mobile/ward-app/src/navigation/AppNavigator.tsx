@@ -18,6 +18,12 @@ import GuardianDashboardScreen from '../screens/GuardianDashboardScreen';
 import CreateWardScreen from '../screens/CreateWardScreen';
 import IncomingCallScreen from '../screens/IncomingCallScreen';
 import TelemetryHistoryScreen from '../screens/TelemetryHistoryScreen';
+import EditGeofenceScreen from '../screens/EditGeofenceScreen';
+import WardAlertsScreen from '../screens/WardAlertsScreen';
+import WardLocationScreen from '../screens/WardLocationScreen';
+import WardGeofencesScreen from '../screens/WardGeofencesScreen';
+import CreateGeofenceScreen from '../screens/CreateGeofenceScreen';
+import GeofenceViolationsScreen from '../screens/GeofenceViolationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -145,12 +151,47 @@ export const AppNavigator = () => {
                 component={CreateWardScreen}
                 options={{ headerShown: true, title: 'Добавить подопечного' }}
               />
+              <Stack.Screen 
+                name="CreateGeofence" 
+                component={CreateGeofenceScreen}
+                options={{ headerShown: true, title: 'Создать геозону' }}
+              />
+              <Stack.Screen 
+                name="EditGeofence" 
+                component={EditGeofenceScreen}
+                options={{ headerShown: true, title: 'Редактировать геозону' }}
+              />
+              <Stack.Screen 
+                name="WardGeofences" 
+                component={WardGeofencesScreen}
+                options={{ headerShown: true, title: 'Геозоны' }}
+              />
+              <Stack.Screen 
+                name="GeofenceViolations" 
+                component={GeofenceViolationsScreen}
+                options={{ headerShown: true, title: 'Нарушения геозон' }}
+              />
+              <Stack.Screen 
+                name="WardLocation" 
+                component={WardLocationScreen}
+                options={{ headerShown: true, title: 'Местоположение' }}
+              />
+              <Stack.Screen 
+                name="WardAlerts" 
+                component={WardAlertsScreen}
+                options={{ headerShown: true, title: 'Алерты подопечного' }}
+              />
             </>
           )}
           <Stack.Screen 
             name="IncomingCall" 
             component={IncomingCallScreen}
-            options={{ headerShown: false, presentation: 'modal' }}
+            options={{ 
+              headerShown: false, 
+              presentation: 'fullScreenModal', // Полноэкранный режим для приоритетного вызова
+              animation: 'slide_from_bottom',
+              gestureEnabled: false, // Нельзя закрыть свайпом
+            }}
           />
           <Stack.Screen 
             name="TelemetryHistory"

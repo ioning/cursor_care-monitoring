@@ -18,20 +18,22 @@ interface FeatureWeights {
   timeOfDay: number;
   movementPattern: number;
   spo2: number;
+  escalationTemporal: number; // Weight for temporal escalation features
 }
 
 @Injectable()
 export class FallPredictionModel {
-  private readonly modelVersion = '1.1.0';
+  private readonly modelVersion = '1.2.0'; // Updated version with temporal features
   private readonly weights: FeatureWeights = {
-    activity: 0.25,
-    heartRate: 0.20,
-    heartRateVariability: 0.15,
-    steps: 0.10,
-    accelerometer: 0.15,
-    timeOfDay: 0.05,
-    movementPattern: 0.05,
-    spo2: 0.05,
+    activity: 0.22,
+    heartRate: 0.18,
+    heartRateVariability: 0.13,
+    steps: 0.09,
+    accelerometer: 0.13,
+    timeOfDay: 0.04,
+    movementPattern: 0.04,
+    spo2: 0.04,
+    escalationTemporal: 0.13, // 13% weight for temporal escalation features
   };
 
   async predict(features: Record<string, any>): Promise<FallPrediction> {
@@ -105,6 +107,23 @@ export class FallPredictionModel {
     if (movementScore > 0) {
       riskScore += movementScore * this.weights.movementPattern;
       factors.push('irregular_movement');
+    }
+
+    // Evaluate temporal escalation features
+    const escalationScore = this.evaluateEscalationTemporal(features);
+    if (escalationScore > 0) {
+      riskScore += escalationScore * this.weights.escalationTemporal;
+      factors.push('escalation_risk');
+      
+      // Add time-based recommendation
+      if (features.escalation_probability > 0.5) {
+        const avgTimeHours = features.avg_time_to_critical_hours;
+        if (avgTimeHours && avgTimeHours > 0) {
+          recommendations.push(
+            `Based on historical data, critical situation may occur within ${Math.round(avgTimeHours)} hours`,
+          );
+        }
+      }
     }
 
     // Normalize risk score to 0-1
@@ -309,6 +328,82 @@ export class FallPredictionModel {
     if (riskScore >= 0.5) return '15-30 minutes';
     if (riskScore >= 0.3) return '30-60 minutes';
     return '1-2 hours';
+  }
+
+  /**
+   * Evaluate temporal escalation features
+   * This considers:
+   * - Recent warnings and their timing
+   * - Historical escalation patterns
+   * - Probability of escalation based on time since last warning
+   */
+  private evaluateEscalationTemporal(features: Record<string, any>): number {
+    let score = 0.0;
+
+    // Check if there are recent warnings
+    if (features.has_recent_warning === true) {
+      const warningCount = features.recent_warning_count || 0;
+      const criticalCount = features.recent_critical_count || 0;
+
+      // Multiple recent warnings increase risk
+      if (warningCount >= 3) {
+        score += 0.4;
+      } else if (warningCount >= 2) {
+        score += 0.25;
+      } else if (warningCount >= 1) {
+        score += 0.15;
+      }
+
+      // If we already have critical alerts, risk is very high
+      if (criticalCount > 0) {
+        score += 0.3;
+      }
+
+      // Time since last warning - closer to average escalation time = higher risk
+      const escalationProbability = features.escalation_probability || 0;
+      if (escalationProbability > 0) {
+        // Probability is already normalized 0-1, use it directly
+        score += escalationProbability * 0.4;
+
+        // If we're past the average escalation time, risk is very high
+        if (escalationProbability >= 0.8) {
+          score += 0.2;
+        }
+      }
+
+      // Use historical average time to critical if available
+      const avgTimeHours = features.avg_time_to_critical_hours;
+      const timeSinceWarningMs = features.time_since_last_warning_ms;
+      
+      if (avgTimeHours && avgTimeHours > 0 && timeSinceWarningMs) {
+        const timeSinceWarningHours = timeSinceWarningMs / (1000 * 60 * 60);
+        const timeRatio = timeSinceWarningHours / avgTimeHours;
+
+        // If we're approaching or past the average escalation time
+        if (timeRatio >= 0.8) {
+          score += 0.3;
+        } else if (timeRatio >= 0.6) {
+          score += 0.2;
+        } else if (timeRatio >= 0.4) {
+          score += 0.1;
+        }
+      }
+    }
+
+    // Check escalation count - more historical escalations = higher risk
+    const escalationCount = features.escalation_count || 0;
+    if (escalationCount > 0) {
+      // More escalations in history = higher risk
+      if (escalationCount >= 5) {
+        score += 0.15;
+      } else if (escalationCount >= 3) {
+        score += 0.1;
+      } else if (escalationCount >= 1) {
+        score += 0.05;
+      }
+    }
+
+    return Math.min(1.0, score);
   }
 
   getVersion(): string {

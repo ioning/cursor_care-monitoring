@@ -3,6 +3,14 @@ import { store } from '../store';
 import { addTelemetryData } from '../store/slices/telemetrySlice';
 import { TelemetryService } from './TelemetryService';
 
+interface BufferedMetric {
+  metricType: string;
+  value: number;
+  unit: string;
+  qualityScore?: number;
+  timestamp: string;
+}
+
 class BluetoothServiceClass {
   private manager: BleManager;
   private connectedDevice: Device | null = null;
@@ -11,6 +19,13 @@ class BluetoothServiceClass {
   private reconnectIntervals: Map<string, NodeJS.Timeout> = new Map();
   private readonly MAX_RECONNECT_ATTEMPTS = 5;
   private readonly RECONNECT_DELAY = 5000; // 5 seconds
+  
+  // Буферизация метрик для пакетной отправки
+  private metricsBuffer: BufferedMetric[] = [];
+  private bufferFlushInterval: NodeJS.Timeout | null = null;
+  private readonly BUFFER_FLUSH_INTERVAL = 15000; // 15 секунд
+  private readonly MAX_BUFFER_SIZE = 10; // Максимум метрик в буфере
+  private characteristicMonitors: Map<string, any> = new Map(); // Для отслеживания подписок
 
   constructor() {
     this.manager = new BleManager();
@@ -189,28 +204,11 @@ class BluetoothServiceClass {
         ),
       ]);
 
-      // Subscribe to notifications
-      const serviceUUID = '0000180d-0000-1000-8000-00805f9b34fb'; // Health Service
-      const characteristicUUID = '00002a37-0000-1000-8000-00805f9b34fb'; // Heart Rate Measurement
+      // Инициализируем буфер и таймер для пакетной отправки
+      this.startBufferFlushTimer();
 
-      device.monitorCharacteristicForService(
-        serviceUUID,
-        characteristicUUID,
-        (error, characteristic) => {
-          if (error) {
-            console.error('Characteristic monitoring error:', error);
-            // При ошибке мониторинга пытаемся переподключиться
-            if (error.message?.includes('disconnected')) {
-              this.scheduleReconnect(deviceId);
-            }
-            return;
-          }
-
-          if (characteristic?.value) {
-            this.handleTelemetryData(characteristic.value);
-          }
-        }
-      );
+      // Подписываемся на все доступные характеристики Health Service
+      await this.subscribeToAllCharacteristics(device);
     } catch (error: any) {
       console.error('Connection error:', error);
       
@@ -223,35 +221,287 @@ class BluetoothServiceClass {
     }
   }
 
-  private handleTelemetryData(data: string) {
+  /**
+   * Подписаться на все характеристики Health Service
+   */
+  private async subscribeToAllCharacteristics(device: Device) {
+    try {
+      const services = await device.services();
+      
+      // Определяем характеристики для мониторинга
+      const characteristicsToMonitor = [
+        { uuid: '00002a37-0000-1000-8000-00805f9b34fb', type: 'heart_rate', unit: 'bpm' }, // Heart Rate
+        { uuid: '00002a19-0000-1000-8000-00805f9b34fb', type: 'battery', unit: '%' }, // Battery Level
+        { uuid: '00002a6d-0000-1000-8000-00805f9b34fb', type: 'temperature', unit: 'c' }, // Temperature
+        { uuid: '00002a53-0000-1000-8000-00805f9b34fb', type: 'steps', unit: 'count' }, // Steps
+        { uuid: '00002a5f-0000-1000-8000-00805f9b34fb', type: 'spo2', unit: '%' }, // SpO2
+      ];
+
+      // Ищем Health Service (0x180D)
+      const healthService = services.find(
+        (s) => s.uuid.toLowerCase() === '0000180d-0000-1000-8000-00805f9b34fb'
+      );
+
+      if (!healthService) {
+        console.warn('Health Service not found, subscribing to default Heart Rate');
+        // Fallback: подписываемся на Heart Rate
+        this.subscribeToCharacteristic(
+          device,
+          '0000180d-0000-1000-8000-00805f9b34fb',
+          '00002a37-0000-1000-8000-00805f9b34fb',
+          'heart_rate',
+          'bpm'
+        );
+        return;
+      }
+
+      // Подписываемся на все доступные характеристики
+      for (const charConfig of characteristicsToMonitor) {
+        try {
+          const characteristics = await healthService.characteristics();
+          const characteristic = characteristics.find(
+            (c) => c.uuid.toLowerCase() === charConfig.uuid.toLowerCase()
+          );
+
+          if (characteristic) {
+            this.subscribeToCharacteristic(
+              device,
+              healthService.uuid,
+              charConfig.uuid,
+              charConfig.type,
+              charConfig.unit
+            );
+          }
+        } catch (error) {
+          console.warn(`Failed to subscribe to ${charConfig.type}:`, error);
+        }
+      }
+
+      // Подписываемся на акселерометр (если доступен)
+      // Обычно это отдельный сервис
+      try {
+        const motionService = services.find(
+          (s) => s.uuid.toLowerCase().includes('motion') || s.uuid.toLowerCase().includes('accelerometer')
+        );
+        if (motionService) {
+          const characteristics = await motionService.characteristics();
+          const accelChar = characteristics.find(
+            (c) => c.uuid.toLowerCase().includes('accel') || c.uuid.toLowerCase().includes('motion')
+          );
+          if (accelChar) {
+            this.subscribeToCharacteristic(
+              device,
+              motionService.uuid,
+              accelChar.uuid,
+              'accelerometer',
+              'g'
+            );
+          }
+        }
+      } catch (error) {
+        console.warn('Accelerometer service not available:', error);
+      }
+    } catch (error) {
+      console.error('Failed to subscribe to characteristics:', error);
+      // Fallback: подписываемся на Heart Rate
+      this.subscribeToCharacteristic(
+        device,
+        '0000180d-0000-1000-8000-00805f9b34fb',
+        '00002a37-0000-1000-8000-00805f9b34fb',
+        'heart_rate',
+        'bpm'
+      );
+    }
+  }
+
+  /**
+   * Подписаться на конкретную характеристику
+   */
+  private subscribeToCharacteristic(
+    device: Device,
+    serviceUUID: string,
+    characteristicUUID: string,
+    metricType: string,
+    defaultUnit: string
+  ) {
+    const monitorKey = `${serviceUUID}-${characteristicUUID}`;
+    
+    // Отменяем предыдущую подписку, если есть
+    if (this.characteristicMonitors.has(monitorKey)) {
+      return; // Уже подписаны
+    }
+
+    const monitor = device.monitorCharacteristicForService(
+      serviceUUID,
+      characteristicUUID,
+      (error, characteristic) => {
+        if (error) {
+          console.error(`Characteristic monitoring error (${metricType}):`, error);
+          if (error.message?.includes('disconnected')) {
+            this.characteristicMonitors.delete(monitorKey);
+            if (this.connectedDevice?.id === device.id) {
+              this.scheduleReconnect(device.id);
+            }
+          }
+          return;
+        }
+
+        if (characteristic?.value) {
+          this.handleTelemetryData(characteristic.value, metricType, defaultUnit);
+        }
+      }
+    );
+
+    this.characteristicMonitors.set(monitorKey, monitor);
+  }
+
+  /**
+   * Обработка данных телеметрии с поддержкой qualityScore
+   */
+  private handleTelemetryData(data: string, metricType?: string, defaultUnit?: string) {
     try {
       // Parse BLE data (format depends on device)
-      const parsed = JSON.parse(data);
+      let parsed: any;
+      try {
+        parsed = JSON.parse(data);
+      } catch {
+        // Если не JSON, пытаемся извлечь числовое значение
+        const numericValue = parseFloat(data);
+        if (!isNaN(numericValue)) {
+          parsed = { value: numericValue };
+        } else {
+          console.warn('Unable to parse telemetry data:', data);
+          return;
+        }
+      }
+
+      // Определяем тип метрики
+      const type = metricType || parsed.type || 'heart_rate';
+      const unit = defaultUnit || parsed.unit || 'bpm';
+      const value = parsed.value;
       
-      const telemetry = {
-        metricType: parsed.type || 'heart_rate',
-        value: parsed.value,
-        unit: parsed.unit || 'bpm',
-        timestamp: new Date().toISOString(),
+      if (value === undefined || value === null) {
+        console.warn('Telemetry data missing value:', parsed);
+        return;
+      }
+
+      // Вычисляем qualityScore на основе качества сигнала BLE
+      // Можно использовать RSSI или другие параметры
+      const qualityScore = parsed.qualityScore !== undefined 
+        ? parsed.qualityScore 
+        : this.calculateQualityScore(parsed.rssi, parsed.signalStrength);
+
+      const telemetry: BufferedMetric = {
+        metricType: type,
+        value: typeof value === 'number' ? value : parseFloat(value),
+        unit,
+        qualityScore,
+        timestamp: parsed.timestamp || new Date().toISOString(),
       };
 
-      store.dispatch(addTelemetryData(telemetry));
+      // Добавляем в Redux store для UI
+      store.dispatch(addTelemetryData({
+        metricType: telemetry.metricType,
+        value: telemetry.value,
+        unit: telemetry.unit,
+        timestamp: telemetry.timestamp,
+      }));
 
-      // Send to API if device is linked
-      if (this.connectedDevice) {
-        TelemetryService.sendTelemetry({
-          deviceId: this.connectedDevice.id,
-          ...telemetry,
-        }).catch((error) => {
-          console.error('Failed to send telemetry:', error);
-        });
-      }
+      // Добавляем в буфер для пакетной отправки
+      this.addToBuffer(telemetry);
     } catch (error) {
       console.error('Failed to parse telemetry data:', error);
     }
   }
 
+  /**
+   * Вычисление qualityScore на основе качества сигнала
+   */
+  private calculateQualityScore(rssi?: number, signalStrength?: number): number {
+    // Если есть RSSI, используем его для оценки качества
+    if (rssi !== undefined) {
+      // RSSI обычно от -100 до 0, где -100 = плохо, 0 = отлично
+      // Нормализуем до 0-1
+      const normalized = Math.max(0, Math.min(1, (rssi + 100) / 100));
+      return Math.round(normalized * 100) / 100; // Округляем до 2 знаков
+    }
+
+    // Если есть signalStrength (0-100), используем его
+    if (signalStrength !== undefined) {
+      return Math.round((signalStrength / 100) * 100) / 100;
+    }
+
+    // По умолчанию считаем качество хорошим
+    return 0.9;
+  }
+
+  /**
+   * Добавить метрику в буфер
+   */
+  private addToBuffer(metric: BufferedMetric) {
+    this.metricsBuffer.push(metric);
+
+    // Если буфер заполнен, отправляем немедленно
+    if (this.metricsBuffer.length >= this.MAX_BUFFER_SIZE) {
+      this.flushBuffer();
+    }
+  }
+
+  /**
+   * Запустить таймер для периодической отправки буфера
+   */
+  private startBufferFlushTimer() {
+    if (this.bufferFlushInterval) {
+      clearInterval(this.bufferFlushInterval);
+    }
+
+    this.bufferFlushInterval = setInterval(() => {
+      this.flushBuffer();
+    }, this.BUFFER_FLUSH_INTERVAL);
+  }
+
+  /**
+   * Отправить буфер метрик пакетом
+   */
+  private flushBuffer() {
+    if (this.metricsBuffer.length === 0 || !this.connectedDevice) {
+      return;
+    }
+
+    const metricsToSend = [...this.metricsBuffer];
+    this.metricsBuffer = [];
+
+    // Отправляем пакетом через TelemetryService
+    TelemetryService.sendTelemetryBatch({
+      deviceId: this.connectedDevice.id,
+      metrics: metricsToSend,
+    }).catch((error) => {
+      console.error('Failed to send telemetry batch:', error);
+      // Возвращаем метрики в буфер при ошибке
+      this.metricsBuffer.unshift(...metricsToSend);
+    });
+  }
+
   async disconnect() {
+    // Отправляем оставшиеся метрики перед отключением
+    this.flushBuffer();
+
+    // Останавливаем таймер буфера
+    if (this.bufferFlushInterval) {
+      clearInterval(this.bufferFlushInterval);
+      this.bufferFlushInterval = null;
+    }
+
+    // Отменяем все подписки на характеристики
+    this.characteristicMonitors.forEach((monitor) => {
+      try {
+        monitor.remove();
+      } catch (error) {
+        console.warn('Error removing characteristic monitor:', error);
+      }
+    });
+    this.characteristicMonitors.clear();
+
     if (this.connectedDevice) {
       const deviceId = this.connectedDevice.id;
       try {
@@ -307,10 +557,32 @@ class BluetoothServiceClass {
   }
 
   cleanup() {
+    // Отправляем оставшиеся метрики
+    this.flushBuffer();
+
+    // Останавливаем таймер буфера
+    if (this.bufferFlushInterval) {
+      clearInterval(this.bufferFlushInterval);
+      this.bufferFlushInterval = null;
+    }
+
+    // Очищаем буфер
+    this.metricsBuffer = [];
+
     // Очищаем все интервалы переподключения
     this.reconnectIntervals.forEach((interval) => clearTimeout(interval));
     this.reconnectIntervals.clear();
     this.reconnectAttempts.clear();
+
+    // Отменяем все подписки
+    this.characteristicMonitors.forEach((monitor) => {
+      try {
+        monitor.remove();
+      } catch (error) {
+        console.warn('Error removing characteristic monitor:', error);
+      }
+    });
+    this.characteristicMonitors.clear();
 
     this.disconnect();
     this.manager.destroy();

@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import { createLogger } from '../../../shared/libs/logger';
 import { createDatabaseConnection } from '../../../shared/libs/database';
 import { createRabbitMQConnection, consumeEvent } from '../../../shared/libs/rabbitmq';
-import { RiskAlertEvent } from '../../../shared/types/event.types';
+import { RiskAlertEvent, GeofenceViolationEvent } from '../../../shared/types/event.types';
 import { AlertService } from './application/services/alert.service';
 
 async function bootstrap() {
@@ -66,6 +66,13 @@ async function bootstrap() {
   const alertService = app.get(AlertService);
   await consumeEvent('risk-alert-queue', async (event: RiskAlertEvent) => {
     await alertService.handleRiskAlert(event);
+  });
+
+  // Start consuming geofence violation events
+  await consumeEvent('geofence-violation-queue', async (event: GeofenceViolationEvent) => {
+    if (event.eventType === 'location.geofence.violation') {
+      await alertService.handleGeofenceViolation(event);
+    }
   });
 
   logger.info(`Alert Service is running on: http://localhost:${port}`);

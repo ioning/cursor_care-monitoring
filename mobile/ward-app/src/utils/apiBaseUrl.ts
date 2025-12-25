@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import { API_PORT, API_PATH, PRODUCTION_API_URL } from '../config/api.config';
 
 /**
  * Resolve API base URL for development runtime.
@@ -24,7 +25,7 @@ function getDevHost(): string | null {
 
 export function getApiBaseUrl(): string {
   if (!__DEV__) {
-    return 'https://api.caremonitoring.com/api/v1';
+    return PRODUCTION_API_URL;
   }
 
   const host = getDevHost();
@@ -32,17 +33,17 @@ export function getApiBaseUrl(): string {
   // If we can't detect host, keep the old behavior
   if (!host) {
     return Platform.OS === 'android'
-      ? 'http://10.0.2.2:3000/api/v1'
-      : 'http://localhost:3000/api/v1';
+      ? `http://10.0.2.2:${API_PORT}${API_PATH}`
+      : `http://localhost:${API_PORT}${API_PATH}`;
   }
 
   // Android emulator reports host as "localhost" for Metro → API must use 10.0.2.2
   if (Platform.OS === 'android' && (host === 'localhost' || host === '127.0.0.1')) {
-    return 'http://10.0.2.2:3000/api/v1';
+    return `http://10.0.2.2:${API_PORT}${API_PATH}`;
   }
 
   // Physical device (or iOS simulator): use the same host as Metro
-  return `http://${host}:3000/api/v1`;
+  return `http://${host}:${API_PORT}${API_PATH}`;
 }
 
 

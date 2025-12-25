@@ -105,5 +105,26 @@ export class CallService {
       return [];
     }
   }
+
+  /**
+   * Получить входящие звонки для текущего пользователя (ward)
+   * Используется для polling
+   */
+  static async getIncomingCalls(wardId: string): Promise<EmergencyCall[]> {
+    try {
+      const response = await apiClient.instance.get('/dispatcher/calls', {
+        params: {
+          wardId,
+          status: 'created,assigned',
+          limit: 10,
+        },
+      });
+      const calls = response.data.calls || response.data.data || response.data;
+      return Array.isArray(calls) ? calls.filter((call: EmergencyCall) => call.wardId === wardId) : [];
+    } catch (error) {
+      console.error('Failed to get incoming calls:', error);
+      return [];
+    }
+  }
 }
 

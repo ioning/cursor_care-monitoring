@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { createWard } from '../store/slices/wardSlice';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const CreateWardScreen: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

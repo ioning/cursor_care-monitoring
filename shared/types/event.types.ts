@@ -96,10 +96,23 @@ export interface EmergencyCallCreatedEvent extends BaseEvent {
   };
 }
 
+export interface GeofenceViolationEvent extends BaseEvent {
+  eventType: 'location.geofence.violation';
+  geofenceId: string;
+  geofenceType: string;
+  violationType: 'exit' | 'entry';
+  location: {
+    latitude: number;
+    longitude: number;
+    accuracy?: number;
+  };
+}
+
 export type SystemEvent =
   | TelemetryReceivedEvent
   | PredictionGeneratedEvent
   | RiskAlertEvent
   | AlertCreatedEvent
-  | EmergencyCallCreatedEvent;
+  | EmergencyCallCreatedEvent
+  | GeofenceViolationEvent;
 

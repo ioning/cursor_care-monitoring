@@ -1,12 +1,12 @@
-import { Controller, Post, Body, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TelemetryService } from '../../application/services/telemetry.service';
 import { CreateTelemetryDto } from '../dto/create-telemetry.dto';
-import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
+import { JwtOrInternalGuard } from '../guards/jwt-or-internal.guard';
 
 @ApiTags('telemetry')
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrInternalGuard)
 @ApiBearerAuth()
 export class TelemetryController {
   constructor(private readonly telemetryService: TelemetryService) {}
@@ -22,6 +22,7 @@ export class TelemetryController {
   @ApiOperation({ summary: 'Get telemetry data for ward' })
   @ApiResponse({ status: 200, description: 'Telemetry data retrieved successfully' })
   async getWardTelemetry(
+    @Request() req: any,
     @Param('wardId') wardId: string,
     @Query('from') from: string,
     @Query('to') to: string,
@@ -29,14 +30,18 @@ export class TelemetryController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.telemetryService.getByWardId(wardId, { from, to, metricType, page, limit });
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    return this.telemetryService.getByWardId(wardId, { from, to, metricType, page, limit }, userId, userRole);
   }
 
   @Get('wards/:wardId/latest')
   @ApiOperation({ summary: 'Get latest telemetry data for ward' })
   @ApiResponse({ status: 200, description: 'Latest telemetry data retrieved successfully' })
-  async getLatest(@Param('wardId') wardId: string) {
-    return this.telemetryService.getLatest(wardId);
+  async getLatest(@Request() req: any, @Param('wardId') wardId: string) {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    return this.telemetryService.getLatest(wardId, userId, userRole);
   }
 }
 

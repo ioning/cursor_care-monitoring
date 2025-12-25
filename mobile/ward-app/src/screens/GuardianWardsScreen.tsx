@@ -14,6 +14,7 @@ import { AppDispatch, RootState } from '../store';
 import { fetchWards, deleteWard } from '../store/slices/wardSlice';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const GuardianWardsScreen: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

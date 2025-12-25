@@ -58,7 +58,7 @@ export class InternalController {
     @Param('userId') userId: string,
     @Headers('x-internal-service') serviceName?: string,
   ) {
-    const allowedServices = ['alert-service', 'integration-service', 'dispatcher-service'];
+    const allowedServices = ['alert-service', 'integration-service', 'dispatcher-service', 'telemetry-service', 'location-service'];
     if (serviceName && !allowedServices.includes(serviceName.toLowerCase())) {
       this.logger.warn('Unauthorized internal service call', { serviceName, wardId, userId });
       throw new Error('Unauthorized internal service call');

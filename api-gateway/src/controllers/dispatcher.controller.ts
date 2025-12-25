@@ -41,6 +41,18 @@ export class DispatcherController {
     return response.data;
   }
 
+  @Post('calls')
+  @ApiOperation({ summary: 'Create emergency call' })
+  async createCall(@Request() req: any, @Body() body: any) {
+    const dispatcherServiceUrl = this.gatewayConfig.getDispatcherServiceUrl();
+    const response = await firstValueFrom(
+      this.httpService.post(`${dispatcherServiceUrl}/dispatcher/calls`, body, {
+        headers: { Authorization: req.headers.authorization },
+      }),
+    );
+    return response.data;
+  }
+
   @Post('calls/:callId/assign')
   @ApiOperation({ summary: 'Assign call to dispatcher' })
   async assignCall(@Request() req: any, @Param('callId') callId: string) {

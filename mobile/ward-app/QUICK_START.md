@@ -34,13 +34,13 @@ npm run ios
 
 ## Настройка API URL
 
-По умолчанию используется `http://localhost:3000/api/v1`.
+Базовый URL API определяется автоматически в `src/utils/apiBaseUrl.ts`:
+- **Android emulator**: `http://10.0.2.2:3000/api/v1`
+- **Physical device**: автоматически определяется IP адрес Metro bundler
+- **iOS simulator**: `http://localhost:3000/api/v1`
+- **Production**: `https://api.caremonitoring.com/api/v1`
 
-Для изменения создайте файл `.env`:
-
-```env
-API_BASE_URL=http://your-api-url.com/api/v1
-```
+**Важно:** Убедитесь, что API Gateway запущен и слушает на всех интерфейсах (`0.0.0.0:3000`), а не только на localhost.
 
 ## Быстрая сборка релиза
 

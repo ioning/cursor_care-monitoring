@@ -27,6 +27,13 @@ export class DispatcherController {
     return this.dispatcherService.getCalls(query);
   }
 
+  @Post('calls')
+  @ApiOperation({ summary: 'Create emergency call' })
+  @ApiResponse({ status: 201, description: 'Call created successfully' })
+  async createCall(@Body() body: any) {
+    return this.dispatcherService.createCall(body);
+  }
+
   @Get('calls/:callId')
   @ApiOperation({ summary: 'Get call by ID' })
   @ApiResponse({ status: 200, description: 'Call retrieved successfully' })

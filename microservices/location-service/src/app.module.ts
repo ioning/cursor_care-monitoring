@@ -10,6 +10,7 @@ import { LocationRepository } from './infrastructure/repositories/location.repos
 import { GeofenceRepository } from './infrastructure/repositories/geofence.repository';
 import { LocationEventPublisher } from './infrastructure/messaging/location-event.publisher';
 import { YandexGeocoderService } from './infrastructure/services/geocoding/yandex-geocoder.service';
+import { UserServiceClient } from './infrastructure/clients/user-service.client';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 
 @Module({
@@ -39,6 +40,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     GeofenceRepository,
     LocationEventPublisher,
     YandexGeocoderService,
+    UserServiceClient,
     JwtStrategy,
   ],
 })

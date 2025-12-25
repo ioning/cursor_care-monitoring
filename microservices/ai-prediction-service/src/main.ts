@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { createLogger } from '../../../shared/libs/logger';
 import { createDatabaseConnection } from '../../../shared/libs/database';
 import { createRabbitMQConnection, consumeEvent } from '../../../shared/libs/rabbitmq';
-import { TelemetryReceivedEvent } from '../../../shared/types/event.types';
+import { TelemetryReceivedEvent, AlertCreatedEvent } from '../../../shared/types/event.types';
 import { AIPredictionService } from './application/services/ai-prediction.service';
 
 async function bootstrap() {
@@ -56,6 +56,11 @@ async function bootstrap() {
   const aiService = app.get(AIPredictionService);
   await consumeEvent('telemetry-queue', async (event: TelemetryReceivedEvent) => {
     await aiService.processTelemetry(event);
+  });
+
+  // Start consuming alert created events to track escalations
+  await consumeEvent('alert-created-queue', async (event: AlertCreatedEvent) => {
+    await aiService.processAlertCreated(event);
   });
 
   logger.info(`AI Prediction Service is running on: http://localhost:${port}`);

@@ -44,6 +44,8 @@ class ApiClient {
           const refreshToken = await AsyncStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
+              // Используем прямой axios для refresh, чтобы избежать циклических зависимостей
+              // (не используем this.client, чтобы избежать бесконечного цикла при 401)
               const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
                 refreshToken,
               });

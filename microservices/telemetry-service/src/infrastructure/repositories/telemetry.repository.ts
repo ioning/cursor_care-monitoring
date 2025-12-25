@@ -183,6 +183,8 @@ export class TelemetryRepository {
     );
 
     const metrics: Record<string, any> = {};
+    let latestTimestamp: string | null = null;
+
     for (const row of result.rows) {
       metrics[row.metric_type] = {
         value: parseFloat(row.value),
@@ -190,11 +192,16 @@ export class TelemetryRepository {
         qualityScore: row.quality_score ? parseFloat(row.quality_score) : undefined,
         timestamp: row.timestamp,
       };
+      // Находим самую позднюю временную метку
+      if (!latestTimestamp || new Date(row.timestamp) > new Date(latestTimestamp)) {
+        latestTimestamp = row.timestamp;
+      }
     }
 
+    // Если данных нет, возвращаем пустой объект с правильной структурой
     return {
       wardId,
-      timestamp: result.rows[0]?.timestamp || new Date().toISOString(),
+      timestamp: latestTimestamp || new Date().toISOString(),
       metrics,
     };
   }

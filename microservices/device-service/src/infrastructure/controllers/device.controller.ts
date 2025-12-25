@@ -9,13 +9,16 @@ import {
   Query,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { DeviceService } from '../../application/services/device.service';
 import { RegisterDeviceDto } from '../dto/register-device.dto';
 import { UpdateDeviceDto } from '../dto/update-device.dto';
 import { LinkDeviceDto } from '../dto/link-device.dto';
+import { DeviceTelemetryDto } from '../dto/device-telemetry.dto';
 import { JwtAuthGuard } from '../../../../../shared/guards/jwt-auth.guard';
+import { ApiKeyGuard } from '../guards/api-key.guard';
 
 @ApiTags('devices')
 @Controller()
@@ -80,6 +83,34 @@ export class DeviceController {
   @ApiResponse({ status: 200, description: 'Device unlinked successfully' })
   async unlinkDevice(@Request() req: any, @Param('deviceId') deviceId: string) {
     return this.deviceService.unlinkDevice(req.user.id, deviceId);
+  }
+}
+
+/**
+ * Controller for device telemetry data (API Key authentication)
+ */
+@ApiTags('device-telemetry')
+@Controller('device-telemetry')
+export class DeviceTelemetryController {
+  constructor(private readonly deviceService: DeviceService) {}
+
+  @Post('devices/:deviceId/data')
+  @ApiOperation({ summary: 'Send telemetry data from device (API Key auth)' })
+  @ApiResponse({ status: 200, description: 'Telemetry data processed successfully' })
+  @ApiHeader({ name: 'X-API-Key', description: 'Device API Key', required: true })
+  @UseGuards(ApiKeyGuard)
+  async sendDeviceTelemetry(
+    @Request() req: any,
+    @Param('deviceId') deviceId: string,
+    @Body() telemetryDto: DeviceTelemetryDto,
+  ) {
+    // Device is attached by ApiKeyGuard
+    const device = req.device;
+    if (device.id !== deviceId) {
+      throw new BadRequestException('Device ID mismatch');
+    }
+
+    return this.deviceService.processDeviceTelemetry(deviceId, telemetryDto);
   }
 }
 

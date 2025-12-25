@@ -68,6 +68,13 @@ async function bootstrap() {
     await integrationService.handleAlertCreated(event);
   });
 
+  // Start consuming call created events
+  await consumeEvent('call-created-queue', async (event: any) => {
+    if (event.eventType === 'dispatcher.call.created') {
+      await integrationService.handleCallCreated(event);
+    }
+  });
+
   logger.info(`Integration Service is running on: http://localhost:${port}`);
 }
 

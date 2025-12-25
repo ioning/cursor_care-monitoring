@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { LocationRepository } from '../../infrastructure/repositories/location.repository';
 import { GeofenceRepository } from '../../infrastructure/repositories/geofence.repository';
 import { LocationEventPublisher } from '../../infrastructure/messaging/location-event.publisher';
 import { YandexGeocoderService } from '../../infrastructure/services/geocoding/yandex-geocoder.service';
+import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
 import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
@@ -25,6 +26,7 @@ export class LocationService {
     private readonly geofenceRepository: GeofenceRepository,
     private readonly eventPublisher: LocationEventPublisher,
     private readonly geocodingService: YandexGeocoderService,
+    private readonly userServiceClient: UserServiceClient,
   ) {}
 
   async recordLocation(data: LocationData): Promise<void> {
@@ -41,7 +43,7 @@ export class LocationService {
     });
 
     // Check geofences
-    const geofences = await this.geofenceRepository.findByWardId(data.wardId);
+    const geofences = await this.geofenceRepository.findByWardId(data.wardId, { enabled: true });
     for (const geofence of geofences) {
       const isInside = this.isPointInGeofence(
         data.latitude,
@@ -79,30 +81,75 @@ export class LocationService {
     });
   }
 
-  async getLatestLocation(wardId: string) {
-    const location = await this.locationRepository.findLatest(wardId);
-    
-    // Если геолокация найдена, пытаемся получить адрес через геокодинг
-    let address: string | null = null;
-    if (location) {
-      address = await this.geocodingService.reverseGeocode(
-        location.latitude,
-        location.longitude,
-      );
+  async getLatestLocation(wardId: string, userId?: string, userRole?: string) {
+    // Check access if user info is provided
+    if (userId && userRole) {
+      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+      if (!hasAccess) {
+        throw new ForbiddenException('You do not have access to this ward\'s location data');
+      }
     }
 
-    return {
-      success: true,
-      data: location
-        ? {
-            ...location,
-            address, // Добавляем адрес к данным геолокации
-          }
-        : null,
-    };
+    try {
+      const location = await this.locationRepository.findLatest(wardId);
+      
+      // Если геолокация найдена, пытаемся получить адрес через геокодинг
+      let address: string | null = null;
+      if (location) {
+        try {
+          address = await this.geocodingService.reverseGeocode(
+            location.latitude,
+            location.longitude,
+          );
+        } catch (error: any) {
+          // Игнорируем ошибки геокодинга - адрес не критичен
+          this.logger.warn('Failed to get address via geocoding', {
+            wardId,
+            error: error?.message,
+          });
+        }
+      }
+
+      return {
+        success: true,
+        data: location
+          ? {
+              id: location.id,
+              wardId: location.wardId,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              accuracy: location.accuracy,
+              source: location.source,
+              timestamp: location.timestamp instanceof Date 
+                ? location.timestamp.toISOString() 
+                : location.timestamp,
+              organizationId: location.organizationId,
+              createdAt: location.createdAt instanceof Date
+                ? location.createdAt.toISOString()
+                : location.createdAt,
+              address, // Добавляем адрес к данным геолокации
+            }
+          : null,
+      };
+    } catch (error: any) {
+      this.logger.error('Failed to get latest location', {
+        wardId,
+        error: error?.message,
+        stack: error?.stack,
+      });
+      throw error;
+    }
   }
 
-  async getLocationHistory(wardId: string, filters: any) {
+  async getLocationHistory(wardId: string, filters: any, userId?: string, userRole?: string) {
+    // Check access if user info is provided
+    if (userId && userRole) {
+      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+      if (!hasAccess) {
+        throw new ForbiddenException('You do not have access to this ward\'s location data');
+      }
+    }
+
     const { from, to, page = 1, limit = 100 } = filters;
     const [locations, total] = await this.locationRepository.findByWardId(
       wardId,
@@ -124,15 +171,59 @@ export class LocationService {
 
   async createGeofence(wardId: string, data: any) {
     const geofenceId = randomUUID();
+    const shape: 'circle' | 'polygon' = data.shape === 'polygon' ? 'polygon' : 'circle';
+    const type: 'safe_zone' | 'restricted_zone' =
+      data.type === 'restricted_zone' ? 'restricted_zone' : 'safe_zone';
+
+    if (shape === 'circle') {
+      const centerLatitude = Number(data.centerLatitude ?? data.center_latitude);
+      const centerLongitude = Number(data.centerLongitude ?? data.center_longitude);
+      const radius = Number(data.radius);
+
+      if (!Number.isFinite(centerLatitude) || !Number.isFinite(centerLongitude) || !Number.isFinite(radius)) {
+        return { success: false, error: 'Invalid circle geofence params' };
+      }
+
+      const geofence = await this.geofenceRepository.create({
+        id: geofenceId,
+        wardId,
+        name: data.name,
+        type,
+        shape,
+        centerLatitude,
+        centerLongitude,
+        radius,
+        enabled: data.enabled ?? true,
+      });
+
+      return {
+        success: true,
+        data: geofence,
+        message: 'Geofence created successfully',
+      };
+    }
+
+    const polygonPoints = Array.isArray(data.polygonPoints) ? data.polygonPoints : data.polygon_points;
+    if (!Array.isArray(polygonPoints) || polygonPoints.length < 3) {
+      return { success: false, error: 'Polygon geofence requires 3+ points' };
+    }
+
+    const normalizedPoints = polygonPoints.map((p: any) => ({
+      latitude: Number(p.latitude),
+      longitude: Number(p.longitude),
+    }));
+    if (normalizedPoints.some((p: any) => !Number.isFinite(p.latitude) || !Number.isFinite(p.longitude))) {
+      return { success: false, error: 'Invalid polygon points' };
+    }
+
     const geofence = await this.geofenceRepository.create({
       id: geofenceId,
       wardId,
       name: data.name,
-      type: data.type,
-      centerLatitude: data.centerLatitude,
-      centerLongitude: data.centerLongitude,
-      radius: data.radius,
-      enabled: true,
+      type,
+      shape,
+      polygonPoints: normalizedPoints,
+      enabled: data.enabled ?? true,
     });
 
     return {
@@ -142,12 +233,25 @@ export class LocationService {
     };
   }
 
-  async getGeofences(wardId: string) {
-    const geofences = await this.geofenceRepository.findByWardId(wardId);
+  async getGeofences(wardId: string, options?: { enabled?: boolean }) {
+    const geofences = await this.geofenceRepository.findByWardId(wardId, options);
     return {
       success: true,
       data: geofences,
     };
+  }
+
+  async updateGeofence(geofenceId: string, patch: any) {
+    const updated = await this.geofenceRepository.update(geofenceId, {
+      name: patch.name,
+      enabled: patch.enabled,
+    });
+    return { success: true, data: updated };
+  }
+
+  async deleteGeofence(geofenceId: string) {
+    const ok = await this.geofenceRepository.delete(geofenceId);
+    return { success: ok };
   }
 
   private isPointInGeofence(
@@ -155,14 +259,42 @@ export class LocationService {
     longitude: number,
     geofence: any,
   ): boolean {
-    // Simple circle geofence check
-    const distance = this.calculateDistance(
-      latitude,
-      longitude,
-      geofence.centerLatitude,
-      geofence.centerLongitude,
-    );
+    if ((geofence.shape || 'circle') === 'polygon') {
+      const polygon = geofence.polygonPoints || geofence.polygon_points;
+      if (!Array.isArray(polygon) || polygon.length < 3) return false;
+      return this.isPointInPolygon({ latitude, longitude }, polygon);
+    }
+
+    if (
+      !Number.isFinite(geofence.centerLatitude) ||
+      !Number.isFinite(geofence.centerLongitude) ||
+      !Number.isFinite(geofence.radius)
+    ) {
+      return false;
+    }
+
+    const distance = this.calculateDistance(latitude, longitude, geofence.centerLatitude, geofence.centerLongitude);
     return distance <= geofence.radius;
+  }
+
+  private isPointInPolygon(
+    point: { latitude: number; longitude: number },
+    polygon: Array<{ latitude: number; longitude: number }>,
+  ): boolean {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].longitude;
+      const yi = polygon[i].latitude;
+      const xj = polygon[j].longitude;
+      const yj = polygon[j].latitude;
+
+      const intersect =
+        yi > point.latitude !== yj > point.latitude &&
+        point.longitude < ((xj - xi) * (point.latitude - yi)) / (yj - yi) + xi;
+
+      if (intersect) inside = !inside;
+    }
+    return inside;
   }
 
   private calculateDistance(

@@ -1,8 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { FallPredictionModel } from '../../infrastructure/ml-models/fall-prediction.model';
 import { PredictionRepository } from '../../infrastructure/repositories/prediction.repository';
+import { EscalationPatternRepository } from '../../infrastructure/repositories/escalation-pattern.repository';
+import { AlertServiceClient } from '../../infrastructure/clients/alert-service.client';
 import { PredictionEventPublisher } from '../../infrastructure/messaging/prediction-event.publisher';
-import { TelemetryReceivedEvent } from '../../../../../shared/types/event.types';
+import { TelemetryReceivedEvent, AlertCreatedEvent } from '../../../../../shared/types/event.types';
 import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
 
@@ -30,6 +32,8 @@ export class AIPredictionService {
   constructor(
     private readonly fallPredictionModel: FallPredictionModel,
     private readonly predictionRepository: PredictionRepository,
+    private readonly escalationPatternRepository: EscalationPatternRepository,
+    private readonly alertServiceClient: AlertServiceClient,
     private readonly eventPublisher: PredictionEventPublisher,
   ) {}
 
@@ -42,7 +46,12 @@ export class AIPredictionService {
       this.validateEvent(event);
 
       // Extract and normalize features from telemetry
+      // Include temporal escalation data for better prediction
       const features = await this.extractFeatures(event.data, event.wardId);
+      
+      // Add temporal escalation features
+      const escalationFeatures = await this.getEscalationFeatures(event.wardId!);
+      Object.assign(features, escalationFeatures);
 
       // Validate features
       if (!this.hasMinimumFeatures(features)) {
@@ -374,6 +383,226 @@ export class AIPredictionService {
 
   async getPredictionById(predictionId: string): Promise<any> {
     return this.predictionRepository.findById(predictionId);
+  }
+
+  /**
+   * Process alert created event to track escalations
+   */
+  async processAlertCreated(event: AlertCreatedEvent): Promise<void> {
+    try {
+      const { wardId, data } = event;
+      if (!wardId || !data) {
+        return;
+      }
+
+      const currentSeverity = data.severity;
+      
+      // Only track if severity is critical (final state)
+      if (currentSeverity === 'critical') {
+        await this.trackEscalation(wardId, data.alertId, data.alertType, data.severity);
+      }
+    } catch (error) {
+      this.logger.error('Error processing alert created event', {
+        error: error instanceof Error ? error.message : String(error),
+        eventId: event.eventId,
+        wardId: event.wardId,
+      });
+    }
+  }
+
+  /**
+   * Track escalation from warning to critical
+   */
+  private async trackEscalation(
+    wardId: string,
+    criticalAlertId: string,
+    alertType: string,
+    severity: string,
+  ): Promise<void> {
+    try {
+      // Get recent alerts for this ward
+      const recentAlerts = await this.alertServiceClient.getRecentAlerts(wardId, {
+        limit: 50,
+        hours: 48, // Look back 48 hours
+      });
+
+      // Find the most recent non-critical alert of the same type before this critical one
+      const criticalAlert = await this.alertServiceClient.getAlertById(criticalAlertId);
+      if (!criticalAlert) {
+        return;
+      }
+
+      const criticalTime = new Date(criticalAlert.createdAt || criticalAlert.triggeredAt).getTime();
+
+      // Find initial alert (low/medium/high severity) of same type before critical
+      let initialAlert = null;
+      for (const alert of recentAlerts) {
+        const alertTime = new Date(alert.createdAt || alert.triggeredAt).getTime();
+        if (
+          alertTime < criticalTime &&
+          alert.id !== criticalAlertId &&
+          alert.alertType === alertType &&
+          ['low', 'medium', 'high'].includes(alert.severity)
+        ) {
+          if (!initialAlert || alertTime > new Date(initialAlert.createdAt || initialAlert.triggeredAt).getTime()) {
+            initialAlert = alert;
+          }
+        }
+      }
+
+      if (initialAlert) {
+        const initialTime = new Date(initialAlert.createdAt || initialAlert.triggeredAt).getTime();
+        const escalationTimeMs = criticalTime - initialTime;
+
+        // Save escalation pattern
+        await this.escalationPatternRepository.save({
+          wardId,
+          initialSeverity: initialAlert.severity,
+          finalSeverity: 'critical',
+          initialAlertId: initialAlert.id,
+          finalAlertId: criticalAlertId,
+          escalationTimeMs,
+          alertType,
+          metricsSnapshot: criticalAlert.dataSnapshot,
+        });
+
+        this.logger.info(`Escalation pattern recorded`, {
+          wardId,
+          alertType,
+          initialSeverity: initialAlert.severity,
+          escalationTimeMs,
+          escalationTimeHours: Math.round(escalationTimeMs / (1000 * 60 * 60) * 100) / 100,
+        });
+      }
+    } catch (error) {
+      this.logger.error('Error tracking escalation', {
+        error: error instanceof Error ? error.message : String(error),
+        wardId,
+        alertId: criticalAlertId,
+      });
+    }
+  }
+
+  /**
+   * Get escalation features for prediction model
+   */
+  private async getEscalationFeatures(wardId: string): Promise<Record<string, any>> {
+    const features: Record<string, any> = {};
+
+    try {
+      // Get recent alerts
+      const recentAlerts = await this.alertServiceClient.getRecentAlerts(wardId, {
+        limit: 20,
+        hours: 24,
+      });
+
+      // Count alerts by severity
+      const alertCounts = {
+        low: 0,
+        medium: 0,
+        high: 0,
+        critical: 0,
+      };
+
+      let hasRecentWarning = false;
+      let timeSinceLastWarning = null;
+
+      for (const alert of recentAlerts) {
+        const severity = alert.severity;
+        if (severity && alertCounts.hasOwnProperty(severity)) {
+          alertCounts[severity as keyof typeof alertCounts]++;
+        }
+
+        // Check for recent warnings (low/medium/high)
+        if (['low', 'medium', 'high'].includes(severity)) {
+          hasRecentWarning = true;
+          const alertTime = new Date(alert.createdAt || alert.triggeredAt).getTime();
+          const timeSince = Date.now() - alertTime;
+          if (timeSinceLastWarning === null || timeSince < timeSinceLastWarning) {
+            timeSinceLastWarning = timeSince;
+          }
+        }
+      }
+
+      features.recent_warning_count = alertCounts.low + alertCounts.medium + alertCounts.high;
+      features.recent_critical_count = alertCounts.critical;
+      features.has_recent_warning = hasRecentWarning;
+      features.time_since_last_warning_ms = timeSinceLastWarning;
+
+      // Get escalation statistics
+      const escalationStats = await this.escalationPatternRepository.getStats(wardId, {
+        days: 90,
+      });
+
+      if (escalationStats.escalationCount > 0) {
+        // Average time to critical in hours
+        features.avg_time_to_critical_hours = escalationStats.averageTimeToCritical / (1000 * 60 * 60);
+        features.median_time_to_critical_hours = escalationStats.medianTimeToCritical / (1000 * 60 * 60);
+        features.escalation_count = escalationStats.escalationCount;
+
+        // If we have recent warnings, calculate probability of escalation
+        if (hasRecentWarning && timeSinceLastWarning !== null) {
+          const timeSinceWarningHours = timeSinceLastWarning / (1000 * 60 * 60);
+          const avgTimeHours = features.avg_time_to_critical_hours;
+
+          // Probability increases as we approach average escalation time
+          if (avgTimeHours > 0) {
+            features.escalation_probability = Math.min(1, timeSinceWarningHours / avgTimeHours);
+          } else {
+            features.escalation_probability = 0;
+          }
+        } else {
+          features.escalation_probability = 0;
+        }
+
+        // Add type-specific escalation times
+        for (const [alertType, stats] of Object.entries(escalationStats.byAlertType)) {
+          features[`avg_time_to_critical_${alertType}_hours`] = stats.averageTime / (1000 * 60 * 60);
+        }
+      } else {
+        // No historical data
+        features.avg_time_to_critical_hours = null;
+        features.escalation_probability = 0;
+        features.escalation_count = 0;
+      }
+    } catch (error) {
+      this.logger.warn('Error getting escalation features', {
+        error: error instanceof Error ? error.message : String(error),
+        wardId,
+      });
+    }
+
+    return features;
+  }
+
+  /**
+   * Get escalation statistics for a ward
+   */
+  async getEscalationStats(
+    wardId: string,
+    options?: {
+      alertType?: string;
+      initialSeverity?: string;
+      days?: number;
+    },
+  ) {
+    return this.escalationPatternRepository.getStats(wardId, options);
+  }
+
+  /**
+   * Get average time to critical for a given severity and alert type
+   */
+  async getAverageTimeToCritical(
+    wardId: string,
+    initialSeverity: string,
+    alertType?: string,
+  ): Promise<number | null> {
+    const timeMs = await this.escalationPatternRepository.getAverageTimeToCritical(
+      wardId,
+      initialSeverity,
+      alertType,
+    );
+    return timeMs ? timeMs / (1000 * 60 * 60) : null; // Convert to hours
   }
 }
 

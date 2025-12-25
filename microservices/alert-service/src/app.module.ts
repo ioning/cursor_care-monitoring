@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AlertController } from './infrastructure/controllers/alert.controller';
+import { InternalController } from './infrastructure/controllers/internal.controller';
 import { HealthController } from './infrastructure/controllers/health.controller';
 import { MetricsController } from './infrastructure/controllers/metrics.controller';
 import { AlertService } from './application/services/alert.service';
@@ -31,7 +32,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
       },
     }),
   ],
-  controllers: [AlertController, HealthController, MetricsController],
+  controllers: [AlertController, InternalController, HealthController, MetricsController],
   providers: [AlertService, AlertRepository, AlertEventPublisher, UserServiceClient, JwtStrategy],
 })
 export class AppModule {}

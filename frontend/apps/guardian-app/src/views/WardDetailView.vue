@@ -43,7 +43,7 @@
       <!-- Current Metrics -->
       <div class="card">
         <h3 class="card-title">Текущие показатели</h3>
-        <div v-if="latestTelemetry && latestTelemetry.metrics" class="metrics-grid">
+        <div v-if="latestTelemetry && latestTelemetry.metrics && Object.keys(latestTelemetry.metrics).length > 0" class="metrics-grid">
           <div
             v-for="(metric, key) in latestTelemetry.metrics"
             :key="key"
@@ -185,8 +185,14 @@ const formatTime = (date: string) => {
 const getMetricLabel = (key: string) => {
   const labels: Record<string, string> = {
     heart_rate: 'Пульс',
-    activity: 'Активность',
+    spo2: 'Насыщение кислородом',
+    steps: 'Шаги',
     temperature: 'Температура',
+    battery: 'Батарея',
+    blood_pressure_systolic: 'Давление (верхнее)',
+    blood_pressure_diastolic: 'Давление (нижнее)',
+    fall_detected: 'Обнаружено падение',
+    activity: 'Активность',
     blood_pressure: 'Давление',
   };
   return labels[key] || key;

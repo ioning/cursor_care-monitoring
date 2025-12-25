@@ -12,6 +12,10 @@
     "build:android": "npx @react-native-community/cli bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android && gradlew.bat assembleRelease",
     "build:android:debug": "npx @react-native-community/cli bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android && gradlew.bat assembleDebug",
     "build:android:bundle": "cd android && gradlew.bat bundleRelease",
+    "android:install:debug": "powershell -ExecutionPolicy Bypass -File ../../scripts/install-apk.ps1 -BuildType debug",
+    "android:install:release": "powershell -ExecutionPolicy Bypass -File ../../scripts/install-apk.ps1 -BuildType release",
+    "android:build-and-install": "npm run build:android:debug && npm run android:install:debug",
+    "android:start": "powershell -ExecutionPolicy Bypass -File scripts/start-app.ps1",
     "build:ios": "cd ios && pod install && echo 'Open ios/CareMonitoringWard.xcworkspace in Xcode to build'",
     "clean:android": "cd android && ./gradlew clean",
     "clean:ios": "cd ios && rm -rf build && rm -rf Pods && rm -rf Podfile.lock"
@@ -34,6 +38,7 @@
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "2.12.1",
     "react-native-image-picker": "^7.0.0",
+    "react-native-incall-manager": "^3.3.0",
     "react-native-maps": "1.10.0",
     "react-native-permissions": "^4.0.3",
     "react-native-push-notification": "^8.1.1",

@@ -33,6 +33,13 @@
             Начать работу
           </button>
           <button
+            v-if="selectedCall.status === 'in_progress' && !isVoiceCallActive"
+            @click="startVoiceCall"
+            class="btn btn-primary"
+          >
+            📞 Начать звонок
+          </button>
+          <button
             v-if="selectedCall.status === 'in_progress'"
             @click="showResolveDialog = true"
             class="btn btn-success"
@@ -151,6 +158,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Голосовой вызов -->
+    <VoiceCall
+      v-if="isVoiceCallActive && selectedCall"
+      :call-id="selectedCall.id"
+      :ward-id="selectedCall.wardId"
+      :dispatcher-id="selectedCall.dispatcherId || authStore.user?.id || ''"
+      :ward-phone="selectedCall.ward?.emergencyContact"
+      @call-ended="handleVoiceCallEnded"
+    />
   </div>
 </template>
 
@@ -160,14 +177,18 @@ import { useRoute, useRouter } from 'vue-router';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useCallsStore } from '../stores/calls';
+import { useAuthStore } from '../stores/auth';
+import VoiceCall from '../components/VoiceCall.vue';
 
 const route = useRoute();
 const router = useRouter();
 const callsStore = useCallsStore();
+const authStore = useAuthStore();
 
 const notes = ref('');
 const resolveNotes = ref('');
 const showResolveDialog = ref(false);
+const isVoiceCallActive = ref(false);
 
 const selectedCall = computed(() => callsStore.selectedCall);
 const isLoading = computed(() => callsStore.isLoading);
@@ -221,6 +242,22 @@ async function saveNotes() {
   } catch (error) {
     console.error('Failed to save notes:', error);
   }
+}
+
+function startVoiceCall() {
+  if (!selectedCall.value) return;
+  
+  // Проверяем, что вызов в работе
+  if (selectedCall.value.status !== 'in_progress') {
+    alert('Сначала начните работу над вызовом');
+    return;
+  }
+
+  isVoiceCallActive.value = true;
+}
+
+function handleVoiceCallEnded() {
+  isVoiceCallActive.value = false;
 }
 
 onMounted(async () => {

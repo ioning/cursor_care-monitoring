@@ -9,6 +9,24 @@ import { createLogger } from '@care-monitoring/shared/libs/logger';
 async function bootstrap() {
   const logger = createLogger({ serviceName: 'api-gateway' });
   
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+    logger.error('Unhandled Rejection at:', { promise, reason });
+    // Don't exit in production, just log
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Unhandled Rejection:', reason);
+    }
+  });
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error: Error) => {
+    logger.error('Uncaught Exception:', error);
+    // Exit gracefully in production, log in development
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  });
+  
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
@@ -51,7 +69,11 @@ async function bootstrap() {
   );
 
   // CORS
-  const corsOrigins = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'];
+  // In development, allow all origins for mobile apps (Android emulator, physical devices, iOS simulator)
+  // In production, use strict CORS_ORIGIN from env
+  const corsOrigins = process.env.NODE_ENV === 'production'
+    ? (process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'])
+    : true; // Allow all origins in development for mobile app compatibility
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
@@ -116,10 +138,12 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  // Listen on all interfaces (0.0.0.0) to allow mobile app connections from emulators and physical devices
+  await app.listen(port, '0.0.0.0');
   
-  logger.info(`API Gateway is running on: http://localhost:${port}`);
+  logger.info(`API Gateway is running on: http://0.0.0.0:${port} (accessible from http://localhost:${port})`);
   logger.info(`Swagger documentation: http://localhost:${port}/api/docs`);
+  logger.info(`Mobile app can connect via: http://10.0.2.2:${port}/api/v1 (Android emulator) or http://<your-ip>:${port}/api/v1 (physical device)`);
 }
 
 bootstrap();

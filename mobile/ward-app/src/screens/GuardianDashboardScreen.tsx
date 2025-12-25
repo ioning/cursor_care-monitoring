@@ -20,11 +20,48 @@ const statusMap = {
  */
 // Функция больше не нужна, так как используем кастомные маркеры
 
+const DEFAULT_REGION = {
+  latitude: 55.751244,
+  longitude: 37.618423,
+  latitudeDelta: 0.15,
+  longitudeDelta: 0.15,
+};
+
 const GuardianDashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const [wards, setWards] = useState<WardStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const getInitialRegion = () => {
+    const withLocation = wards.filter((w) => w.location);
+    if (withLocation.length === 0) return DEFAULT_REGION;
+
+    const latitudes = withLocation.map((w) => w.location!.latitude);
+    const longitudes = withLocation.map((w) => w.location!.longitude);
+
+    const minLat = Math.min(...latitudes);
+    const maxLat = Math.max(...latitudes);
+    const minLng = Math.min(...longitudes);
+    const maxLng = Math.max(...longitudes);
+
+    const midLat = (minLat + maxLat) / 2;
+    const midLng = (minLng + maxLng) / 2;
+
+    const latDelta = Math.max(0.01, (maxLat - minLat) * 1.8);
+    const lngDelta = Math.max(0.01, (maxLng - minLng) * 1.8);
+
+    return {
+      latitude: midLat,
+      longitude: midLng,
+      latitudeDelta: latDelta,
+      longitudeDelta: lngDelta,
+    };
+  };
+
+  const handleMarkerPress = (wardId: string) => {
+    navigation.navigate('WardDetail' as never, { wardId } as never);
+  };
 
   const loadWards = async () => {
     try {

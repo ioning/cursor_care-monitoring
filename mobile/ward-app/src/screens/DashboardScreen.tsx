@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { RootState } from '../store';
 import { fetchDevices, autoConnectDevices } from '../store/slices/deviceSlice';
+import { CallService } from '../services/CallService';
 import { colors, spacing, typography, radii, shadows, getStatusColor } from '../theme/designSystem';
 
 type MetricConfig = {
@@ -86,6 +89,7 @@ const DashboardScreen: React.FC = () => {
   const { connectedDevice } = useSelector((state: RootState) => state.device);
   const { latest } = useSelector((state: RootState) => state.telemetry);
   const { currentLocation } = useSelector((state: RootState) => state.location);
+  const [isCalling, setIsCalling] = useState(false);
 
   useEffect(() => {
     // Загружаем устройства и автоматически подключаемся
@@ -123,6 +127,30 @@ const DashboardScreen: React.FC = () => {
     : 'Браслет не подключён';
 
   const connectionStatus = connectedDevice ? 'Онлайн' : 'Нет связи';
+
+  const handleCallDispatcher = async () => {
+    setIsCalling(true);
+    try {
+      const call = await CallService.createCall({
+        callType: 'assistance',
+        priority: 'medium',
+        source: 'mobile_app',
+        location: currentLocation
+          ? {
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+              accuracy: currentLocation.accuracy,
+            }
+          : undefined,
+      });
+      Alert.alert('Успешно', 'Ваш запрос отправлен диспетчеру. Ожидайте звонка.', [{ text: 'OK' }]);
+    } catch (error: any) {
+      console.error('Failed to create call:', error);
+      Alert.alert('Ошибка', error.message || 'Не удалось связаться с диспетчером. Попробуйте еще раз.');
+    } finally {
+      setIsCalling(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -191,10 +219,19 @@ const DashboardScreen: React.FC = () => {
               <Text style={styles.quickActionText}>Экстренный SOS</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.quickActionButton, { backgroundColor: colors.primary }]}
+              style={[styles.quickActionButton, { backgroundColor: colors.primary }, isCalling && styles.quickActionButtonDisabled]}
+              onPress={handleCallDispatcher}
+              disabled={isCalling}
+              activeOpacity={0.85}
             >
-              <Icon name="call" size={28} color="#fff" />
-              <Text style={styles.quickActionText}>Позвонить диспетчеру</Text>
+              {isCalling ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Icon name="call" size={28} color="#fff" />
+              )}
+              <Text style={styles.quickActionText}>
+                {isCalling ? 'Соединение...' : 'Позвонить диспетчеру'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -366,6 +403,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: typography.subtitle,
     fontWeight: '700',
+  },
+  quickActionButtonDisabled: {
+    opacity: 0.6,
   },
   locationCard: {
     flexDirection: 'row',

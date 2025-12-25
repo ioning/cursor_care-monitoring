@@ -1,18 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Vibration, Alert } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Vibration, Alert, Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import InCallManager from 'react-native-incall-manager';
 
 import { colors, spacing, typography, radii, shadows } from '../theme/designSystem';
 import { CallService } from '../services/CallService';
+import { AudioService } from '../services/AudioService';
+import { BluetoothService } from '../services/BluetoothService';
 
-const AUTO_ANSWER_SECONDS = 10;
+const AUTO_ANSWER_SECONDS = 4;
 
 export const IncomingCallScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const callId = (route.params as any)?.callId;
-  const [remaining, setRemaining] = useState(AUTO_ANSWER_SECONDS);
+  const settings = useSelector((state: RootState) => state.settings);
+  const [remaining, setRemaining] = useState(settings.autoAnswerDelay || AUTO_ANSWER_SECONDS);
   const [isProcessing, setIsProcessing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -32,43 +38,107 @@ export const IncomingCallScreen: React.FC = () => {
       return;
     }
 
-    Vibration.vibrate([0, 400, 400], true);
-    intervalRef.current = setInterval(() => {
-      setRemaining((prev: number) => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
+    // Устанавливаем приоритетный вызов поверх всего
+    if (settings.priorityCallOverlay) {
+      // Для Android: устанавливаем флаг системного окна
+      if (Platform.OS === 'android') {
+        InCallManager.setKeepScreenOn(true);
+        // Устанавливаем максимальный приоритет для уведомления
+        InCallManager.start({ media: 'audio' });
+      }
+    }
+
+    // Вибрация, если включена в настройках
+    if (settings.callVibration) {
+      Vibration.vibrate([0, 400, 400], true);
+    }
+
+    // Звук звонка, если включен в настройках
+    if (settings.callSound) {
+      // Звук будет воспроизводиться через уведомление
+    }
+
+    // Автоответ, если включен
+    if (settings.autoAnswerCalls) {
+      intervalRef.current = setInterval(() => {
+        setRemaining((prev: number) => (prev <= 1 ? 0 : prev - 1));
+      }, 1000);
+    }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       Vibration.cancel();
+      if (Platform.OS === 'android') {
+        InCallManager.setKeepScreenOn(false);
+      }
     };
-  }, [callId, navigation]);
+  }, [callId, navigation, settings]);
 
-  useEffect(() => {
-    if (remaining === 0 && intervalRef.current && !isProcessing) {
-      clearInterval(intervalRef.current);
-      handleAnswer();
-    }
-  }, [remaining, isProcessing]);
-
-  const handleAnswer = async () => {
+  const handleAnswer = useCallback(async () => {
     if (isProcessing || !callId) return;
 
     setIsProcessing(true);
     Vibration.cancel();
 
     try {
+      // Инициализируем аудио сессию для звонка
+      await AudioService.initialize();
+
+      // Включаем громкую связь, если включено в настройках
+      if (settings.defaultSpeakerMode) {
+        await AudioService.enableSpeaker();
+      }
+
+      // Используем Bluetooth, если включено в настройках
+      if (settings.useBluetoothForCalls) {
+        try {
+          // Проверяем подключенные Bluetooth устройства
+          const connectionStatus = BluetoothService.getConnectionStatus();
+          if (connectionStatus.connected) {
+            // Bluetooth устройство подключено - используем его для звонка
+            console.log('[IncomingCall] Using Bluetooth device for call');
+            // InCallManager автоматически использует Bluetooth, если доступен
+          }
+        } catch (bluetoothError) {
+          console.warn('[IncomingCall] Bluetooth not available, using speaker:', bluetoothError);
+          // Продолжаем с громкой связью
+        }
+      }
+      
+      // Принимаем звонок
       await CallService.accept(callId);
-      Alert.alert('Успешно', 'Звонок принят', [
+      
+      // Показываем сообщение об успехе
+      const message = settings.defaultSpeakerMode 
+        ? 'Громкая связь включена' 
+        : 'Звонок принят';
+      Alert.alert('Звонок принят', message, [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Ошибка', error.message || 'Не удалось принять звонок');
+      console.error('Failed to accept call:', error);
+      // Даже если что-то не удалось, пытаемся принять звонок
+      try {
+        await CallService.accept(callId);
+        Alert.alert('Звонок принят', 'Некоторые настройки не применены', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      } catch (acceptError: any) {
+        Alert.alert('Ошибка', acceptError.message || 'Не удалось принять звонок');
+      }
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [callId, isProcessing, navigation, settings]);
+
+  useEffect(() => {
+    if (remaining === 0 && intervalRef.current && !isProcessing && settings.autoAnswerCalls) {
+      clearInterval(intervalRef.current);
+      handleAnswer();
+    }
+  }, [remaining, isProcessing, handleAnswer, settings.autoAnswerCalls]);
 
   const handleDecline = async () => {
     if (isProcessing || !callId) return;
@@ -96,12 +166,14 @@ export const IncomingCallScreen: React.FC = () => {
         </View>
         <Text style={styles.callerName}>{caller.name}</Text>
         <Text style={styles.callerRole}>{caller.role}</Text>
-        <View style={styles.timerBadge}>
-          <Icon name="access-time" size={18} color={colors.accent} />
-          <Text style={styles.timerText}>
-            Автоответ через {remaining} c
-          </Text>
-        </View>
+        {settings.autoAnswerCalls && (
+          <View style={styles.timerBadge}>
+            <Icon name="access-time" size={18} color={colors.accent} />
+            <Text style={styles.timerText}>
+              Автоответ через {remaining} c
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.actions}>
@@ -128,9 +200,16 @@ export const IncomingCallScreen: React.FC = () => {
 
       <View style={styles.helperText}>
         <Text style={styles.helperLabel}>Нажмите «Ответить», чтобы связаться с диспетчером.</Text>
-        <Text style={styles.helperLabel}>
-          Если вы ничего не сделаете, звонок автоматически примется.
-        </Text>
+        {settings.autoAnswerCalls && (
+          <Text style={styles.helperLabel}>
+            Если вы ничего не сделаете, звонок автоматически примется через {settings.autoAnswerDelay || AUTO_ANSWER_SECONDS} секунды{settings.defaultSpeakerMode ? ' с включением громкой связи' : ''}.
+          </Text>
+        )}
+        {settings.defaultSpeakerMode && (
+          <Text style={styles.helperLabel}>
+            Громкая связь будет включена автоматически для использования браслета.
+          </Text>
+        )}
       </View>
     </View>
   );
