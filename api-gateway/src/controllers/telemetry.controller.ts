@@ -52,7 +52,7 @@ export class TelemetryController {
     // Transform from mobile app format (single metric) to service format (array of metrics)
     if (data.metricType || data.type) {
       const metricType = data.metricType || data.type;
-      const transformed = {
+      const transformed: any = {
         deviceId: data.deviceId || user?.deviceId,
         metrics: [
           {

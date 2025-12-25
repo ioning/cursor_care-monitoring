@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { WardRepository } from '../../infrastructure/repositories/ward.repository';
 import { GuardianWardRepository } from '../../infrastructure/repositories/guardian-ward.repository';
 import { UserRepository } from '../../infrastructure/repositories/user.repository';
@@ -39,10 +39,11 @@ export class WardService {
       throw new NotFoundException('Guardian not found');
     }
 
-    // Создаем запись в wards
+    // Создаем запись в wards (исключаем phone и relationship, так как они не в схеме таблицы wards)
+    const { phone, relationship, ...wardData } = createWardDto;
     const ward = await this.wardRepository.create({
       id: wardId,
-      ...createWardDto,
+      ...wardData,
       organizationId: guardian.organizationId,
     });
 
@@ -53,47 +54,50 @@ export class WardService {
       relationship: createWardDto.relationship || 'ward',
     });
 
-    // Если указан телефон, создаем аккаунт и отправляем SMS
+    // Телефон обязателен, создаем аккаунт и отправляем SMS
     let accountCreated = false;
     let temporaryPassword: string | null = null;
 
-    if (createWardDto.phone) {
-      try {
-        // Генерируем временный пароль
-        temporaryPassword = this.generateTemporaryPassword();
+    try {
+      // Генерируем временный пароль
+      temporaryPassword = this.generateTemporaryPassword();
 
-        // Создаем пользователя в Auth Service
-        await this.authServiceClient.createWardUser({
-          id: wardId, // Используем тот же UUID что и для ward
-          fullName: createWardDto.fullName,
-          phone: createWardDto.phone,
-          password: temporaryPassword,
-          organizationId: guardian.organizationId,
-        });
+      // Создаем пользователя в Auth Service
+      await this.authServiceClient.createWardUser({
+        id: wardId, // Используем тот же UUID что и для ward
+        fullName: createWardDto.fullName,
+        phone: createWardDto.phone,
+        password: temporaryPassword,
+        organizationId: guardian.organizationId,
+      });
 
-        accountCreated = true;
+      accountCreated = true;
 
-        // Отправляем SMS с учетными данными
-        const smsMessage = this.createSmsMessage(createWardDto.fullName, temporaryPassword);
-        await this.integrationServiceClient.sendSms({
-          to: createWardDto.phone,
-          message: smsMessage,
-        });
+      // Отправляем SMS с учетными данными
+      const smsMessage = this.createSmsMessage(createWardDto.fullName, temporaryPassword);
+      await this.integrationServiceClient.sendSms({
+        to: createWardDto.phone,
+        message: smsMessage,
+      });
 
-        this.logger.info(`Ward account created and SMS sent: ${wardId}`, {
-          wardId,
-          guardianId,
-          phone: createWardDto.phone,
-        });
-      } catch (error: any) {
-        this.logger.error('Failed to create ward account or send SMS', {
-          wardId,
-          guardianId,
-          error: error.message,
-        });
-        // Не прерываем создание подопечного, но логируем ошибку
-        // Опекун может создать аккаунт позже
+      this.logger.info(`Ward account created and SMS sent: ${wardId}`, {
+        wardId,
+        guardianId,
+        phone: createWardDto.phone,
+      });
+    } catch (error: any) {
+      this.logger.error('Failed to create ward account or send SMS', {
+        wardId,
+        guardianId,
+        error: error.message,
+        status: error.response?.status,
+      });
+      // Прерываем создание подопечного, так как телефон обязателен
+      // Используем правильный HTTP Exception для корректной обработки на фронтенде
+      if (error.response?.status === 400 || error.response?.status === 409) {
+        throw new BadRequestException(`Не удалось создать аккаунт подопечного: ${error.response?.data?.message || error.message}`);
       }
+      throw new InternalServerErrorException(`Не удалось создать аккаунт подопечного: ${error.message}`);
     }
 
     this.logger.info(`Ward created: ${wardId} by guardian ${guardianId}`, {
@@ -107,10 +111,7 @@ export class WardService {
       data: ward,
       message: 'Ward created successfully',
       accountCreated,
-      // В development режиме возвращаем пароль для тестирования
-      ...(process.env.NODE_ENV === 'development' && temporaryPassword
-        ? { temporaryPassword }
-        : {}),
+      temporaryPassword, // Всегда возвращаем пароль для отображения опекуну
     };
   }
 

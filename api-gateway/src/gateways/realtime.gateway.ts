@@ -46,26 +46,26 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         // Создаем URL из request
         const host = request.headers?.host || 'localhost:3000';
         const protocol = request.headers?.['x-forwarded-proto'] || 'http';
-        let urlPath = request.url;
+        const url = new URL(request.url, `${protocol}://${host}`);
         
-        // Убираем query string для парсинга пути
-        const urlWithoutQuery = urlPath.split('?')[0];
-        const url = new URL(urlPath, `${protocol}://${host}`);
-        
-        // Извлекаем канал из пути (например, /ws/guardian или /ws/admin)
+        // Извлекаем канал из query параметров (предпочтительно)
+        // Также поддерживаем канал в пути для обратной совместимости
         const pathParts = url.pathname.split('/').filter(Boolean);
-        this.logger.debug('WebSocket connection path parts', { pathParts, url: url.pathname });
+        this.logger.debug('WebSocket connection', { 
+          pathname: url.pathname, 
+          pathParts, 
+          searchParams: Object.fromEntries(url.searchParams) 
+        });
         
-        if (pathParts.length >= 2 && pathParts[0] === 'ws') {
+        // Сначала пытаемся получить канал из query параметров
+        const channelParam = url.searchParams.get('channel');
+        if (channelParam) {
+          channel = channelParam;
+        } else if (pathParts.length >= 2 && pathParts[0] === 'ws') {
+          // Если канала нет в query, пытаемся извлечь из пути (например, /ws/guardian)
           channel = pathParts[1];
-        } else if (pathParts.length === 1 && pathParts[0] === 'ws') {
-          // Если путь просто /ws, пытаемся получить канал из query параметров
-          const channelParam = url.searchParams.get('channel');
-          if (channelParam) {
-            channel = channelParam;
-          } else {
-            channel = 'default';
-          }
+        } else {
+          channel = 'default';
         }
         
         // Извлекаем токен и tenant из query параметров

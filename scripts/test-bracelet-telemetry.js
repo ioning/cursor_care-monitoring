@@ -87,6 +87,11 @@ async function main() {
 
   // Шаг 3: Отправка тестовых данных телеметрии
   console.log('\n3. Отправка тестовых данных телеметрии...');
+  
+  if (!TOKEN) {
+    console.error('   ✗ Токен не получен, невозможно отправить телеметрию');
+    process.exit(1);
+  }
 
   const now = new Date().toISOString();
   const telemetryData = {
@@ -137,9 +142,15 @@ async function main() {
   };
 
   try {
+    console.log(`   Отправка запроса на ${API_GATEWAY_URL}/api/v1/telemetry`);
+    console.log(`   Authorization header: Bearer ${TOKEN.substring(0, 20)}...`);
+    
     const telemetryResponse = await fetch(`${API_GATEWAY_URL}/api/v1/telemetry`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(telemetryData),
     });
 
@@ -147,6 +158,9 @@ async function main() {
 
     if (!telemetryResponse.ok) {
       console.error('   ✗ Ошибка отправки телеметрии:', JSON.stringify(telemetryDataResponse, null, 2));
+      console.error('   Status:', telemetryResponse.status);
+      console.error('   Headers:', JSON.stringify(Object.fromEntries(telemetryResponse.headers.entries()), null, 2));
+      console.error('   TOKEN:', TOKEN ? TOKEN.substring(0, 20) + '...' : 'NOT SET');
       process.exit(1);
     }
 

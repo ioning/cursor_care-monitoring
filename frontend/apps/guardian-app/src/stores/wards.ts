@@ -65,7 +65,7 @@ export const useWardsStore = defineStore('wards', () => {
     try {
       const response = await wardsApi.createWard(data);
       wards.value.push(response.data);
-      return response.data;
+      return { ward: response.data, temporaryPassword: response.temporaryPassword };
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка создания подопечного';
       throw err;

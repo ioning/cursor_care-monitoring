@@ -51,6 +51,18 @@
             <label class="form-label">Полное имя *</label>
             <input v-model="form.fullName" type="text" class="form-input" required />
           </div>
+          <div v-if="!editingWard" class="form-group">
+            <label class="form-label">Телефон *</label>
+            <input 
+              v-model="form.phone" 
+              type="tel" 
+              class="form-input" 
+              placeholder="+79001234567"
+              pattern="\+7\d{10}"
+              required 
+            />
+            <small class="form-hint">Формат: +7XXXXXXXXXX</small>
+          </div>
           <div class="form-group">
             <label class="form-label">Дата рождения</label>
             <input v-model="form.dateOfBirth" type="date" class="form-input" />
@@ -86,6 +98,36 @@
         </form>
       </div>
     </div>
+
+    <!-- Password Modal -->
+    <div v-if="showPasswordModal" class="modal-overlay" @click="showPasswordModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Пароль для входа подопечного</h3>
+          <button @click="showPasswordModal = false" class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="password-info">
+            <p>Подопечному отправлено SMS с данными для входа.</p>
+            <p class="password-label">Сгенерированный пароль:</p>
+            <div class="password-display">
+              <code class="password-text">{{ generatedPassword }}</code>
+              <button 
+                @click="copyPassword" 
+                class="btn btn-secondary btn-small"
+                title="Копировать пароль"
+              >
+                📋 Копировать
+              </button>
+            </div>
+            <p class="password-warning">⚠️ Сохраните этот пароль! Он больше не будет показан.</p>
+          </div>
+          <div class="modal-footer">
+            <button @click="showPasswordModal = false" class="btn btn-primary">Понятно</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -101,11 +143,15 @@ const error = ref('');
 
 const form = reactive({
   fullName: '',
+  phone: '',
   dateOfBirth: '',
   gender: '',
   medicalInfo: '',
   emergencyContact: '',
 });
+
+const showPasswordModal = ref(false);
+const generatedPassword = ref('');
 
 const calculateAge = (dateOfBirth: string) => {
   const today = new Date();
@@ -132,11 +178,18 @@ const handleSubmit = async () => {
   error.value = '';
   try {
     if (editingWard.value) {
-      await wardsStore.updateWard(editingWard.value.id, form);
+      // При обновлении не отправляем phone
+      const { phone, ...updateData } = form;
+      await wardsStore.updateWard(editingWard.value.id, updateData);
+      closeModal();
     } else {
-      await wardsStore.createWard(form);
+      const result = await wardsStore.createWard(form);
+      closeModal();
+      if (result.temporaryPassword) {
+        generatedPassword.value = result.temporaryPassword;
+        showPasswordModal.value = true;
+      }
     }
-    closeModal();
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка сохранения';
   }
@@ -147,12 +200,22 @@ const closeModal = () => {
   editingWard.value = null;
   Object.assign(form, {
     fullName: '',
+    phone: '',
     dateOfBirth: '',
     gender: '',
     medicalInfo: '',
     emergencyContact: '',
   });
   error.value = '';
+};
+
+const copyPassword = async () => {
+  try {
+    await navigator.clipboard.writeText(generatedPassword.value);
+    // Можно добавить уведомление об успешном копировании
+  } catch (err) {
+    console.error('Failed to copy password:', err);
+  }
 };
 
 onMounted(() => {
@@ -299,6 +362,57 @@ onMounted(() => {
   border-radius: var(--radius);
   font-size: 0.875rem;
   margin-bottom: 1rem;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--gray-500);
+  font-size: 0.75rem;
+}
+
+.password-info {
+  text-align: center;
+}
+
+.password-info p {
+  margin-bottom: 1rem;
+  color: var(--gray-700);
+}
+
+.password-label {
+  font-weight: 600;
+  margin-top: 1.5rem !important;
+}
+
+.password-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+}
+
+.password-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  font-family: 'Courier New', monospace;
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.password-warning {
+  margin-top: 1.5rem !important;
+  color: var(--warning) !important;
+  font-weight: 500;
 }
 </style>
 

@@ -13,6 +13,7 @@ export interface Ward {
 
 export interface CreateWardDto {
   fullName: string;
+  phone: string;
   dateOfBirth?: string;
   gender?: string;
   relationship?: string;
@@ -39,7 +40,7 @@ export const wardsApi = {
     return response.data;
   },
 
-  createWard: async (data: CreateWardDto): Promise<{ success: boolean; data: Ward }> => {
+  createWard: async (data: CreateWardDto): Promise<{ success: boolean; data: Ward; temporaryPassword?: string }> => {
     const response = await apiClient.post('/users/wards', data);
     return response.data;
   },

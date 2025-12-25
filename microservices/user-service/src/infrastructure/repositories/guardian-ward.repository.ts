@@ -66,8 +66,8 @@ export class GuardianWardRepository {
               gw.notification_preferences, gw.duty_schedule, gw.created_at as linked_at
        FROM guardian_wards gw
        JOIN wards w ON w.id = gw.ward_id
-       WHERE gw.guardian_id = $1 AND w.status = 'active' AND gw.status = 'active'
-       ORDER BY gw.is_primary DESC, gw.created_at DESC`,
+       WHERE gw.guardian_id = $1 AND w.status = 'active'
+       ORDER BY gw.is_primary DESC NULLS LAST, gw.created_at DESC`,
       [guardianId],
     );
     return result.rows.map((row) => ({
@@ -93,8 +93,8 @@ export class GuardianWardRepository {
       `SELECT gw.*, u.full_name, u.email, u.phone
        FROM guardian_wards gw
        JOIN users u ON u.id = gw.guardian_id
-       WHERE gw.ward_id = $1 AND gw.status = 'active'
-       ORDER BY gw.is_primary DESC, gw.created_at ASC`,
+       WHERE gw.ward_id = $1
+       ORDER BY gw.is_primary DESC NULLS LAST, gw.created_at ASC`,
       [wardId],
     );
     return result.rows.map((row) => ({

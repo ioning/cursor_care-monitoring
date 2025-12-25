@@ -32,7 +32,7 @@ export class OrganizationServiceClient {
             timeout: 5000,
           },
         ),
-      );
+      ) as { data: { success: boolean; data: Organization } };
 
       if (response.data.success && response.data.data) {
         this.logger.info(`Organization found for serial number: ${serialNumber}`, {
@@ -66,7 +66,7 @@ export class OrganizationServiceClient {
             timeout: 5000,
           },
         ),
-      );
+      ) as { data: { success: boolean; data: Organization } };
 
       if (response.data.success && response.data.data) {
         return response.data.data;

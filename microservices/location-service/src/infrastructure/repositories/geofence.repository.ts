@@ -139,7 +139,7 @@ export class GeofenceRepository {
   async delete(geofenceId: string): Promise<boolean> {
     const db = getDatabaseConnection();
     const result = await db.query('DELETE FROM geofences WHERE id = $1', [geofenceId]);
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   private mapRowToGeofence(row: any): Geofence {

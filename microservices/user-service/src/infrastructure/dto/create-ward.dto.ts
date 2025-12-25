@@ -8,12 +8,12 @@ export class CreateWardDto {
 
   @ApiProperty({ 
     example: '+79001234567', 
-    required: false,
+    required: true,
     description: 'Номер телефона подопечного для отправки SMS с учетными данными. Формат: +7XXXXXXXXXX'
   })
   @Matches(/^\+7\d{10}$/, { message: 'Номер телефона должен быть в формате +7XXXXXXXXXX' })
-  @IsOptional()
-  phone?: string;
+  @IsString()
+  phone: string;
 
   @ApiProperty({ example: '1990-01-15', required: false })
   @IsDateString()
