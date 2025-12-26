@@ -3,12 +3,15 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagg
 import { TelemetryService } from '../../application/services/telemetry.service';
 import { CreateTelemetryDto } from '../dto/create-telemetry.dto';
 import { JwtOrInternalGuard } from '../guards/jwt-or-internal.guard';
+import { createLogger } from '../../../../../shared/libs/logger';
 
 @ApiTags('telemetry')
 @Controller()
 @UseGuards(JwtOrInternalGuard)
 @ApiBearerAuth()
 export class TelemetryController {
+  private readonly logger = createLogger({ serviceName: 'telemetry-service' });
+  
   constructor(private readonly telemetryService: TelemetryService) {}
 
   @Post()
@@ -32,6 +35,7 @@ export class TelemetryController {
   ) {
     const userId = req.user?.id;
     const userRole = req.user?.role;
+    this.logger.info(`getWardTelemetry: req.user=${JSON.stringify(req.user)}, userId=${userId}, userRole=${userRole}, wardId=${wardId}`);
     return this.telemetryService.getByWardId(wardId, { from, to, metricType, page, limit }, userId, userRole);
   }
 
@@ -41,6 +45,7 @@ export class TelemetryController {
   async getLatest(@Request() req: any, @Param('wardId') wardId: string) {
     const userId = req.user?.id;
     const userRole = req.user?.role;
+    this.logger.info(`getLatest: req.user=${JSON.stringify(req.user)}, userId=${userId}, userRole=${userRole}, wardId=${wardId}`);
     return this.telemetryService.getLatest(wardId, userId, userRole);
   }
 }

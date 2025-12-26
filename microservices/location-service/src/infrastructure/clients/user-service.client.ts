@@ -25,6 +25,11 @@ export class UserServiceClient {
    * This calls the user-service internal endpoint: GET /internal/wards/:wardId/access/:userId
    */
   async hasAccessToWard(userId: string, wardId: string, userRole?: string): Promise<boolean> {
+    // Admin users have access to all wards
+    if (userRole === 'admin') {
+      return true;
+    }
+
     // Ward users can only access their own data
     if (userRole === 'ward' && userId !== wardId) {
       return false;

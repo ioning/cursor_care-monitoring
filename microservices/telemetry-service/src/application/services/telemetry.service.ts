@@ -140,12 +140,26 @@ export class TelemetryService {
   }
 
   async getByWardId(wardId: string, query: any, userId?: string, userRole?: string) {
+    // Log received parameters for debugging
+    this.logger.debug(`getByWardId called: userId=${userId}, userRole=${userRole}, wardId=${wardId}`);
+    
     // Check access if user info is provided
     if (userId && userRole) {
-      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to this ward\'s telemetry data');
+      // Normalize role to lowercase for comparison
+      const normalizedRole = userRole.toLowerCase();
+      // Admin, dispatcher have full access
+      if (normalizedRole === 'admin' || normalizedRole === 'dispatcher') {
+        this.logger.info(`Access granted for ${userRole} (${normalizedRole}) ${userId} to ward ${wardId}`);
+      } else {
+        this.logger.debug(`Checking access for ${userRole} ${userId} to ward ${wardId}`);
+        const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+        this.logger.info(`Access check result for ${userRole} ${userId} to ward ${wardId}: ${hasAccess}`);
+        if (!hasAccess) {
+          throw new ForbiddenException('You do not have access to this ward\'s telemetry data');
+        }
       }
+    } else {
+      this.logger.warn(`Access check skipped: userId=${userId}, userRole=${userRole}`);
     }
 
     const { from, to, metricType, page = 1, limit = 20 } = query;
@@ -170,12 +184,26 @@ export class TelemetryService {
   }
 
   async getLatest(wardId: string, userId?: string, userRole?: string) {
+    // Log received parameters for debugging
+    this.logger.debug(`getLatest called: userId=${userId}, userRole=${userRole}, wardId=${wardId}`);
+    
     // Check access if user info is provided
     if (userId && userRole) {
-      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to this ward\'s telemetry data');
+      // Normalize role to lowercase for comparison
+      const normalizedRole = userRole.toLowerCase();
+      // Admin, dispatcher have full access
+      if (normalizedRole === 'admin' || normalizedRole === 'dispatcher') {
+        this.logger.info(`Access granted for ${userRole} (${normalizedRole}) ${userId} to ward ${wardId}`);
+      } else {
+        this.logger.debug(`Checking access for ${userRole} ${userId} to ward ${wardId}`);
+        const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+        this.logger.info(`Access check result for ${userRole} ${userId} to ward ${wardId}: ${hasAccess}`);
+        if (!hasAccess) {
+          throw new ForbiddenException('You do not have access to this ward\'s telemetry data');
+        }
       }
+    } else {
+      this.logger.warn(`Access check skipped: userId=${userId}, userRole=${userRole}`);
     }
 
     const data = await this.telemetryRepository.findLatest(wardId);

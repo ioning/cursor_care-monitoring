@@ -84,9 +84,17 @@ export class LocationService {
   async getLatestLocation(wardId: string, userId?: string, userRole?: string) {
     // Check access if user info is provided
     if (userId && userRole) {
-      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to this ward\'s location data');
+      // Normalize role to lowercase for comparison
+      const normalizedRole = userRole.toLowerCase();
+      // Admin, dispatcher have full access
+      if (normalizedRole === 'admin' || normalizedRole === 'dispatcher') {
+        this.logger.info(`Access granted for ${userRole} (${normalizedRole}) ${userId} to ward ${wardId}`);
+      } else {
+        const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+        this.logger.info(`Access check for ${userRole} ${userId} to ward ${wardId}: ${hasAccess}`);
+        if (!hasAccess) {
+          throw new ForbiddenException('You do not have access to this ward\'s location data');
+        }
       }
     }
 
@@ -144,9 +152,17 @@ export class LocationService {
   async getLocationHistory(wardId: string, filters: any, userId?: string, userRole?: string) {
     // Check access if user info is provided
     if (userId && userRole) {
-      const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to this ward\'s location data');
+      // Normalize role to lowercase for comparison
+      const normalizedRole = userRole.toLowerCase();
+      // Admin, dispatcher have full access
+      if (normalizedRole === 'admin' || normalizedRole === 'dispatcher') {
+        this.logger.info(`Access granted for ${userRole} (${normalizedRole}) ${userId} to ward ${wardId}`);
+      } else {
+        const hasAccess = await this.userServiceClient.hasAccessToWard(userId, wardId, userRole);
+        this.logger.info(`Access check for ${userRole} ${userId} to ward ${wardId}: ${hasAccess}`);
+        if (!hasAccess) {
+          throw new ForbiddenException('You do not have access to this ward\'s location data');
+        }
       }
     }
 

@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Приложение будет доступно на http://localhost:5173
+Приложение будет доступно на http://localhost:5174
 
 ## Сборка
 

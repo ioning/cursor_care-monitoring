@@ -88,8 +88,8 @@ const form = ref({
 const loading = computed(() => authStore.loading);
 const error = computed(() => authStore.error);
 
-const guardianAppUrl = computed(() => import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5173');
-const dispatcherAppUrl = computed(() => import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5174');
+const guardianAppUrl = computed(() => import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5174');
+const dispatcherAppUrl = computed(() => import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5175');
 const adminAppUrl = computed(() => import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5185');
 
 const handleLogin = async () => {

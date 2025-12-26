@@ -132,22 +132,91 @@ export class TelemetryRepository {
 
     const offset = (page - 1) * limit;
 
-    // Оптимизированный запрос с использованием индекса
-    const dataResult = await db.query(
-      `SELECT * FROM raw_metrics 
+    // Сначала получаем уникальные timestamp'ы с пагинацией
+    const timestampsResult = await db.query(
+      `SELECT DISTINCT timestamp, ward_id
+       FROM raw_metrics 
        WHERE ${whereClause}
        ORDER BY timestamp DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset],
     );
 
-    // Оптимизированный COUNT с использованием приблизительного подсчета для больших таблиц
-    // Используем точный COUNT только если результат небольшой
+    if (timestampsResult.rows.length === 0) {
+      // COUNT уникальных timestamp'ов
+      const countResult = await db.query(
+        `SELECT COUNT(DISTINCT timestamp) as total 
+         FROM raw_metrics 
+         WHERE ${whereClause}`,
+        params,
+      );
+      return [[], parseInt(countResult.rows[0].total)];
+    }
+
+    // Получаем все метрики для найденных timestamp'ов
+    const timestamps = timestampsResult.rows.map(row => row.timestamp);
+    const timestampsPlaceholders = timestamps.map((_, i) => `$${paramIndex + i + 1}`).join(',');
+    
+    let metricsWhereClause = `ward_id = $1 AND timestamp IN (${timestampsPlaceholders})`;
+    const metricsParams = [wardId, ...timestamps];
+    
+    if (metricType) {
+      metricsWhereClause += ` AND metric_type = $${metricsParams.length + 1}`;
+      metricsParams.push(metricType);
+    }
+
+    const metricsResult = await db.query(
+      `SELECT 
+         metric_type,
+         value,
+         unit,
+         quality_score,
+         timestamp,
+         ward_id
+       FROM raw_metrics 
+       WHERE ${metricsWhereClause}
+       ORDER BY timestamp DESC, metric_type`,
+      metricsParams,
+    );
+
+    // Группируем метрики по timestamp
+    const groupedByTimestamp = new Map<string, {
+      wardId: string;
+      timestamp: string;
+      metrics: Record<string, any>;
+    }>();
+
+    for (const row of metricsResult.rows) {
+      const timestamp = row.timestamp.toISOString();
+      if (!groupedByTimestamp.has(timestamp)) {
+        groupedByTimestamp.set(timestamp, {
+          wardId: row.ward_id,
+          timestamp,
+          metrics: {},
+        });
+      }
+
+      const group = groupedByTimestamp.get(timestamp)!;
+      group.metrics[row.metric_type] = {
+        value: parseFloat(row.value),
+        unit: row.unit,
+        qualityScore: row.quality_score ? parseFloat(row.quality_score) : undefined,
+        timestamp,
+      };
+    }
+
+    // Преобразуем Map в массив, сохраняя порядок по timestamp (DESC)
+    const groupedData = Array.from(groupedByTimestamp.values()).sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    // COUNT уникальных timestamp'ов
     let countResult;
-    if (page === 1 && dataResult.rows.length < limit) {
-      // Если первая страница и данных меньше лимита, используем точный COUNT
+    if (page === 1 && groupedData.length < limit) {
       countResult = await db.query(
-        `SELECT COUNT(*) as total FROM raw_metrics WHERE ${whereClause}`,
+        `SELECT COUNT(DISTINCT timestamp) as total 
+         FROM raw_metrics 
+         WHERE ${whereClause}`,
         params,
       );
     } else {
@@ -157,13 +226,13 @@ export class TelemetryRepository {
           CASE 
             WHEN (SELECT reltuples FROM pg_class WHERE relname = 'raw_metrics') > 10000
             THEN (SELECT reltuples::bigint FROM pg_class WHERE relname = 'raw_metrics')
-            ELSE (SELECT COUNT(*) FROM raw_metrics WHERE ${whereClause})
+            ELSE (SELECT COUNT(DISTINCT timestamp) FROM raw_metrics WHERE ${whereClause})
           END as total`,
         params,
       );
     }
 
-    return [dataResult.rows, parseInt(countResult.rows[0].total)];
+    return [groupedData, parseInt(countResult.rows[0].total)];
   }
 
   async findLatest(wardId: string): Promise<any> {

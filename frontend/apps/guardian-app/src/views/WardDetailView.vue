@@ -135,11 +135,59 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Редактировать подопечного</h3>
+          <button @click="closeModal" class="modal-close">×</button>
+        </div>
+        <form @submit.prevent="handleSubmit" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Полное имя *</label>
+            <input v-model="form.fullName" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата рождения</label>
+            <input v-model="form.dateOfBirth" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Пол</label>
+            <select v-model="form.gender" class="form-select">
+              <option value="">Не указан</option>
+              <option value="male">Мужской</option>
+              <option value="female">Женский</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Медицинская информация</label>
+            <textarea
+              v-model="form.medicalInfo"
+              class="form-input"
+              rows="3"
+              placeholder="Аллергии, хронические заболевания и т.д."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Экстренный контакт</label>
+            <input v-model="form.emergencyContact" type="text" class="form-input" />
+          </div>
+          <div v-if="error" class="error-message">{{ error }}</div>
+          <div class="modal-footer">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Отмена</button>
+            <button type="submit" class="btn btn-primary" :disabled="wardsStore.isLoading">
+              Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWardsStore } from '../stores/wards';
 import { useAlertsStore } from '../stores/alerts';
@@ -158,6 +206,16 @@ const alertsStore = useAlertsStore();
 const devicesStore = useDevicesStore();
 
 const latestTelemetry = ref<any>(null);
+const showEditModal = ref(false);
+const error = ref('');
+
+const form = reactive({
+  fullName: '',
+  dateOfBirth: '',
+  gender: '',
+  medicalInfo: '',
+  emergencyContact: '',
+});
 
 const wardAlerts = computed(() =>
   alertsStore.alerts.filter((a) => a.wardId === wardId && a.status === 'active'),
@@ -199,7 +257,42 @@ const getMetricLabel = (key: string) => {
 };
 
 const handleEdit = () => {
-  // Navigate to edit or open modal
+  if (!wardsStore.currentWard) return;
+  
+  // Заполняем форму текущими данными подопечного
+  form.fullName = wardsStore.currentWard.fullName || '';
+  form.dateOfBirth = wardsStore.currentWard.dateOfBirth || '';
+  form.gender = wardsStore.currentWard.gender || '';
+  form.medicalInfo = wardsStore.currentWard.medicalInfo || '';
+  form.emergencyContact = wardsStore.currentWard.emergencyContact || '';
+  
+  showEditModal.value = true;
+  error.value = '';
+};
+
+const handleSubmit = async () => {
+  error.value = '';
+  try {
+    await wardsStore.updateWard(wardId, form);
+    closeModal();
+    // Обновляем данные подопечного после сохранения
+    await wardsStore.fetchWard(wardId);
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Ошибка сохранения данных';
+  }
+};
+
+const closeModal = () => {
+  showEditModal.value = false;
+  error.value = '';
+  // Очищаем форму
+  Object.assign(form, {
+    fullName: '',
+    dateOfBirth: '',
+    gender: '',
+    medicalInfo: '',
+    emergencyContact: '',
+  });
 };
 
 const handleAcknowledge = async (alertId: string) => {
@@ -244,7 +337,7 @@ onMounted(async () => {
 }
 
 .ward-header {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: 2rem;
   margin-bottom: 2rem;
@@ -252,6 +345,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .ward-header-info {
@@ -264,10 +358,11 @@ onMounted(async () => {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 .ward-meta {
-  color: var(--gray-600);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -279,22 +374,23 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--gray-900);
+  color: var(--text-primary);
 }
 
 .metrics-grid {
@@ -304,27 +400,28 @@ onMounted(async () => {
 }
 
 .metric-card {
-  background: var(--gray-50);
+  background: var(--bg-tertiary);
   border-radius: var(--radius);
   padding: 1rem;
   text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .metric-label {
   font-size: 0.875rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
 .metric-value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--gray-900);
+  color: var(--text-primary);
 }
 
 .metric-quality {
   font-size: 0.75rem;
-  color: var(--gray-500);
+  color: var(--text-tertiary);
   margin-top: 0.25rem;
 }
 
@@ -345,13 +442,14 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: var(--gray-50);
+  background: var(--bg-tertiary);
   border-radius: var(--radius);
+  border: 1px solid var(--border-color);
 }
 
 .device-name {
   font-weight: 500;
-  color: var(--gray-900);
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -360,11 +458,133 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
 }
 
 .btn-sm {
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.error-message {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  background: var(--bg-card);
+}
+
+.form-input[type="date"] {
+  font-family: inherit;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
 }
 </style>

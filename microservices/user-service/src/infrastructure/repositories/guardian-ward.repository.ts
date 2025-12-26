@@ -158,8 +158,11 @@ export class GuardianWardRepository {
 
   async hasAccess(guardianId: string, wardId: string): Promise<boolean> {
     const db = getDatabaseConnection();
+    // Проверяем наличие активной связи опекун-подопечный
     const result = await db.query(
-      'SELECT 1 FROM guardian_wards WHERE guardian_id = $1 AND ward_id = $2',
+      `SELECT 1 FROM guardian_wards 
+       WHERE guardian_id = $1 AND ward_id = $2 
+       AND (status IS NULL OR status = 'active')`,
       [guardianId, wardId],
     );
     return result.rows.length > 0;

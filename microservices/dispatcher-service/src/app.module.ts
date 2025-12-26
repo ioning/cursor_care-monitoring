@@ -13,6 +13,7 @@ import { DispatcherRepository } from './infrastructure/repositories/dispatcher.r
 import { SMPProviderRepository } from './infrastructure/repositories/smp-provider.repository';
 import { ServicePriceRepository } from './infrastructure/repositories/service-price.repository';
 import { SMPCallRepository } from './infrastructure/repositories/smp-call.repository';
+import { UserServiceClient } from './infrastructure/clients/user-service.client';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 
 @Module({
@@ -44,6 +45,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     SMPProviderRepository,
     ServicePriceRepository,
     SMPCallRepository,
+    UserServiceClient,
     JwtStrategy,
   ],
 })

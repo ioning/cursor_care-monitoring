@@ -84,8 +84,8 @@ export const resendVerificationCode = async (data: ResendVerificationCodeRequest
 
 export const getDashboardUrl = (role: string, _organizationId?: string): string => {
   const baseUrls = {
-    guardian: import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5173',
-    dispatcher: import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5174',
+    guardian: import.meta.env.VITE_GUARDIAN_APP_URL || 'http://localhost:5174',
+    dispatcher: import.meta.env.VITE_DISPATCHER_APP_URL || 'http://localhost:5175',
     admin: import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5185',
     organization_admin: import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5185',
   };

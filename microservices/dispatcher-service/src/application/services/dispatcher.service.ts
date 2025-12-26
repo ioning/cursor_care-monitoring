@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CallRepository } from '../../infrastructure/repositories/call.repository';
 import { DispatcherRepository } from '../../infrastructure/repositories/dispatcher.repository';
+import { UserServiceClient } from '../../infrastructure/clients/user-service.client';
 import { RiskAlertEvent } from '../../../../../shared/types/event.types';
 import { createLogger } from '../../../../../shared/libs/logger';
 import { randomUUID } from 'crypto';
@@ -14,6 +15,7 @@ export class DispatcherService {
   constructor(
     private readonly callRepository: CallRepository,
     private readonly dispatcherRepository: DispatcherRepository,
+    private readonly userServiceClient: UserServiceClient,
   ) {}
 
   async handleCriticalAlert(event: RiskAlertEvent): Promise<void> {
@@ -82,8 +84,22 @@ export class DispatcherService {
       { page, limit },
     );
 
+    // Enrich calls with ward information
+    const uniqueWardIds = Array.from(new Set(calls.map(call => call.wardId)));
+    const wardsMap = await this.userServiceClient.getWardsByIds(uniqueWardIds);
+
+    const enrichedCalls = calls.map(call => ({
+      ...call,
+      ward: wardsMap.get(call.wardId) ? {
+        id: wardsMap.get(call.wardId).id,
+        fullName: wardsMap.get(call.wardId).fullName,
+        medicalInfo: wardsMap.get(call.wardId).medicalInfo,
+        emergencyContact: wardsMap.get(call.wardId).emergencyContact,
+      } : undefined,
+    }));
+
     return {
-      calls,
+      calls: enrichedCalls,
       total,
       page: parseInt(page),
       limit: parseInt(limit),
@@ -177,9 +193,22 @@ export class DispatcherService {
     if (!call) {
       throw new Error('Call not found');
     }
+
+    // Enrich call with ward information
+    const ward = await this.userServiceClient.getWardById(call.wardId);
+    const enrichedCall = {
+      ...call,
+      ward: ward ? {
+        id: ward.id,
+        fullName: ward.fullName,
+        medicalInfo: ward.medicalInfo,
+        emergencyContact: ward.emergencyContact,
+      } : undefined,
+    };
+
     return {
       success: true,
-      data: call,
+      data: enrichedCall,
     };
   }
 

@@ -79,7 +79,7 @@ npm run build
 
 После успешного входа/регистрации пользователь автоматически перенаправляется в соответствующий личный кабинет:
 
-- **guardian** → Guardian App (http://localhost:5173)
+- **guardian** → Guardian App (http://localhost:5174)
 - **dispatcher** → Dispatcher App (http://localhost:5174)
 - **admin** / **organization_admin** → Admin App (http://localhost:5185)
 
@@ -91,7 +91,7 @@ npm run build
 
 ```env
 VITE_API_URL=http://localhost:3000/api/v1
-VITE_GUARDIAN_APP_URL=http://localhost:5173
+VITE_GUARDIAN_APP_URL=http://localhost:5174
 VITE_DISPATCHER_APP_URL=http://localhost:5174
 VITE_ADMIN_APP_URL=http://localhost:5185
 VITE_PORT=5175
@@ -187,7 +187,7 @@ npm run build
 
 После успешного входа/регистрации пользователь автоматически перенаправляется в соответствующий личный кабинет:
 
-- **guardian** → Guardian App (http://localhost:5173)
+- **guardian** → Guardian App (http://localhost:5174)
 - **dispatcher** → Dispatcher App (http://localhost:5174)
 - **admin** / **organization_admin** → Admin App (http://localhost:5185)
 
@@ -199,7 +199,7 @@ npm run build
 
 ```env
 VITE_API_URL=http://localhost:3000/api/v1
-VITE_GUARDIAN_APP_URL=http://localhost:5173
+VITE_GUARDIAN_APP_URL=http://localhost:5174
 VITE_DISPATCHER_APP_URL=http://localhost:5174
 VITE_ADMIN_APP_URL=http://localhost:5185
 VITE_PORT=5175

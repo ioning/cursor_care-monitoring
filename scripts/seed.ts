@@ -418,7 +418,6 @@ async function seedTelemetryServiceData(params: { deviceId: string; wardId: stri
     const baseHeartRate = 72;
     const baseSpo2 = 98;
     const baseTemperature = 36.6;
-    const baseSteps = 0; // Начнем с 0, будем накапливать
 
     // Генерируем данные для каждого дня
     for (let day = 0; day < daysBack; day++) {
@@ -438,7 +437,6 @@ async function seedTelemetryServiceData(params: { deviceId: string; wardId: stri
 
         // Вариации значений в зависимости от времени суток и активности
         const activityFactor = isDaytime ? 1.0 : 0.7; // Ночью метрики ниже
-        const randomVariation = () => (Math.random() - 0.5) * 0.1; // ±5% вариация
 
         // Heart rate: 65-85 bpm днем, 60-75 ночью
         const heartRate = isDaytime

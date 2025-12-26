@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Headers } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FamilyAccessService } from '../../application/services/family-access.service';
+import { WardService } from '../../application/services/ward.service';
 import { createLogger } from '../../../../../shared/libs/logger';
 
 @ApiTags('internal')
@@ -8,7 +9,10 @@ import { createLogger } from '../../../../../shared/libs/logger';
 export class InternalController {
   private readonly logger = createLogger({ serviceName: 'user-service' });
 
-  constructor(private readonly familyAccessService: FamilyAccessService) {}
+  constructor(
+    private readonly familyAccessService: FamilyAccessService,
+    private readonly wardService: WardService,
+  ) {}
 
   /**
    * Internal endpoint for service-to-service calls
@@ -78,6 +82,47 @@ export class InternalController {
       this.logger.error('Failed to check access to ward (internal)', {
         wardId,
         userId,
+        error: error.message,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Internal endpoint to get ward by ID
+   */
+  @Get('wards/:wardId')
+  @ApiOperation({ summary: '[Internal] Get ward by ID' })
+  @ApiResponse({ status: 200, description: 'Ward retrieved successfully' })
+  async getWardById(
+    @Param('wardId') wardId: string,
+    @Headers('x-internal-service') serviceName?: string,
+  ) {
+    const allowedServices = ['alert-service', 'integration-service', 'dispatcher-service', 'telemetry-service', 'location-service'];
+    if (serviceName && !allowedServices.includes(serviceName.toLowerCase())) {
+      this.logger.warn('Unauthorized internal service call', { serviceName, wardId });
+      throw new Error('Unauthorized internal service call');
+    }
+
+    try {
+      // For internal calls, skip access check - dispatchers have access to all wards
+      const ward = await this.wardService.getByIdInternal(wardId);
+      
+      if (!ward) {
+        return {
+          success: false,
+          data: null,
+          message: 'Ward not found',
+        };
+      }
+
+      return {
+        success: true,
+        data: ward,
+      };
+    } catch (error: any) {
+      this.logger.error('Failed to get ward (internal)', {
+        wardId,
         error: error.message,
       });
       throw error;

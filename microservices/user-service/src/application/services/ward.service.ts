@@ -166,6 +166,15 @@ export class WardService {
     };
   }
 
+  /**
+   * Internal method to get ward by ID without access check
+   * Used for service-to-service calls (dispatcher, alert-service, etc.)
+   */
+  async getByIdInternal(wardId: string) {
+    const ward = await this.wardRepository.findById(wardId);
+    return ward;
+  }
+
   async update(guardianId: string, wardId: string, updateWardDto: UpdateWardDto) {
     // Verify guardian has access
     const hasAccess = await this.guardianWardRepository.hasAccess(guardianId, wardId);

@@ -46,5 +46,14 @@ export const authApi = {
     }
     return data;
   },
+
+  async getMe(): Promise<LoginResponse['user']> {
+    const response = await apiClient.get('/users/me');
+    const data = response.data;
+    if (data?.success && data?.data) {
+      return data.data;
+    }
+    return data;
+  },
 };
 
